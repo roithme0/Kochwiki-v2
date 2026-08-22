@@ -1,0 +1,13 @@
+<mat-card>
+  <mat-card-content class="legend-content">
+    <div class="color-indicator" [style.--color]="legendElement().color"></div>
+    <p class="display-name">{{ legendElement().displayName }}</p>
+    <div class="spacer"></div>
+    <mat-card>
+      <mat-card-content class="percentage-content">
+        <p class="value-percentage">{{ displayedValuePercentage() }} %</p>
+      </mat-card-content>
+    </mat-card>
+    <p class="value-absolute">{{ displayedValueAbsolute() }} g</p>
+  </mat-card-content>
+</mat-card>

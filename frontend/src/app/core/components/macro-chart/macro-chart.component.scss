@@ -1,0 +1,21 @@
+:host {
+  position: relative;
+}
+
+// makes auto size work for some reason
+.canvas {
+  width: 0px;
+  height: 0px;
+}
+
+.kcal-wrapper {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.kcal {
+  margin: 0;
+}

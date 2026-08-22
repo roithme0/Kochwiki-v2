@@ -1,0 +1,8 @@
+<app-dialog-header title="Rezept löschen?" [showCloseButon]="false" />
+
+<mat-dialog-actions>
+  <button mat-stroked-button color="warn" (click)="deleteRecipe()">Ja</button>
+  <button mat-stroked-button cdkFocusInitial (click)="dialogRef.close()">
+    Nein
+  </button>
+</mat-dialog-actions>

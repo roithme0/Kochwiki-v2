@@ -1,0 +1,23 @@
+<mat-card>
+  <mat-card-content>
+    <app-macro-chart
+      class="macro-chart"
+      [recipeOrFoodstuff]="recipe()"
+      [showKcal]="false"
+    />
+  </mat-card-content>
+
+  <mat-card-header>
+    <mat-card-title>{{ recipe().name }}</mat-card-title>
+
+    <!-- preptime -->
+    @if(recipe().preptime != null){
+    <mat-card-subtitle>{{ recipe().preptime }} min</mat-card-subtitle>
+    }
+
+    <!-- no preptime -->
+    @else {
+    <mat-card-subtitle style="visibility: hidden">? min</mat-card-subtitle>
+    }
+  </mat-card-header>
+</mat-card>

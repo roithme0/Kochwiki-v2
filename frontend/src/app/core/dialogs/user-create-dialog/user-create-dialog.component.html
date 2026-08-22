@@ -1,0 +1,24 @@
+<app-dialog-header title="Nutzer erstellen" [showCloseButon]="true" />
+
+<mat-dialog-content class="mat-dialog-content">
+  <form
+    action="POST"
+    class="form"
+    [formGroup]="customUserForm"
+    (ngSubmit)="onSubmit()"
+  >
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Nutzername</mat-label>
+      <input matInput formControlName="username" />
+    </mat-form-field>
+
+    <button
+      mat-stroked-button
+      type="submit"
+      color="primary"
+      [disabled]="!customUserForm.valid"
+    >
+      Erstellen
+    </button>
+  </form>
+</mat-dialog-content>

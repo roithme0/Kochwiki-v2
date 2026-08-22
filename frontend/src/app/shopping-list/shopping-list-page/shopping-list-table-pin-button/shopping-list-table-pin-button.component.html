@@ -1,0 +1,19 @@
+<button mat-icon-button (click)="OnClick()">
+  <!-- isPinned -->
+  @if(isPinned() == true){
+  <mat-icon
+    aria-hidden="false"
+    aria-label="Pin hinzufügen"
+    fontIcon="star"
+  ></mat-icon>
+  }
+
+  <!-- isNotPinned -->
+  @else{
+  <mat-icon
+    aria-hidden="false"
+    aria-label="Pin entfernen"
+    fontIcon="star_border"
+  ></mat-icon>
+  }
+</button>

@@ -1,0 +1,52 @@
+<mat-toolbar class="toolbar">
+  <!-- home -->
+  @if(pageHeaderService.showHome()){
+  <button
+    mat-icon-button
+    color="accent"
+    aria-setsize=""
+    routerLink=""
+    routerLinkActive="active"
+    class="medium-size-button"
+  >
+    <mat-icon aria-hidden="false" aria-label="Home" fontIcon="home" /></button
+  >}
+
+  <div class="headline-wrapper">
+    <span class="headline">{{ pageHeaderService.headline() }}</span>
+
+    @if(environmentName != 'prod' ){
+    <span class="environment">{{ environmentName }}</span>
+    }
+  </div>
+
+  <span class="spacer"></span>
+
+  <!-- back arrow -->
+  @if(pageHeaderService.showBack() == true){
+  <button
+    mat-icon-button
+    color="accent"
+    class="medium-size-button"
+    routerLinkActive="active"
+    [routerLink]="pageHeaderService.back()"
+  >
+    <mat-icon aria-hidden="false" aria-label="Zurück" fontIcon="arrow_back" />
+  </button>
+  }
+
+  <!-- logout -->
+  @if(pageHeaderService.showLogout()){
+  <button
+    mat-icon-button
+    color="accent"
+    (click)="activeCustomUserService.logout()"
+    class="medium-size-button"
+  >
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Logout"
+      fontIcon="logout"
+    /></button
+  >}
+</mat-toolbar>

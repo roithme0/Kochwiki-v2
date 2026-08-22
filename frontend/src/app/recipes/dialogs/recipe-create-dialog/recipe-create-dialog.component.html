@@ -1,0 +1,49 @@
+<app-dialog-header title="Rezept erstellen" [showCloseButon]="true" />
+
+<mat-dialog-content class="mat-dialog-content">
+  <!-- loading -->
+  @if(isLoading() == true){
+  <mat-spinner diameter="25" />
+  }
+
+  <!-- error -->
+  @else if(hasError() == true){
+  <div class="error">
+    <mat-icon aria-hidden="false" aria-label="Fehler" fontIcon="error" />
+    <p>Zutaten konnten nicht geladen werden.</p>
+  </div>
+  }
+
+  <!-- loaded -->
+  @else {
+  <form [formGroup]="recipeForm" action="POST" class="form">
+    <mat-stepper #stepper>
+      <mat-step errorMessage="">
+        <app-recipe-meta-form />
+      </mat-step>
+
+      <mat-step errorMessage="">
+        <app-recipe-ingredients-form [foodstuffs]="foodstuffs" />
+      </mat-step>
+
+      <mat-step errorMessage="">
+        <app-recipe-preparation-form />
+      </mat-step>
+    </mat-stepper>
+
+    <mat-divider />
+
+    <div class="button-wrapper">
+      <button
+        mat-stroked-button
+        type="submit"
+        color="primary"
+        [disabled]="!recipeForm.valid"
+        (click)="onSubmit()"
+      >
+        Speichern
+      </button>
+    </div>
+  </form>
+  }
+</mat-dialog-content>

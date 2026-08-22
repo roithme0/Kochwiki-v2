@@ -1,0 +1,60 @@
+.preparation-mat-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.steps-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.remove-button {
+  margin: 5px 0;
+}
+
+.index-and-description-wrapper {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.index-field {
+  flex: 0 0 4rem;
+}
+
+.description-field {
+  flex: 1;
+}
+
+.button-wrapper {
+  padding: 0 24px 24px;
+  display: flex;
+
+  button {
+    flex: 1;
+  }
+}
+
+/* remove arrows from input number field */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+/* remove arrows from input number field */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

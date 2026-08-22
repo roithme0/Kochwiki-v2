@@ -1,0 +1,52 @@
+@use "../../../styles/styles.scss" as *;
+
+:host {
+  /* stretch hole page */
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  /* stretch hole page */
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.spinner-wrapper,
+.error-wrapper {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.foodstuffs-table {
+  flex: 1;
+}
+
+.bottom-elements-placeholder {
+  height: 70px;
+}
+
+.bottom-elements {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  width: calc(100% - 2 * $floating-button-position);
+  max-width: 30rem;
+  position: absolute;
+  right: $floating-button-position;
+  bottom: $floating-button-position;
+}

@@ -1,0 +1,48 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Zutaten</mat-card-title>
+    <mat-card-subtitle>{{ recipe().servings }} Portionen</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="grid">
+      <!-- loaded -->
+      @if(isLoading() == false && hasError() == false){ @for(ingredient of
+      recipe().ingredients; track ingredient.id){
+      <app-macro-chart
+        class="macro-chart"
+        [recipeOrFoodstuff]="ingredient.foodstuff"
+        [showKcal]="false"
+      />
+      <span>{{ ingredient.name }}</span>
+      <span class="amount"
+        >{{ ingredient.amount }} {{ ingredient.unitVerbose }}</span
+      >
+
+      <app-ingredients-grid-shopping-list-button
+        class="ingredients-grid-shopping-list-button"
+        [ngClass]="{ hide: environmentName == 'prod' }"
+        [ingredient]="ingredient"
+        [servings]="recipe().servings"
+      />
+      }
+
+      <!-- no ingredients -->
+      @if (recipe().ingredients.length == 0) {
+      <span class="no-ingredients">Keine Zutaten vorhanden</span>
+      } }
+
+      <!-- error -->
+      @if(isLoading() == false && hasError() == true){
+      <span class="error">Ein Fehler ist aufgetreten</span>
+      }
+    </div>
+  </mat-card-content>
+
+  <mat-card-footer class="footer">
+    <!-- loading -->
+    @if(isLoading() == true){
+    <mat-progress-bar mode="query" class="progress-bar" />
+    }
+  </mat-card-footer>
+</mat-card>

@@ -1,0 +1,48 @@
+@use "../../../../styles/mat-card-styles.scss" as *;
+
+mat-card {
+  gap: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: min-content 1fr min-content min-content;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.progress-bar-wrapper {
+  margin: 0 5px;
+}
+
+.macro-chart {
+  width: 24px;
+  height: 24px;
+  opacity: 0.7;
+}
+
+.ingredients-grid-shopping-list-button {
+  &.hide {
+    width: 0;
+    opacity: 0;
+  }
+}
+
+.no-ingredients,
+.error {
+  grid-column: span 3;
+}
+
+.amount {
+  text-wrap: nowrap;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+}
+
+.progress-bar {
+  height: 2px;
+  width: calc(100% - 2rem);
+}

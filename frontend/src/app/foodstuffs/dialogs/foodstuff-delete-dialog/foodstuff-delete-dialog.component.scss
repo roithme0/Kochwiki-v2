@@ -1,0 +1,13 @@
+:host {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+mat-dialog-actions {
+  padding: 0 !important;
+}
+
+button {
+  flex: 1;
+}

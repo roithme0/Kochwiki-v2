@@ -1,0 +1,41 @@
+<!-- loading -->
+@if(recipesGridHelperService.loading() == true){
+<div class="spinner-wrapper">
+  <mat-spinner diameter="25" />
+</div>
+}
+
+<!-- error -->
+@else if(recipesGridHelperService.error() == true) {
+<p>Ein Fehler ist aufgetreten</p>
+}
+
+<!-- loaded -->
+@else if(recipesGridHelperService.loading() == false &&
+recipesGridHelperService.error() == false) {
+
+<!-- recipes -->
+@if(displayedRecipes().length > 0){
+<div class="grid" [style.--columns]="displayedColumns()">
+  @for(recipe of displayedRecipes(); track recipe.id){
+  <app-recipes-grid-element
+    [recipe]="recipe"
+    (click)="router.navigate(['recipes', recipe.id])"
+  />
+  }
+</div>
+}
+
+<!-- no recipes -->
+@else{
+<div class="no-recipes-placeholder">
+  @if(recipesGridControlsService.searchBy().length > 0){
+  <p>Keine passenden Rezepte gefunden.</p>
+  <button mat-button (click)="recipesGridControlsService.clearSearch()">
+    Suche zurücksetzen
+  </button>
+  }@else {
+  <p>Keine Rezepte vorhanden.</p>
+  }
+</div>
+} }

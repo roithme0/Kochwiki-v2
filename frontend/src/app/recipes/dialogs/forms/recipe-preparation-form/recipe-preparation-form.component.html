@@ -1,0 +1,56 @@
+<div class="preparation-mat-step" [formGroup]="preparationFormGroup">
+  <mat-form-field appearance="outline" floatLabel="always">
+    <mat-label>Zubereitungszeit</mat-label>
+    <input matInput type="number" formControlName="preptime" />
+    <span matTextSuffix>min</span>
+  </mat-form-field>
+
+  <div class="steps-wrapper" formArrayName="steps">
+    @for(step of steps.controls; track step) {
+    <div class="step-wrapper" formGroupName="{{ $index }}">
+      <button
+        mat-icon-button
+        color="warn"
+        class="remove-button"
+        (click)="removeStep($index)"
+      >
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Löschen"
+          fontIcon="close"
+        ></mat-icon>
+      </button>
+
+      <div class="index-and-description-wrapper">
+        <mat-form-field
+          appearance="outline"
+          floatLabel="always"
+          class="index-field"
+        >
+          <mat-label>Index</mat-label>
+          <input matInput type="number" formControlName="index" />
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="outline"
+          floatLabel="always"
+          class="description-field"
+        >
+          <mat-label>Beschreibung</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            cdkTextareaAutosize
+            #autosize="cdkTextareaAutosize"
+          >
+          </textarea>
+        </mat-form-field>
+      </div>
+    </div>
+    }
+  </div>
+
+  <button mat-stroked-button color="accent" (click)="addStep()">
+    Hinzufügen
+  </button>
+</div>

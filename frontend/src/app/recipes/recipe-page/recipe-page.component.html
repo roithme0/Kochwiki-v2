@@ -1,0 +1,44 @@
+<main>
+  @if(recipeIsLoading()){
+  <div class="spinner-wrapper">
+    <mat-spinner diameter="25" />
+  </div>
+  }@else { @if(recipe != null){
+  <article>
+    <app-ingredients-grid [recipe]="recipe" />
+    <app-steps-grid [recipe]="recipe" />
+    <app-recipe-macro-chart-card [recipe]="recipe" />
+    <div class="spacer"></div>
+  </article>
+
+  <div class="buttons-wrapper">
+    <button
+      mat-mini-fab
+      (click)="openPatchRecipeDialog()"
+      class="medium-size-button"
+    >
+      <mat-icon aria-hidden="false" aria-label="edit icon" fontIcon="edit" />
+    </button>
+
+    <button
+      mat-mini-fab
+      color="warn"
+      (click)="openDeleteRecipeDialog()"
+      class="medium-size-button"
+    >
+      <mat-icon
+        aria-hidden="false"
+        aria-label="delete icon"
+        fontIcon="delete"
+      />
+    </button>
+  </div>
+  }@else {
+  <div class="recipe-not-found-placeholder">
+    <p>Rezept nicht gefunden.</p>
+    <button mat-button (click)="router.navigate(['recipes'])">
+      Alle Rezepte anzeigen
+    </button>
+  </div>
+  } }
+</main>

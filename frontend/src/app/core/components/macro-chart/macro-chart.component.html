@@ -1,0 +1,6 @@
+<canvas #canvas class="canvas"></canvas>
+@if(recipeOrFoodstuff().kcal != null && showKcal()){
+<div class="kcal-wrapper">
+  <p class="kcal">{{ recipeOrFoodstuff().kcal }} kcal</p>
+</div>
+}

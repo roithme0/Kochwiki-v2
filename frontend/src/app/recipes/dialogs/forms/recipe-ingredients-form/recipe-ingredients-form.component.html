@@ -1,0 +1,46 @@
+<div class="ingredients-mat-step" [formGroup]="ingredientsFormGroup">
+  <!-- servings -->
+  <mat-form-field appearance="outline" floatLabel="always">
+    <mat-label>Portionen</mat-label>
+    <input matInput type="number" formControlName="servings" />
+  </mat-form-field>
+
+  <!-- ingredients -->
+  <div class="ingredients-wrapper" formArrayName="ingredients">
+    @for(ingredient of ingredients.controls; track ingredient){
+    <div class="ingredient-wrapper" formGroupName="{{ $index }}">
+      <button mat-icon-button color="warn" (click)="removeIngredient($index)">
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Löschen"
+          fontIcon="close"
+        ></mat-icon>
+      </button>
+
+      <app-ingredient-field [foodstuffs]="foodstuffs()" [index]="$index" />
+    </div>
+    }
+  </div>
+
+  <!-- add ingredient -->
+  <div class="ingredients-array-buttons-wrapper">
+    <button
+      mat-stroked-button
+      color="accent"
+      (click)="addIngredient()"
+      class="add-ingredient-button"
+    >
+      Hinzufügen
+    </button>
+
+    <!-- create foodstuff -->
+    <button
+      mat-stroked-button
+      color="accent"
+      (click)="openCreateFoodstuffDialog()"
+      class="create-foodstuff-button"
+    >
+      Erstellen
+    </button>
+  </div>
+</div>

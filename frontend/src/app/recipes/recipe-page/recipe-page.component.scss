@@ -1,0 +1,58 @@
+@use "../../../styles/styles.scss" as *;
+
+:host {
+  /* stretch hole page */
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+}
+
+main,
+article {
+  /* stretch hole page */
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  position: relative;
+}
+
+.spinner-wrapper {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.spacer {
+  flex: 0 0 4rem;
+}
+
+img {
+  flex: 0 0 40%;
+}
+
+.buttons-wrapper {
+  position: absolute;
+  right: $floating-button-position;
+  bottom: $floating-button-position;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.recipe-not-found-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}

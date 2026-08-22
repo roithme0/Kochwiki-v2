@@ -1,0 +1,131 @@
+$standard-font-size: 16px;
+
+$element-background-color: rgba(128, 128, 128, 0.1);
+$element-box-shadow: var(--mdc-elevated-card-container-elevation);
+
+$transform-duration: 0.5s;
+
+$floating-button-position: 1rem;
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: $standard-font-size;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+html {
+  // drop down of auto complete field
+  --mat-autocomplete-container-shape: 0.5rem;
+  --mat-optgroup-label-text-size: #{$standard-font-size};
+  --mat-option-label-text-size: #{$standard-font-size};
+
+  overscroll-behavior-y: none; /* prevent pull to refresh on mobile */
+  height: 100dvh;
+}
+
+body {
+  height: 100%;
+  margin: 0; /* auto added by material ui */
+  font-family: Roboto, "Helvetica Neue", sans-serif; /* auto added by material ui */
+}
+
+app-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  > *:not(app-page-header, router-outlet) {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+main {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}

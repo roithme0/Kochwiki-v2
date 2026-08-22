@@ -1,0 +1,8 @@
+<app-dialog-header title="Lebensmittel löschen?" [showCloseButon]="false" />
+
+<mat-dialog-actions>
+  <button mat-stroked-button color="warn" (click)="deleteFoodstuff()">
+    Ja
+  </button>
+  <button mat-stroked-button cdkFocusInitial mat-dialog-close>Nein</button>
+</mat-dialog-actions>

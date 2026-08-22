@@ -1,0 +1,23 @@
+<main>
+  <nav>
+    @for(customUser of customUsers(); track customUser.id){
+    <mat-card (click)="onCustomUserSelected(customUser)">
+      <mat-card-content>
+        <img src="../../assets/icons/hide_image.svg" />
+      </mat-card-content>
+
+      <mat-card-header>
+        <mat-card-title>{{ customUser.username }}</mat-card-title>
+      </mat-card-header>
+    </mat-card>
+    }
+  </nav>
+
+  <button
+    mat-mini-fab
+    (click)="openUserCreateDialog()"
+    class="create-user-button medium-size-button"
+  >
+    <mat-icon aria-hidden="false" aria-label="Hinzufügen" fontIcon="add" />
+  </button>
+</main>
