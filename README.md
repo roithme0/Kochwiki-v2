@@ -1,29 +1,32 @@
-# Project Context Guide
+# Kochwiki
 
-This file is intended to be mandatory project context for both humans and coding assistants.
-
-Use it as the root documentation contract for your project. Replace the placeholder content below with project-specific details, and remove sections or lines you will not maintain.
+Kochwiki is a private, mobile-first recipe app. This next iteration builds on v1 and introduces AI-assisted recipe improvements, while serving as a practical project for professional AI and full-stack engineering.
 
 ## Core Features
 
-List the features that define the project. Keep this section short and ordered by importance so contributors can quickly understand what matters most.
+- **Recipe and ingredient management**: Create and maintain recipes and ingredients manually, including images.
+- **Nutrition tracking**: Track calories and macronutrients per ingredient and calculate them for each recipe from its ingredients and quantities.
+- **Gut-health recipe improvements**: Use AI to assess recipes against transparent, non-medical gut-health criteria and propose reviewable improvements. Initial signals include fibre, ingredient diversity, fermented foods, and the degree of processing. Allergies, intolerances, and dietary exclusions take priority.
+- **Mobile-first experience**: Use the application on a phone, including image capture or selection and cooking-friendly interactions. A Progressive Web App is the intended delivery model; desktop is secondary for now.
 
-- **Primary feature**: `[Describe the single most important capability of the project, the user it serves, and the expected outcome.]`
-- **Supporting features**:
-  - `[Add the next most important feature if needed.]`
-  - `[Remove this subsection if the project is centered around one core capability.]`
+## Planned Architecture
 
-## Tech Stack
+- **Frontend**: Angular, built mobile-first as an installable PWA.
+- **Backend**: A single Python FastAPI service.
+- **Database**: PostgreSQL for recipes, ingredients, nutrition data, and image metadata.
+- **Image storage**: Self-managed SeaweedFS, accessed through its S3-compatible API. Images are stored as objects; PostgreSQL stores metadata and object references.
+- **Image access**: Private buckets with short-lived presigned upload and download URLs issued by the backend.
 
-- **Backend**: `[Replace or remove]`
-- **Frontend**: `[Replace or remove]`
-- **Database**: `[Replace or remove]`
-- **Migrations**: `[Replace or remove]`
-- **Primary UI library**: `[Replace or remove]`
-- **Other important tooling**: `[Add items worth knowing before implementation]`
+## AI and API Direction
 
-## Workflows
+AI suggestions must be explainable and individually reviewable. Accepted changes should preserve the original recipe or otherwise provide a clear history.
 
-Use workflows only when explicitly prompted to do so by the user.
+The project may later expose a constrained API for general-purpose agents. This will be treated as a security boundary: capabilities, authentication, authorization, and auditability must be designed before agent write access is introduced.
 
-- Spec-Driven Delivery Workflow (`/.codex/workflows/spec-driven-delivery.md`)
+## Operational Notes
+
+The initial service layout intentionally stays small: FastAPI, PostgreSQL, and SeaweedFS. A single SeaweedFS node is a single point of failure, so backups for both database and object storage are required from the outset. Replication and additional services will be added only when they address a concrete need.
+
+## Scope
+
+Kochwiki is for personal, private use. It is also a learning environment for applying production-minded AI and full-stack practices.
