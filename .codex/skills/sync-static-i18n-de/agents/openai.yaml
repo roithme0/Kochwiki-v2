@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync Static i18n DE"
+  short_description: "Sync Angular static German XLF"
+  default_prompt: "Use $sync-static-i18n-de to update `messages.de.xlf` from `messages.xlf`, translate new or changed units into German, and run final XLF QC."
