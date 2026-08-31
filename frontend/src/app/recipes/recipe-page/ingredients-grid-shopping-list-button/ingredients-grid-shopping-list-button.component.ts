@@ -52,7 +52,7 @@ export class IngredientsGridShoppingListButtonComponent {
           this.isAddedToShoppingList.set(true);
           this.isLoading.set(false);
           this.snackBarService.open(
-            this.ingredient().name + ' wurde der Einkaufsliste hinzugefügt.'
+            this.ingredient().foodstuff.name + ' wurde der Einkaufsliste hinzugefügt.'
           );
         },
         error: (error: any) => {
@@ -61,7 +61,7 @@ export class IngredientsGridShoppingListButtonComponent {
           this.isLoading.set(false);
           this.snackBarService.open(
             'Fehler beim Hinzufügen von ' +
-              this.ingredient().name +
+              this.ingredient().foodstuff.name +
               ' zur Einkaufsliste.'
           );
         },
@@ -80,7 +80,7 @@ export class IngredientsGridShoppingListButtonComponent {
           this.isAddedToShoppingList.set(false);
           this.isLoading.set(false);
           this.snackBarService.open(
-            this.ingredient().name + ' wurde von der Einkaufsliste entfernt.'
+            this.ingredient().foodstuff.name + ' wurde von der Einkaufsliste entfernt.'
           );
         },
         error: (error: any) => {
@@ -89,7 +89,7 @@ export class IngredientsGridShoppingListButtonComponent {
           this.isLoading.set(false);
           this.snackBarService.open(
             'Fehler beim Entfernen von ' +
-              this.ingredient().name +
+              this.ingredient().foodstuff.name +
               ' von der Einkaufsliste.'
           );
         },
@@ -110,7 +110,7 @@ export class IngredientsGridShoppingListButtonComponent {
     }
 
     let shoppingListItemIngredient: ShoppingListItemIngredient | undefined;
-    this.ingredient().shoppingListItemIngredients.forEach((item) => {
+    (this.ingredient().shoppingListItemIngredients ?? []).forEach((item) => {
       if (item.shoppingListId === activeCustomUser.id) {
         shoppingListItemIngredient = item;
       }

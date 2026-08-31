@@ -5,6 +5,8 @@ services:
       POSTGRES_DB: kochwiki_test
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
+    tmpfs:
+      - /var/lib/postgresql/data
     ports:
       - "${TEST_DB_PORT:-5433}:5432"
     healthcheck:

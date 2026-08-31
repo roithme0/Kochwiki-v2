@@ -7,10 +7,9 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.foodstuff import Foodstuff
 from app.models.recipe import Ingredient, Recipe, Step
-from app.schemas.foodstuff import FoodstuffOut
 from app.schemas.recipe import IngredientOut, IngredientWrite, RecipeCreate, RecipeOut, RecipeUpdate, StepOut, StepWrite
 from app.services.exceptions import ConflictError, NotFoundError
-from app.services.foodstuffs import foodstuff_out
+from app.services.foodstuffs import foodstuff_summary_out
 
 
 def list_recipes(session: Session) -> Sequence[Recipe]:
@@ -87,21 +86,12 @@ def recipe_out(recipe: Recipe) -> RecipeOut:
 
 
 def ingredient_out(ingredient: Ingredient) -> IngredientOut:
-    foodstuff: FoodstuffOut = foodstuff_out(ingredient.foodstuff)
     return IngredientOut(
         id=ingredient.id,
         index=ingredient.index,
         amount=ingredient.amount,
-        foodstuff=foodstuff,
-        name=ingredient.foodstuff.name,
-        brand=ingredient.foodstuff.brand,
+        foodstuff=foodstuff_summary_out(ingredient.foodstuff),
         recipeId=ingredient.recipe_id,
-        unitVerbose=ingredient.foodstuff.unit.verbose_name,
-        unit=ingredient.foodstuff.unit.value,
-        kcal=ingredient.foodstuff.kcal,
-        carbs=ingredient.foodstuff.carbs,
-        protein=ingredient.foodstuff.protein,
-        fat=ingredient.foodstuff.fat,
     )
 
 

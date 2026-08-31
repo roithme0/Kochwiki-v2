@@ -40,7 +40,7 @@ class FoodstuffUpdate(BaseModel):
         return None if value == "" else value
 
 
-class FoodstuffOut(BaseModel):
+class FoodstuffSummaryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -52,4 +52,7 @@ class FoodstuffOut(BaseModel):
     carbs: JsonDecimal | None
     protein: JsonDecimal | None
     fat: JsonDecimal | None
+
+
+class FoodstuffOut(FoodstuffSummaryOut):
     recipeIds: list[int]

@@ -54,7 +54,9 @@ def test_recipe_contract_persists_order_and_derives_nutrition(client: TestClient
     assert recipe["carbs"] == 16
     assert recipe["protein"] == 9.25
     assert recipe["fat"] == 6.75
-    assert [ingredient["name"] for ingredient in recipe["ingredients"]] == ["Oats", "Egg"]
+    assert [ingredient["foodstuff"]["name"] for ingredient in recipe["ingredients"]] == ["Oats", "Egg"]
+    assert set(recipe["ingredients"][0]) == {"id", "index", "amount", "foodstuff", "recipeId"}
+    assert "recipeIds" not in recipe["ingredients"][0]["foodstuff"]
     assert [step["description"] for step in recipe["steps"]] == ["Cook", "Serve"]
 
     persisted = client.get(f"/recipes/{recipe['id']}")
@@ -121,7 +123,7 @@ def test_typed_patch_replaces_recipe_ingredients_and_keeps_totals_derived(client
 
     assert patched_recipe.status_code == 200
     assert patched_recipe.json()["kcal"] == 117
-    assert [ingredient["name"] for ingredient in patched_recipe.json()["ingredients"]] == ["Egg"]
+    assert [ingredient["foodstuff"]["name"] for ingredient in patched_recipe.json()["ingredients"]] == ["Egg"]
     assert client.patch(f"/foodstuffs/{egg['id']}", json={"kcal": 80}).status_code == 200
     assert client.get(f"/recipes/{recipe['id']}").json()["kcal"] == 120
 

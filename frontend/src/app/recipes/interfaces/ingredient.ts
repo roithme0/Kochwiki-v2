@@ -1,20 +1,11 @@
-import { Foodstuff } from '../../foodstuffs/interfaces/foodstuff';
+import { FoodstuffSummary } from '../../foodstuffs/interfaces/foodstuff-summary';
 import { ShoppingListItemIngredient } from '../../shopping-list/interfaces/shopping-list-item-ingredient';
 
 export interface Ingredient {
-  [key: string]: any;
   id: number;
   index: number;
   amount: number;
-  foodstuff: Foodstuff;
-  shoppingListItemIngredients: ShoppingListItemIngredient[];
-  name: string;
-  brand: string | null;
+  foodstuff: FoodstuffSummary;
   recipeId: number;
-  unitVerbose: string;
-  carbs: number | null;
-  protein: number | null;
-  unit: string;
-  kcal: number | null;
-  fat: number | null;
+  shoppingListItemIngredients?: ShoppingListItemIngredient[];
 }

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.common import JsonDecimal
-from app.schemas.foodstuff import FoodstuffOut
+from app.schemas.foodstuff import FoodstuffSummaryOut
 
 
 class IngredientWrite(BaseModel):
@@ -60,16 +60,8 @@ class IngredientOut(BaseModel):
     id: int
     index: int
     amount: JsonDecimal
-    foodstuff: FoodstuffOut
-    name: str
-    brand: str | None
+    foodstuff: FoodstuffSummaryOut
     recipeId: int
-    unitVerbose: str
-    unit: str
-    kcal: JsonDecimal | None
-    carbs: JsonDecimal | None
-    protein: JsonDecimal | None
-    fat: JsonDecimal | None
 
 
 class StepOut(BaseModel):

@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Chart, DoughnutController, ArcElement } from 'chart.js';
-import { Foodstuff } from '../../../foodstuffs/interfaces/foodstuff';
+import { FoodstuffSummary } from '../../../foodstuffs/interfaces/foodstuff-summary';
 import { ChartLegendElement } from '../../../interfaces/chart-legend-element';
 import { Recipe } from '../../../recipes/interfaces/recipe';
 
@@ -28,7 +28,7 @@ const PLACEHOLDER_LEGEND: Record<string, ChartLegendElement> = {
   styleUrl: './macro-chart.component.scss',
 })
 export class MacroChartComponent {
-  recipeOrFoodstuff = input.required<Recipe | Foodstuff>();
+  recipeOrFoodstuff = input.required<Recipe | FoodstuffSummary>();
   showKcal = input<boolean>(true);
 
   legendUpdated = output<Record<string, ChartLegendElement>>();
@@ -71,7 +71,7 @@ export class MacroChartComponent {
   }
 
   private buildLegend = (
-    recipeOrFoodstuff: Recipe | Foodstuff
+    recipeOrFoodstuff: Recipe | FoodstuffSummary
   ): Record<string, ChartLegendElement> =>
     this.dataIncompleteOrInvalid()
       ? PLACEHOLDER_LEGEND
@@ -107,7 +107,7 @@ export class MacroChartComponent {
 
   private createChart(
     canvas: HTMLCanvasElement,
-    recipeOrFoodstuff: Recipe | Foodstuff,
+    recipeOrFoodstuff: Recipe | FoodstuffSummary,
     legend: Record<string, ChartLegendElement>,
     dataIncompleteOrInvalid: boolean
   ): void {
@@ -142,7 +142,7 @@ export class MacroChartComponent {
   }
 
   private calculateValuePercentage(
-    recipeOrFoodstuff: Recipe | Foodstuff,
+    recipeOrFoodstuff: Recipe | FoodstuffSummary,
     macroValue: number | null | undefined
   ): number | null {
     if (

@@ -6,12 +6,12 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.foodstuff import Foodstuff
 from app.models.recipe import Ingredient
-from app.schemas.foodstuff import FoodstuffCreate, FoodstuffOut, FoodstuffUpdate
+from app.schemas.foodstuff import FoodstuffCreate, FoodstuffOut, FoodstuffSummaryOut, FoodstuffUpdate
 from app.services.exceptions import ConflictError, NotFoundError
 
 
-def foodstuff_out(foodstuff: Foodstuff) -> FoodstuffOut:
-    return FoodstuffOut(
+def foodstuff_summary_out(foodstuff: Foodstuff) -> FoodstuffSummaryOut:
+    return FoodstuffSummaryOut(
         id=foodstuff.id,
         name=foodstuff.name,
         brand=foodstuff.brand,
@@ -21,6 +21,21 @@ def foodstuff_out(foodstuff: Foodstuff) -> FoodstuffOut:
         carbs=foodstuff.carbs,
         protein=foodstuff.protein,
         fat=foodstuff.fat,
+    )
+
+
+def foodstuff_out(foodstuff: Foodstuff) -> FoodstuffOut:
+    summary = foodstuff_summary_out(foodstuff)
+    return FoodstuffOut(
+        id=summary.id,
+        name=summary.name,
+        brand=summary.brand,
+        unit=summary.unit,
+        unitVerbose=summary.unitVerbose,
+        kcal=summary.kcal,
+        carbs=summary.carbs,
+        protein=summary.protein,
+        fat=summary.fat,
         recipeIds=sorted({ingredient.recipe_id for ingredient in foodstuff.ingredients}),
     )
 
