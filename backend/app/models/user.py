@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
-class CustomUser(Base):
+class User(Base):
     __tablename__ = "custom_user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
