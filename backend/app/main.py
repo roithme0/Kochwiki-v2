@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -30,7 +31,11 @@ async def handle_domain_error(_: Request, error: DomainError) -> JSONResponse:
 async def handle_validation_error(_: Request, error: RequestValidationError) -> JSONResponse:
     return JSONResponse(
         status_code=422,
-        content={"statusCode": 422, "message": "Validation failed", "details": error.errors()},
+        content={
+            "statusCode": 422,
+            "message": "Validation failed",
+            "details": jsonable_encoder(error.errors()),
+        },
     )
 
 

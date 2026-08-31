@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.schemas.user import CustomUserCreate, CustomUserUpdate
+from app.schemas.user import UserCreate, UserUpdate
 from app.services.exceptions import ConflictError, NotFoundError
 
 
@@ -27,14 +27,14 @@ def get_user(session: Session, user_id: int) -> User:
     return user
 
 
-def create_user(session: Session, payload: CustomUserCreate) -> User:
+def create_user(session: Session, payload: UserCreate) -> User:
     user = User(username=payload.username)
     session.add(user)
     _flush_for_integrity(session)
     return user
 
 
-def update_user(session: Session, user_id: int, payload: CustomUserUpdate) -> User:
+def update_user(session: Session, user_id: int, payload: UserUpdate) -> User:
     user = get_user(session, user_id)
     if "username" in payload.model_fields_set:
         user.username = payload.username or user.username
@@ -52,4 +52,4 @@ def _flush_for_integrity(session: Session) -> None:
         session.flush()
     except IntegrityError as error:
         session.rollback()
-        raise ConflictError("A custom user with the same username already exists") from error
+        raise ConflictError("A user with the same username already exists") from error

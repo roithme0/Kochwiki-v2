@@ -118,6 +118,8 @@ def test_typed_patch_replaces_recipe_ingredients_and_keeps_totals_derived(client
         f"/recipes/{recipe['id']}",
         json={
             "servings": 2,
+            "originName": "Family cookbook",
+            "originUrl": "https://example.com/patchable-recipe",
             "ingredients": [{"index": 1, "amount": 3, "foodstuffId": egg["id"]}],
             "steps": [{"index": 1, "description": "Mix"}],
         },
@@ -125,12 +127,16 @@ def test_typed_patch_replaces_recipe_ingredients_and_keeps_totals_derived(client
 
     assert patched_recipe.status_code == 200
     assert patched_recipe.json()["kcal"] == 117
+    assert patched_recipe.json()["originName"] == "Family cookbook"
+    assert patched_recipe.json()["originUrl"] == "https://example.com/patchable-recipe"
     assert [ingredient["foodstuff"]["name"] for ingredient in patched_recipe.json()["ingredients"]] == ["Egg"]
-    assert client.patch(f"/foodstuffs/{egg['id']}", json={"kcal": 80}).status_code == 200
+    patched_foodstuff = client.patch(f"/foodstuffs/{egg['id']}", json={"kcal": 80, "brand": ""})
+    assert patched_foodstuff.status_code == 200
+    assert patched_foodstuff.json()["brand"] is None
     assert client.get(f"/recipes/{recipe['id']}").json()["kcal"] == 120
 
 
-def test_custom_user_has_no_shopping_list_side_effect(client: TestClient) -> None:
+def test_user_has_no_shopping_list_side_effect(client: TestClient) -> None:
     created = client.post("/users", json={"username": "Roi"})
 
     assert created.status_code == 201
@@ -170,6 +176,13 @@ def test_validation_and_metadata_contracts(client: TestClient) -> None:
 
     assert invalid.status_code == 422
     assert invalid.json()["statusCode"] == 422
+    null_name = client.patch("/foodstuffs/1", json={"name": None})
+    assert null_name.status_code == 422
+    assert null_name.json()["details"][0]["msg"] == "Value error, name cannot be null"
+    assert client.patch("/foodstuffs/1", json={"unit": None}).status_code == 422
+    assert client.patch("/recipes/1", json={"name": None}).status_code == 422
+    assert client.patch("/recipes/1", json={"servings": None}).status_code == 422
+    assert client.patch("/recipes/1", json={"originUrl": "not a valid URL"}).status_code == 422
     assert client.get("/foodstuffs-meta-data/unit-choices").json() == {
         unit.value: unit.verbose_name for unit in Unit
     }

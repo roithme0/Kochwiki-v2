@@ -1,7 +1,8 @@
 from collections.abc import Sequence
 from decimal import Decimal
+from typing import Literal
 
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
@@ -10,6 +11,8 @@ from app.models.recipe import Ingredient, Recipe, Step
 from app.schemas.recipe import IngredientOut, IngredientWrite, RecipeCreate, RecipeOut, RecipeUpdate, StepOut, StepWrite
 from app.services.exceptions import ConflictError, NotFoundError
 from app.services.foodstuffs import foodstuff_summary_out
+
+NutritionField = Literal["kcal", "carbs", "protein", "fat"]
 
 
 def list_recipes(session: Session) -> Sequence[Recipe]:
@@ -41,17 +44,23 @@ def create_recipe(session: Session, payload: RecipeCreate) -> Recipe:
 
 def update_recipe(session: Session, recipe_id: int, payload: RecipeUpdate) -> Recipe:
     recipe = get_recipe(session, recipe_id)
-    updates = payload.model_dump(exclude_unset=True, exclude={"ingredients", "steps"})
-    attribute_names = {"name", "servings", "preptime"}
-    for field_name, value in updates.items():
-        target_name = field_name if field_name in attribute_names else _snake_case(field_name)
-        setattr(recipe, target_name, value)
+    updated_fields = payload.model_fields_set
+    if "name" in updated_fields and payload.name is not None:
+        recipe.name = payload.name
+    if "servings" in updated_fields and payload.servings is not None:
+        recipe.servings = payload.servings
+    if "preptime" in updated_fields:
+        recipe.preptime = payload.preptime
+    if "originName" in updated_fields:
+        recipe.origin_name = payload.originName
+    if "originUrl" in updated_fields:
+        recipe.origin_url = payload.originUrl
 
-    if "ingredients" in payload.model_fields_set:
+    if "ingredients" in updated_fields:
         ingredient_payloads = payload.ingredients or []
         foodstuffs = _foodstuffs_for_ingredients(session, ingredient_payloads)
         _replace_ingredients(recipe, ingredient_payloads, foodstuffs)
-    if "steps" in payload.model_fields_set:
+    if "steps" in updated_fields:
         recipe.steps = _new_steps(payload.steps or [])
 
     _flush_for_integrity(session, "A recipe with the same name or duplicate foodstuff already exists")
@@ -109,7 +118,7 @@ def list_steps(session: Session) -> Sequence[Step]:
     return session.scalars(statement).all()
 
 
-def _recipe_statement():
+def _recipe_statement() -> Select[tuple[Recipe]]:
     return (
         select(Recipe)
         .options(selectinload(Recipe.ingredients).selectinload(Ingredient.foodstuff), selectinload(Recipe.steps))
@@ -161,12 +170,12 @@ def _new_steps(payloads: list[StepWrite]) -> list[Step]:
     return [Step(index=payload.index, description=payload.description) for payload in payloads]
 
 
-def _total_nutrition(recipe: Recipe, attribute: str) -> Decimal | None:
+def _total_nutrition(recipe: Recipe, attribute: NutritionField) -> Decimal | None:
     if not recipe.ingredients:
         return None
     total = Decimal("0")
     for ingredient in recipe.ingredients:
-        value = getattr(ingredient.foodstuff, attribute)
+        value = _nutrition_value(ingredient.foodstuff, attribute)
         if value is None:
             return None
         if ingredient.foodstuff.unit.value in ("G", "ML"):
@@ -180,8 +189,14 @@ def _per_serving(total: Decimal | None, servings: int) -> Decimal | None:
     return None if total is None else total / Decimal(servings)
 
 
-def _snake_case(name: str) -> str:
-    return {"originName": "origin_name", "originUrl": "origin_url"}[name]
+def _nutrition_value(foodstuff: Foodstuff, attribute: NutritionField) -> Decimal | None:
+    if attribute == "kcal":
+        return foodstuff.kcal
+    if attribute == "carbs":
+        return foodstuff.carbs
+    if attribute == "protein":
+        return foodstuff.protein
+    return foodstuff.fat
 
 
 def _flush_for_integrity(session: Session, message: str) -> None:
