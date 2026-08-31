@@ -1,0 +1,27 @@
+---
+version: "3.1"
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kochwiki
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - /volume1/docker/Kochwiki/staging/postgresql/data:/var/lib/postgresql/data
+
+  backend-app:
+    image: roithme0/kochwiki-backend:alpha
+    ports:
+      - 8889:8080
+    depends_on:
+      - db
+
+  frontend-app:
+    image: roithme0/kochwiki-frontend:alpha
+    ports:
+      - 8001:80
+    depends_on:
+      - backend-app
