@@ -1,0 +1,94 @@
+from decimal import Decimal
+from urllib.parse import urlparse
+
+from pydantic import BaseModel, Field, field_validator
+
+from app.schemas.common import JsonDecimal
+from app.schemas.foodstuff import FoodstuffOut
+
+
+class IngredientWrite(BaseModel):
+    index: int = Field(ge=1, le=99)
+    amount: Decimal = Field(gt=0, le=9999)
+    foodstuffId: int = Field(gt=0)
+
+
+class StepWrite(BaseModel):
+    index: int = Field(ge=1, le=99)
+    description: str = Field(min_length=1, max_length=200)
+
+
+class RecipeFields(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    servings: int = Field(ge=1, le=99)
+    preptime: int | None = Field(default=None, ge=1, le=999)
+    originName: str | None = Field(default=None, max_length=200)
+    originUrl: str | None = Field(default=None, max_length=200)
+
+    @field_validator("originUrl")
+    @classmethod
+    def validate_origin_url(cls, value: str | None) -> str | None:
+        if value in (None, ""):
+            return None
+        parsed = urlparse(value)
+        if not parsed.scheme or not parsed.netloc:
+            raise ValueError("originUrl must be a valid absolute URL")
+        return value
+
+
+class RecipeCreate(RecipeFields):
+    ingredients: list[IngredientWrite] = Field(default_factory=list)
+    steps: list[StepWrite] = Field(default_factory=list)
+
+
+class RecipeUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    servings: int | None = Field(default=None, ge=1, le=99)
+    preptime: int | None = Field(default=None, ge=1, le=999)
+    originName: str | None = Field(default=None, max_length=200)
+    originUrl: str | None = Field(default=None, max_length=200)
+    ingredients: list[IngredientWrite] | None = None
+    steps: list[StepWrite] | None = None
+
+    @field_validator("originUrl")
+    @classmethod
+    def validate_origin_url(cls, value: str | None) -> str | None:
+        return RecipeFields.validate_origin_url(value)
+
+
+class IngredientOut(BaseModel):
+    id: int
+    index: int
+    amount: JsonDecimal
+    foodstuff: FoodstuffOut
+    name: str
+    brand: str | None
+    recipeId: int
+    unitVerbose: str
+    unit: str
+    kcal: JsonDecimal | None
+    carbs: JsonDecimal | None
+    protein: JsonDecimal | None
+    fat: JsonDecimal | None
+
+
+class StepOut(BaseModel):
+    id: int
+    index: int
+    description: str
+    recipeId: int
+
+
+class RecipeOut(BaseModel):
+    id: int
+    name: str
+    servings: int
+    preptime: int | None
+    originName: str | None
+    originUrl: str | None
+    kcal: JsonDecimal | None
+    carbs: JsonDecimal | None
+    protein: JsonDecimal | None
+    fat: JsonDecimal | None
+    ingredients: list[IngredientOut]
+    steps: list[StepOut]
