@@ -17,12 +17,6 @@
         >{{ ingredient.amount }} {{ ingredient.foodstuff.unitVerbose }}</span
       >
 
-      <app-ingredients-grid-shopping-list-button
-        class="ingredients-grid-shopping-list-button"
-        [ngClass]="{ hide: environmentName == 'prod' }"
-        [ingredient]="ingredient"
-        [servings]="recipe().servings"
-      />
       }
       @empty {
       <span class="no-ingredients">Keine Zutaten vorhanden</span>

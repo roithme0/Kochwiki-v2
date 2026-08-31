@@ -3,7 +3,6 @@ import { HomePageComponent } from './core/home-page/home-page.component';
 import { FoodstuffsPageComponent } from './foodstuffs/foodstuffs-page/foodstuffs-page.component';
 import { RecipesPageComponent } from './recipes/recipes-page/recipes-page.component';
 import { RecipePageComponent } from './recipes/recipe-page/recipe-page.component';
-import { ShoppingListPageComponent } from './shopping-list/shopping-list-page/shopping-list-page.component';
 import { SelectCustomUserPageComponent } from './core/select-custom-user-page/select-custom-user-page.component';
 import { AuthGuard } from './core/classes/auth-guard';
 
@@ -12,12 +11,6 @@ export const routes: Routes = [
     path: '',
     component: HomePageComponent,
     title: 'Home',
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'shoppingList',
-    component: ShoppingListPageComponent,
-    title: 'Einkaufsliste',
     canActivate: [AuthGuard],
   },
   {

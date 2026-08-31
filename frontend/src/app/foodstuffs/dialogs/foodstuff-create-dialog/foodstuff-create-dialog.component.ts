@@ -12,7 +12,7 @@ import {
 import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Foodstuff } from '../../interfaces/foodstuff';
-import { forkJoin, Observable, take } from 'rxjs';
+import { forkJoin, take } from 'rxjs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -46,13 +46,13 @@ export class FoodstuffCreateDialogComponent {
   unitChoices: FoodstuffUnitChoices | null = null;
 
   foodstuffForm = this.fb.group({
-    name: ['', Validators.required],
-    brand: [''],
-    unit: ['', Validators.required],
-    kcal: [<number | null>null],
-    carbs: [<number | null>null],
-    protein: [<number | null>null],
-    fat: [<number | null>null],
+    name: this.fb.nonNullable.control('', Validators.required),
+    brand: this.fb.control<string | null>(''),
+    unit: this.fb.nonNullable.control('', Validators.required),
+    kcal: this.fb.control<number | null>(null),
+    carbs: this.fb.control<number | null>(null),
+    protein: this.fb.control<number | null>(null),
+    fat: this.fb.control<number | null>(null),
   });
 
   ngOnInit(): void {
@@ -60,7 +60,7 @@ export class FoodstuffCreateDialogComponent {
   }
 
   onSubmit(): void {
-    const foodstuff: Partial<Foodstuff> = this.foodstuffForm.value as Foodstuff;
+    const foodstuff = this.toFoodstuffUpdates();
 
     this.foodstuffBackendService
       .postFoodstuff(foodstuff)
@@ -81,7 +81,7 @@ export class FoodstuffCreateDialogComponent {
   }
 
   fetchMetaData(): void {
-    const requests: Observable<any> = forkJoin({
+    const requests = forkJoin({
       verboseNames: this.foodstuffBackendService.fetchFoodstuffVerboseNames(),
       unitChoices: this.foodstuffBackendService.fetchFoodstuffUnitChoices(),
     });
@@ -100,5 +100,13 @@ export class FoodstuffCreateDialogComponent {
     });
   }
 
-  getKeys = (obj: Object): string[] => Object.keys(obj);
+  getKeys = (obj: Readonly<Record<string, string>>): string[] =>
+    Object.keys(obj);
+
+  private toFoodstuffUpdates(): Partial<Foodstuff> {
+    const { name, brand, unit, kcal, carbs, protein, fat } =
+      this.foodstuffForm.getRawValue();
+
+    return { name, brand, unit, kcal, carbs, protein, fat };
+  }
 }

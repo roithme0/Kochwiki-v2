@@ -11,7 +11,7 @@ import {
   FoodstuffUnitChoices,
   FoodstuffVerboseNames,
 } from '../../interfaces/foodstuff-meta-data';
-import { forkJoin, Observable, take } from 'rxjs';
+import { forkJoin, take } from 'rxjs';
 import { Foodstuff } from '../../interfaces/foodstuff';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -46,13 +46,13 @@ export class FoodstuffPatchDialogComponent {
   unitChoices: FoodstuffUnitChoices | null = null;
 
   foodstuffForm = this.fb.group({
-    name: ['', Validators.required],
-    brand: [''],
-    unit: ['', Validators.required],
-    kcal: [<number | null>null],
-    carbs: [<number | null>null],
-    protein: [<number | null>null],
-    fat: [<number | null>null],
+    name: this.fb.nonNullable.control('', Validators.required),
+    brand: this.fb.control<string | null>(''),
+    unit: this.fb.nonNullable.control('', Validators.required),
+    kcal: this.fb.control<number | null>(null),
+    carbs: this.fb.control<number | null>(null),
+    protein: this.fb.control<number | null>(null),
+    fat: this.fb.control<number | null>(null),
   });
 
   ngOnInit(): void {
@@ -62,8 +62,8 @@ export class FoodstuffPatchDialogComponent {
 
   //#region Events
 
-  onSubmit(formData: any): void {
-    const updates: Partial<Foodstuff> = formData as Foodstuff;
+  onSubmit(): void {
+    const updates = this.toFoodstuffUpdates();
 
     this.foodstuffBackendService
       .patchFoodstuff(this.data.id, updates)
@@ -101,7 +101,7 @@ export class FoodstuffPatchDialogComponent {
   }
 
   fetchMetaData(): void {
-    const requests: Observable<any> = forkJoin({
+    const requests = forkJoin({
       verboseNames: this.foodstuffBackendService.fetchFoodstuffVerboseNames(),
       unitChoices: this.foodstuffBackendService.fetchFoodstuffUnitChoices(),
     });
@@ -120,7 +120,15 @@ export class FoodstuffPatchDialogComponent {
     });
   }
 
-  getKeys = (obj: Object): string[] => Object.keys(obj);
+  getKeys = (obj: Readonly<Record<string, string>>): string[] =>
+    Object.keys(obj);
+
+  private toFoodstuffUpdates(): Partial<Foodstuff> {
+    const { name, brand, unit, kcal, carbs, protein, fat } =
+      this.foodstuffForm.getRawValue();
+
+    return { name, brand, unit, kcal, carbs, protein, fat };
+  }
 
   //#endregion
 }

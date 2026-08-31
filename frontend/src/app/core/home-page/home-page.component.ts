@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
 import { PageHeaderService } from '../../services/page-header.service';
 import { VERSION } from '../../../version';
 import { BackendMetaService } from '../services/backend-meta.service';
@@ -17,8 +16,6 @@ export class HomePageComponent {
   readonly backendMetaService = inject(BackendMetaService);
 
   readonly frontendVersion: string = VERSION;
-  readonly environmentName: string = environment.name;
-
   ngOnInit(): void {
     this.pageHeaderService.updateHeader(true, 'Home', '', false);
   }

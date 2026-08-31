@@ -12,7 +12,7 @@ import {
 } from '../../interfaces/foodstuff-meta-data';
 import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
 import { SnackBarService } from '../../../services/snack-bar.service';
-import { Observable, forkJoin, take, takeUntil } from 'rxjs';
+import { forkJoin, take, takeUntil } from 'rxjs';
 import { Unsubscribe } from '../../../utils/unsubsribe';
 import { RecipeBackendService } from '../../../recipes/services/recipe-backend.service';
 
@@ -74,7 +74,7 @@ export class FoodstuffsService extends Unsubscribe {
     this._isLoading.set(true);
     this._hasError.set(false);
 
-    const requests: Observable<any> = forkJoin({
+    const requests = forkJoin({
       foodstuffs: this.foodstuffBackendService.getAllFoodstuffs(),
       verboseNames: this.foodstuffBackendService.fetchFoodstuffVerboseNames(),
       unitChoices: this.foodstuffBackendService.fetchFoodstuffUnitChoices(),

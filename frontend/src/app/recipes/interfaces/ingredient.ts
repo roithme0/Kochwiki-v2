@@ -1,5 +1,4 @@
 import { FoodstuffSummary } from '../../foodstuffs/interfaces/foodstuff-summary';
-import { ShoppingListItemIngredient } from '../../shopping-list/interfaces/shopping-list-item-ingredient';
 
 export interface Ingredient {
   id: number;
@@ -7,5 +6,4 @@ export interface Ingredient {
   amount: number;
   foodstuff: FoodstuffSummary;
   recipeId: number;
-  shoppingListItemIngredients?: ShoppingListItemIngredient[];
 }
