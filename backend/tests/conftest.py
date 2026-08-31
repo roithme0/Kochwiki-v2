@@ -1,13 +1,23 @@
 import os
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://test:test@db:5432/kochwiki_test")
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL", "postgresql+psycopg://test:test@localhost:5433/kochwiki_test"
+)
+os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
 from app.db.session import engine
 from app.main import app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def migrate_database() -> None:
+    command.upgrade(Config("alembic.ini"), "head")
 
 
 @pytest.fixture(autouse=True)
