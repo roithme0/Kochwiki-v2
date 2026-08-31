@@ -41,6 +41,18 @@ class RecipeCreate(RecipeFields):
     ingredients: list[IngredientWrite] = Field(default_factory=list)
     steps: list[StepWrite] = Field(default_factory=list)
 
+    @field_validator("ingredients")
+    @classmethod
+    def validate_unique_ingredient_indexes(cls, value: list[IngredientWrite]) -> list[IngredientWrite]:
+        _validate_unique_indexes([ingredient.index for ingredient in value], "ingredient")
+        return value
+
+    @field_validator("steps")
+    @classmethod
+    def validate_unique_step_indexes(cls, value: list[StepWrite]) -> list[StepWrite]:
+        _validate_unique_indexes([step.index for step in value], "step")
+        return value
+
 
 class RecipeUpdate(RecipeFields):
     name: str | None = Field(default=None, min_length=1, max_length=200)
@@ -50,6 +62,20 @@ class RecipeUpdate(RecipeFields):
     originUrl: str | None = Field(default=None, max_length=200)
     ingredients: list[IngredientWrite] | None = None
     steps: list[StepWrite] | None = None
+
+    @field_validator("ingredients")
+    @classmethod
+    def validate_unique_ingredient_indexes(cls, value: list[IngredientWrite] | None) -> list[IngredientWrite] | None:
+        if value is not None:
+            _validate_unique_indexes([ingredient.index for ingredient in value], "ingredient")
+        return value
+
+    @field_validator("steps")
+    @classmethod
+    def validate_unique_step_indexes(cls, value: list[StepWrite] | None) -> list[StepWrite] | None:
+        if value is not None:
+            _validate_unique_indexes([step.index for step in value], "step")
+        return value
 
     @model_validator(mode="after")
     def validate_required_fields(self) -> Self:
@@ -88,3 +114,8 @@ class RecipeOut(BaseModel):
     fat: JsonDecimal | None
     ingredients: list[IngredientOut]
     steps: list[StepOut]
+
+
+def _validate_unique_indexes(indexes: list[int], item_name: str) -> None:
+    if len(indexes) != len(set(indexes)):
+        raise ValueError(f"{item_name} indexes must be unique per recipe")

@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
+from app.db.session import get_db, get_write_db
 from app.models.enums import Unit
 from app.schemas.foodstuff import FoodstuffCreate, FoodstuffOut, FoodstuffUpdate
 from app.services import foodstuffs
@@ -22,25 +22,22 @@ def get_foodstuff(foodstuff_id: int, session: Session = Depends(get_db)) -> Food
 
 
 @router.post("/foodstuffs", response_model=FoodstuffOut, status_code=status.HTTP_201_CREATED)
-def post_foodstuff(payload: FoodstuffCreate, session: Session = Depends(get_db)) -> FoodstuffOut:
+def post_foodstuff(payload: FoodstuffCreate, session: Session = Depends(get_write_db, scope="function")) -> FoodstuffOut:
     foodstuff = foodstuffs.create_foodstuff(session, payload)
-    session.commit()
     return foodstuffs.foodstuff_out(foodstuff)
 
 
 @router.patch("/foodstuffs/{foodstuff_id}", response_model=FoodstuffOut)
 def patch_foodstuff(
-    foodstuff_id: int, payload: FoodstuffUpdate, session: Session = Depends(get_db)
+    foodstuff_id: int, payload: FoodstuffUpdate, session: Session = Depends(get_write_db, scope="function")
 ) -> FoodstuffOut:
     foodstuff = foodstuffs.update_foodstuff(session, foodstuff_id, payload)
-    session.commit()
     return foodstuffs.foodstuff_out(foodstuff)
 
 
 @router.delete("/foodstuffs/{foodstuff_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_foodstuff(foodstuff_id: int, session: Session = Depends(get_db)) -> Response:
+def delete_foodstuff(foodstuff_id: int, session: Session = Depends(get_write_db, scope="function")) -> Response:
     foodstuffs.delete_foodstuff(session, foodstuff_id)
-    session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

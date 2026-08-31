@@ -37,6 +37,7 @@ class Ingredient(Base):
     __tablename__ = "ingredient"
     __table_args__ = (
         UniqueConstraint("foodstuff_id", "recipe_id", name="uq_ingredient_foodstuff_recipe"),
+        UniqueConstraint("recipe_id", "index", name="uq_ingredient_recipe_index"),
         CheckConstraint('"index" >= 1', name="ck_ingredient_index_positive"),
         CheckConstraint("amount > 0", name="ck_ingredient_amount_positive"),
     )
@@ -52,7 +53,10 @@ class Ingredient(Base):
 
 class Step(Base):
     __tablename__ = "step"
-    __table_args__ = (CheckConstraint('"index" >= 1', name="ck_step_index_positive"),)
+    __table_args__ = (
+        UniqueConstraint("recipe_id", "index", name="uq_step_recipe_index"),
+        CheckConstraint('"index" >= 1', name="ck_step_index_positive"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     index: Mapped[int] = mapped_column(nullable=False)

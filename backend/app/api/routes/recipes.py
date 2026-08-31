@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
+from app.db.session import get_db, get_write_db
 from app.schemas.recipe import IngredientOut, RecipeCreate, RecipeOut, RecipeUpdate, StepOut
 from app.services import recipes
 
@@ -21,23 +21,20 @@ def get_recipe(recipe_id: int, session: Session = Depends(get_db)) -> RecipeOut:
 
 
 @router.post("/recipes", response_model=RecipeOut, status_code=status.HTTP_201_CREATED)
-def post_recipe(payload: RecipeCreate, session: Session = Depends(get_db)) -> RecipeOut:
+def post_recipe(payload: RecipeCreate, session: Session = Depends(get_write_db, scope="function")) -> RecipeOut:
     recipe = recipes.create_recipe(session, payload)
-    session.commit()
     return recipes.recipe_out(recipe)
 
 
 @router.patch("/recipes/{recipe_id}", response_model=RecipeOut)
-def patch_recipe(recipe_id: int, payload: RecipeUpdate, session: Session = Depends(get_db)) -> RecipeOut:
+def patch_recipe(recipe_id: int, payload: RecipeUpdate, session: Session = Depends(get_write_db, scope="function")) -> RecipeOut:
     recipe = recipes.update_recipe(session, recipe_id, payload)
-    session.commit()
     return recipes.recipe_out(recipe)
 
 
 @router.delete("/recipes/{recipe_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_recipe(recipe_id: int, session: Session = Depends(get_db)) -> Response:
+def delete_recipe(recipe_id: int, session: Session = Depends(get_write_db, scope="function")) -> Response:
     recipes.delete_recipe(session, recipe_id)
-    session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

@@ -1,13 +1,13 @@
 from collections.abc import Sequence
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.foodstuff import Foodstuff
 from app.models.recipe import Ingredient
 from app.schemas.foodstuff import FoodstuffCreate, FoodstuffOut, FoodstuffSummaryOut, FoodstuffUpdate
 from app.services.exceptions import ConflictError, NotFoundError
+from app.services.integrity import flush_for_unique_conflict
 
 
 def foodstuff_summary_out(foodstuff: Foodstuff) -> FoodstuffSummaryOut:
@@ -60,7 +60,7 @@ def get_foodstuff(session: Session, foodstuff_id: int) -> Foodstuff:
 def create_foodstuff(session: Session, payload: FoodstuffCreate) -> Foodstuff:
     foodstuff = Foodstuff(**payload.model_dump())
     session.add(foodstuff)
-    _flush_for_integrity(session)
+    flush_for_unique_conflict(session, "uq_foodstuff_name_brand", "A foodstuff with the same name and brand already exists")
     return get_foodstuff(session, foodstuff.id)
 
 
@@ -68,7 +68,7 @@ def update_foodstuff(session: Session, foodstuff_id: int, payload: FoodstuffUpda
     foodstuff = get_foodstuff(session, foodstuff_id)
     for field_name, value in payload.model_dump(exclude_unset=True).items():
         setattr(foodstuff, field_name, value)
-    _flush_for_integrity(session)
+    flush_for_unique_conflict(session, "uq_foodstuff_name_brand", "A foodstuff with the same name and brand already exists")
     return get_foodstuff(session, foodstuff.id)
 
 
@@ -81,11 +81,3 @@ def delete_foodstuff(session: Session, foodstuff_id: int) -> None:
         raise ConflictError("Foodstuff cannot be deleted while it is used by a recipe")
     session.delete(foodstuff)
     session.flush()
-
-
-def _flush_for_integrity(session: Session) -> None:
-    try:
-        session.flush()
-    except IntegrityError as error:
-        session.rollback()
-        raise ConflictError("A foodstuff with the same name and brand already exists") from error

@@ -171,6 +171,79 @@ def test_recipe_name_and_foodstuff_membership_are_unique(client: TestClient) -> 
     assert duplicate_foodstuff.status_code == 409
 
 
+def test_failed_recipe_update_rolls_back_all_changes(client: TestClient) -> None:
+    oats = create_foodstuff(client)
+    recipe = client.post(
+        "/recipes",
+        json={
+            "name": "Original recipe",
+            "servings": 1,
+            "ingredients": [{"index": 1, "amount": 100, "foodstuffId": oats["id"]}],
+        },
+    ).json()
+    client.post("/recipes", json={"name": "Taken recipe name", "servings": 1})
+
+    response = client.patch(
+        f"/recipes/{recipe['id']}",
+        json={"name": "Taken recipe name", "ingredients": []},
+    )
+
+    assert response.status_code == 409
+    persisted_recipe = client.get(f"/recipes/{recipe['id']}").json()
+    assert persisted_recipe["name"] == "Original recipe"
+    assert len(persisted_recipe["ingredients"]) == 1
+
+
+def test_recipe_positions_must_be_unique(client: TestClient) -> None:
+    oats = create_foodstuff(client)
+    egg = create_foodstuff(client, name="Egg")
+
+    duplicate_ingredient_index = client.post(
+        "/recipes",
+        json={
+            "name": "Duplicate ingredient position",
+            "servings": 1,
+            "ingredients": [
+                {"index": 1, "amount": 100, "foodstuffId": oats["id"]},
+                {"index": 1, "amount": 1, "foodstuffId": egg["id"]},
+            ],
+        },
+    )
+    assert duplicate_ingredient_index.status_code == 422
+
+    duplicate_step_index = client.post(
+        "/recipes",
+        json={
+            "name": "Duplicate step position",
+            "servings": 1,
+            "steps": [
+                {"index": 1, "description": "Mix"},
+                {"index": 1, "description": "Bake"},
+            ],
+        },
+    )
+    assert duplicate_step_index.status_code == 422
+
+    recipe = client.post(
+        "/recipes",
+        json={
+            "name": "Patch positions",
+            "servings": 1,
+            "steps": [{"index": 1, "description": "Mix"}],
+        },
+    ).json()
+    duplicate_patch_index = client.patch(
+        f"/recipes/{recipe['id']}",
+        json={
+            "steps": [
+                {"index": 1, "description": "Mix"},
+                {"index": 1, "description": "Bake"},
+            ]
+        },
+    )
+    assert duplicate_patch_index.status_code == 422
+
+
 def test_validation_and_metadata_contracts(client: TestClient) -> None:
     invalid = client.post("/foodstuffs", json={"name": "Missing required values"})
 

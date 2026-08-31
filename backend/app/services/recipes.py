@@ -3,7 +3,6 @@ from decimal import Decimal
 from typing import Literal
 
 from sqlalchemy import Select, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.foodstuff import Foodstuff
@@ -11,6 +10,7 @@ from app.models.recipe import Ingredient, Recipe, Step
 from app.schemas.recipe import IngredientOut, IngredientWrite, RecipeCreate, RecipeOut, RecipeUpdate, StepOut, StepWrite
 from app.services.exceptions import ConflictError, NotFoundError
 from app.services.foodstuffs import foodstuff_summary_out
+from app.services.integrity import flush_for_unique_conflict
 
 NutritionField = Literal["kcal", "carbs", "protein", "fat"]
 
@@ -38,13 +38,21 @@ def create_recipe(session: Session, payload: RecipeCreate) -> Recipe:
     recipe.ingredients = _new_ingredients(payload.ingredients, foodstuffs)
     recipe.steps = _new_steps(payload.steps)
     session.add(recipe)
-    _flush_for_integrity(session, "A recipe with the same name already exists")
+    flush_for_unique_conflict(session, "uq_recipe_name", "A recipe with the same name already exists")
     return get_recipe(session, recipe.id)
 
 
 def update_recipe(session: Session, recipe_id: int, payload: RecipeUpdate) -> Recipe:
     recipe = get_recipe(session, recipe_id)
     updated_fields = payload.model_fields_set
+
+    if "ingredients" in updated_fields:
+        ingredient_payloads = payload.ingredients or []
+        foodstuffs = _foodstuffs_for_ingredients(session, ingredient_payloads)
+        _replace_ingredients(session, recipe, ingredient_payloads, foodstuffs)
+    if "steps" in updated_fields:
+        _replace_steps(session, recipe, payload.steps or [])
+
     if "name" in updated_fields and payload.name is not None:
         recipe.name = payload.name
     if "servings" in updated_fields and payload.servings is not None:
@@ -56,14 +64,7 @@ def update_recipe(session: Session, recipe_id: int, payload: RecipeUpdate) -> Re
     if "originUrl" in updated_fields:
         recipe.origin_url = payload.originUrl
 
-    if "ingredients" in updated_fields:
-        ingredient_payloads = payload.ingredients or []
-        foodstuffs = _foodstuffs_for_ingredients(session, ingredient_payloads)
-        _replace_ingredients(recipe, ingredient_payloads, foodstuffs)
-    if "steps" in updated_fields:
-        recipe.steps = _new_steps(payload.steps or [])
-
-    _flush_for_integrity(session, "A recipe with the same name or duplicate foodstuff already exists")
+    flush_for_unique_conflict(session, "uq_recipe_name", "A recipe with the same name already exists")
     return get_recipe(session, recipe.id)
 
 
@@ -148,22 +149,17 @@ def _new_ingredients(payloads: list[IngredientWrite], foodstuffs: dict[int, Food
 
 
 def _replace_ingredients(
-    recipe: Recipe, payloads: list[IngredientWrite], foodstuffs: dict[int, Foodstuff]
+    session: Session, recipe: Recipe, payloads: list[IngredientWrite], foodstuffs: dict[int, Foodstuff]
 ) -> None:
-    existing_by_foodstuff_id = {ingredient.foodstuff_id: ingredient for ingredient in recipe.ingredients}
-    requested_ids = {payload.foodstuffId for payload in payloads}
-    recipe.ingredients[:] = [
-        ingredient for ingredient in recipe.ingredients if ingredient.foodstuff_id in requested_ids
-    ]
-    for payload in payloads:
-        existing = existing_by_foodstuff_id.get(payload.foodstuffId)
-        if existing is None:
-            recipe.ingredients.append(
-                Ingredient(index=payload.index, amount=payload.amount, foodstuff=foodstuffs[payload.foodstuffId])
-            )
-        else:
-            existing.index = payload.index
-            existing.amount = payload.amount
+    recipe.ingredients.clear()
+    session.flush()
+    recipe.ingredients = _new_ingredients(payloads, foodstuffs)
+
+
+def _replace_steps(session: Session, recipe: Recipe, payloads: list[StepWrite]) -> None:
+    recipe.steps.clear()
+    session.flush()
+    recipe.steps = _new_steps(payloads)
 
 
 def _new_steps(payloads: list[StepWrite]) -> list[Step]:
@@ -197,11 +193,3 @@ def _nutrition_value(foodstuff: Foodstuff, attribute: NutritionField) -> Decimal
     if attribute == "protein":
         return foodstuff.protein
     return foodstuff.fat
-
-
-def _flush_for_integrity(session: Session, message: str) -> None:
-    try:
-        session.flush()
-    except IntegrityError as error:
-        session.rollback()
-        raise ConflictError(message) from error
