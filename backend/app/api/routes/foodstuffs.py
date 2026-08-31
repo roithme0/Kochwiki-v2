@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.models.enums import Unit
 from app.schemas.foodstuff import FoodstuffCreate, FoodstuffOut, FoodstuffUpdate
 from app.services import foodstuffs
 
@@ -59,4 +60,4 @@ def get_foodstuff_verbose_names() -> dict[str, str]:
 
 @router.get("/foodstuffs-meta-data/unit-choices")
 def get_foodstuff_unit_choices() -> dict[str, str]:
-    return {"G": "g", "ML": "ml", "PIECE": "Stk."}
+    return {unit.value: unit.verbose_name for unit in Unit}

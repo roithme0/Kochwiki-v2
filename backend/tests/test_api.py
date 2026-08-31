@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
 
+from app.models.enums import Unit
+
 
 def create_foodstuff(client: TestClient, **overrides: object) -> dict[str, object]:
     payload: dict[str, object] = {
@@ -169,8 +171,6 @@ def test_validation_and_metadata_contracts(client: TestClient) -> None:
     assert invalid.status_code == 422
     assert invalid.json()["statusCode"] == 422
     assert client.get("/foodstuffs-meta-data/unit-choices").json() == {
-        "G": "g",
-        "ML": "ml",
-        "PIECE": "Stk.",
+        unit.value: unit.verbose_name for unit in Unit
     }
     assert client.get("/meta/version").headers["content-type"].startswith("text/plain")
