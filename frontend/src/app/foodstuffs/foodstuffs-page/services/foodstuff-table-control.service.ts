@@ -20,8 +20,7 @@ export class FoodstuffTableControlService {
   private _searchBy: WritableSignal<string> = signal(DEFAULT_SEARCH_BY);
 
   foodstuffs = computed((): Foodstuff[] =>
-    this.foodstuffsService
-      .foodstuffs()
+    [...this.foodstuffsService.foodstuffs()]
       .sort((a, b) =>
         a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
       )

@@ -14,6 +14,6 @@ export class StepsGridComponent {
   recipe = input.required<Recipe>();
 
   stepsSorted = computed((): Step[] =>
-    this.recipe().steps.sort((a: Step, b: Step) => a.index - b.index)
+    [...this.recipe().steps].sort((a: Step, b: Step) => a.index - b.index)
   );
 }

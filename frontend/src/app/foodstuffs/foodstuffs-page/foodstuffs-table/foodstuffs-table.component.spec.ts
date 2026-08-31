@@ -1,23 +1,40 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { FoodstuffsTableComponent } from './foodstuffs-table.component';
+import { FoodstuffTableDisplayedFieldsService } from '../services/foodstuff-table-displayed-fields.service';
+import { FoodstuffsService } from '../services/foodstuffs.service';
+import { FoodstuffTableControlService } from '../services/foodstuff-table-control.service';
 
 describe('FoodstuffsTableComponent', () => {
   let component: FoodstuffsTableComponent;
-  let fixture: ComponentFixture<FoodstuffsTableComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [FoodstuffsTableComponent]
-    })
-    .compileComponents();
-    
-    fixture = TestBed.createComponent(FoodstuffsTableComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: FoodstuffsService,
+          useValue: { foodstuffs: signal([]), verboseNames: signal(null) },
+        },
+        { provide: FoodstuffTableDisplayedFieldsService, useValue: {} },
+        { provide: FoodstuffTableControlService, useValue: { searchBy: signal('') } },
+        { provide: MatDialog, useValue: {} },
+      ],
+    });
+    component = TestBed.runInInjectionContext(
+      () => new FoodstuffsTableComponent()
+    );
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('disconnects the resize observer when destroyed', () => {
+    const resizeObserver = jasmine.createSpyObj<ResizeObserver>(
+      'ResizeObserver',
+      ['disconnect']
+    );
+    component.tableWrapperResizeObserver = resizeObserver;
+
+    component.ngOnDestroy();
+
+    expect(resizeObserver.disconnect).toHaveBeenCalledOnceWith();
   });
 });

@@ -33,11 +33,11 @@ export class RecipesService extends Unsubscribe {
     return this._recipes;
   }
 
-  get loading(): Signal<boolean> {
+  get isLoading(): Signal<boolean> {
     return this._loading;
   }
 
-  get error(): Signal<boolean> {
+  get hasError(): Signal<boolean> {
     return this._error;
   }
 
@@ -47,7 +47,7 @@ export class RecipesService extends Unsubscribe {
       .subscribe(() => this.fetchRecipes());
   }
 
-  private async fetchRecipes() {
+  private fetchRecipes(): void {
     this._loading.set(true);
     this.recipeBackendService
       .getAllRecipes()

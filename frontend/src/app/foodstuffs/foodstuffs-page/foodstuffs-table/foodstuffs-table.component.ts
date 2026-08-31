@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   ElementRef,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -38,7 +39,7 @@ const DEFAULT_PAGE_SIZE: number = 12;
   templateUrl: './foodstuffs-table.component.html',
   styleUrl: './foodstuffs-table.component.scss',
 })
-export class FoodstuffsTableComponent {
+export class FoodstuffsTableComponent implements OnDestroy {
   readonly displayedFieldsService = inject(
     FoodstuffTableDisplayedFieldsService
   );
@@ -89,6 +90,10 @@ export class FoodstuffsTableComponent {
     this.tableDataSource.sort = this.sort;
     this.tableDataSource.paginator = this.paginator;
     this.tableWrapperResizeObserver.observe(this.tableWrapper.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.tableWrapperResizeObserver.disconnect();
   }
 
   contentChanged(): void {

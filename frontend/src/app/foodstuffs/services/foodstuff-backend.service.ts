@@ -19,7 +19,7 @@ export class FoodstuffBackendService {
   private _foodstuffsChanged$ = new Subject<void>();
   foodstuffsChanged$ = this._foodstuffsChanged$.asObservable();
 
-  notifyFoodstuffsChanged() {
+  notifyFoodstuffsChanged(): void {
     this._foodstuffsChanged$.next();
   }
 

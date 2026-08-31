@@ -61,7 +61,7 @@ export class RecipesGridComponent {
   }
 
   sortRecipes = (sortBy: string, recipes: Recipe[]): Recipe[] =>
-    structuredClone(recipes).sort((a, b) =>
+    [...recipes].sort((a, b) =>
       sortBy === 'name' ? a.name.localeCompare(b.name) : 0
     );
 }

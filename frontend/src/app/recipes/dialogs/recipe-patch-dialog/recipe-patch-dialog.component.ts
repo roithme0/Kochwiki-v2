@@ -104,7 +104,7 @@ export class RecipePatchDialogComponent extends Unsubscribe {
       .pipe(take(1))
       .subscribe({
         next: (foodstuffs) => {
-          this.foodstuffs = foodstuffs.sort((a, b) =>
+          this.foodstuffs = [...foodstuffs].sort((a, b) =>
             a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
           );
           this.isLoadingFoodstuffs.set(false);

@@ -70,7 +70,7 @@ export class FoodstuffsService extends Unsubscribe {
       .subscribe(() => this.fetchFoodstuffs());
   }
 
-  private async fetchFoodstuffs() {
+  private fetchFoodstuffs(): void {
     this._isLoading.set(true);
     this._hasError.set(false);
 

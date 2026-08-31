@@ -55,7 +55,7 @@ export class RecipePreparationFormComponent {
       this.recipeForm.get('preparationFormGroup')?.patchValue({
         preptime: recipe.preptime,
       });
-      this.stepsSorted = recipe.steps.sort((a, b) => a.index - b.index);
+      this.stepsSorted = [...recipe.steps].sort((a, b) => a.index - b.index);
       this.stepsSorted.forEach((step) => this.addStep(step));
     }
   }

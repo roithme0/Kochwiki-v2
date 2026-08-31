@@ -1,18 +1,18 @@
 <!-- loading -->
-@if(recipesGridHelperService.loading() == true){
+@if(recipesGridHelperService.isLoading() == true){
 <div class="spinner-wrapper">
   <mat-spinner diameter="25" />
 </div>
 }
 
 <!-- error -->
-@else if(recipesGridHelperService.error() == true) {
+@else if(recipesGridHelperService.hasError() == true) {
 <p>Ein Fehler ist aufgetreten</p>
 }
 
 <!-- loaded -->
-@else if(recipesGridHelperService.loading() == false &&
-recipesGridHelperService.error() == false) {
+@else if(recipesGridHelperService.isLoading() == false &&
+recipesGridHelperService.hasError() == false) {
 
 <!-- recipes -->
 @if(displayedRecipes().length > 0){

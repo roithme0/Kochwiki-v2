@@ -4,6 +4,7 @@ import {
   effect,
   ElementRef,
   input,
+  OnDestroy,
   output,
   ViewChild,
 } from '@angular/core';
@@ -27,7 +28,7 @@ const PLACEHOLDER_LEGEND: Record<string, ChartLegendElement> = {
   templateUrl: './macro-chart.component.html',
   styleUrl: './macro-chart.component.scss',
 })
-export class MacroChartComponent {
+export class MacroChartComponent implements OnDestroy {
   recipeOrFoodstuff = input.required<Recipe | FoodstuffSummary>();
   showKcal = input<boolean>(true);
 
@@ -54,7 +55,14 @@ export class MacroChartComponent {
   );
 
   constructor() {
-    effect(() => this.legendUpdated.emit(this.legend()));
+    effect(() => {
+      const recipeOrFoodstuff = this.recipeOrFoodstuff();
+      const legend = this.legend();
+      const dataIncompleteOrInvalid = this.dataIncompleteOrInvalid();
+
+      this.legendUpdated.emit(legend);
+      this.updateChart(recipeOrFoodstuff, legend, dataIncompleteOrInvalid);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -68,6 +76,31 @@ export class MacroChartComponent {
         this.dataIncompleteOrInvalid()
       );
     }
+  }
+
+  ngOnDestroy(): void {
+    this.chart?.destroy();
+    this.chart = null;
+  }
+
+  private updateChart(
+    recipeOrFoodstuff: Recipe | FoodstuffSummary,
+    legend: Record<string, ChartLegendElement>,
+    dataIncompleteOrInvalid: boolean
+  ): void {
+    const chart = this.chart;
+    const dataSet = chart?.data.datasets[0];
+    if (chart == null || dataSet == null) return;
+
+    dataSet.data = this.getChartData(
+      recipeOrFoodstuff,
+      dataIncompleteOrInvalid
+    );
+    dataSet.backgroundColor = this.getChartColors(
+      legend,
+      dataIncompleteOrInvalid
+    );
+    chart.update();
   }
 
   private buildLegend = (
@@ -120,25 +153,45 @@ export class MacroChartComponent {
       data: {
         datasets: [
           {
-            data: dataIncompleteOrInvalid
-              ? [PLACEHOLDER_VALUE]
-              : [
-                  recipeOrFoodstuff.carbs,
-                  recipeOrFoodstuff.protein,
-                  recipeOrFoodstuff.fat,
-                ],
-            backgroundColor: dataIncompleteOrInvalid
-              ? [legend['placeholder'].color]
-              : [
-                  legend['carbs'].color,
-                  legend['protein'].color,
-                  legend['fat'].color,
-                ],
+            data: this.getChartData(
+              recipeOrFoodstuff,
+              dataIncompleteOrInvalid
+            ),
+            backgroundColor: this.getChartColors(
+              legend,
+              dataIncompleteOrInvalid
+            ),
             borderWidth: 0,
           },
         ],
       },
     });
+  }
+
+  private getChartData(
+    recipeOrFoodstuff: Recipe | FoodstuffSummary,
+    dataIncompleteOrInvalid: boolean
+  ): number[] {
+    return dataIncompleteOrInvalid
+      ? [PLACEHOLDER_VALUE]
+      : [
+          recipeOrFoodstuff.carbs ?? 0,
+          recipeOrFoodstuff.protein ?? 0,
+          recipeOrFoodstuff.fat ?? 0,
+        ];
+  }
+
+  private getChartColors(
+    legend: Record<string, ChartLegendElement>,
+    dataIncompleteOrInvalid: boolean
+  ): string[] {
+    return dataIncompleteOrInvalid
+      ? [legend['placeholder'].color]
+      : [
+          legend['carbs'].color,
+          legend['protein'].color,
+          legend['fat'].color,
+        ];
   }
 
   private calculateValuePercentage(
