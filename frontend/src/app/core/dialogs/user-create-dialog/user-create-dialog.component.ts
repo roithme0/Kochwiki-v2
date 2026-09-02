@@ -7,8 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { take } from 'rxjs';
-import { CustomUser } from '../../../interfaces/custom-user';
-import { CustomUserBackendService } from '../../../services/custom-user-backend.service';
+import { User } from '../../../interfaces/user';
+import { UserBackendService } from '../../../services/user-backend.service';
 import { SnackBarService } from '../../../services/snack-bar.service';
 
 @Component({
@@ -26,29 +26,28 @@ import { SnackBarService } from '../../../services/snack-bar.service';
 })
 export class UserCreateDialogComponent {
   readonly dialogRef = inject(MatDialogRef);
-  readonly customUserBackendService = inject(CustomUserBackendService);
+  readonly userBackendService = inject(UserBackendService);
   readonly snackBarService = inject(SnackBarService);
   readonly fb = inject(FormBuilder);
 
-  customUserForm = this.fb.group({
+  userForm = this.fb.group({
     username: ['', Validators.required],
   });
 
   onSubmit(): void {
-    const customUser: Partial<CustomUser> = this.customUserForm
-      .value as CustomUser;
+    const user: Partial<User> = this.userForm.value as User;
 
-    this.customUserBackendService
-      .postCustomUser(customUser)
+    this.userBackendService
+      .postUser(user)
       .pipe(take(1))
       .subscribe({
-        next: (customUser: CustomUser) => {
+        next: () => {
           this.snackBarService.open('Benutzer erstellt');
-          this.customUserBackendService.notifyCustomUsersChanged();
+          this.userBackendService.notifyUsersChanged();
           this.dialogRef.close();
         },
-        error: (error: any) => {
-          console.error('failed to create customUser: ', error);
+        error: (error: unknown) => {
+          console.error('failed to create user: ', error);
           this.snackBarService.open('Benutzer konnte nicht erstellt werden');
         },
       });

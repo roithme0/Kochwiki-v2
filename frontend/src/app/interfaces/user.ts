@@ -1,4 +1,4 @@
-export interface CustomUser {
+export interface User {
   id: number;
   username: string;
 }

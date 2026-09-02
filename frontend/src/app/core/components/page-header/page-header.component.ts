@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { environment } from '../../../../environments/environment';
-import { ActiveCustomUserService } from '../../../services/active-custom-user.service';
+import { ActiveUserService } from '../../../services/active-user.service';
 import { PageHeaderService } from '../../../services/page-header.service';
 import { BackendMetaService } from '../../services/backend-meta.service';
 
@@ -24,7 +24,7 @@ import { BackendMetaService } from '../../services/backend-meta.service';
 })
 export class PageHeaderComponent {
   readonly pageHeaderService = inject(PageHeaderService);
-  readonly activeCustomUserService = inject(ActiveCustomUserService);
+  readonly activeUserService = inject(ActiveUserService);
   readonly backendMetaService = inject(BackendMetaService);
 
   readonly environmentName: string = environment.name;

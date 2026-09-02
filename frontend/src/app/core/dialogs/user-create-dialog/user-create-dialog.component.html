@@ -4,7 +4,7 @@
   <form
     action="POST"
     class="form"
-    [formGroup]="customUserForm"
+    [formGroup]="userForm"
     (ngSubmit)="onSubmit()"
   >
     <mat-form-field appearance="outline" floatLabel="always">
@@ -16,7 +16,7 @@
       mat-stroked-button
       type="submit"
       color="primary"
-      [disabled]="!customUserForm.valid"
+      [disabled]="!userForm.valid"
     >
       Erstellen
     </button>

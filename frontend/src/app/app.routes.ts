@@ -3,7 +3,7 @@ import { HomePageComponent } from './core/home-page/home-page.component';
 import { FoodstuffsPageComponent } from './foodstuffs/foodstuffs-page/foodstuffs-page.component';
 import { RecipesPageComponent } from './recipes/recipes-page/recipes-page.component';
 import { RecipePageComponent } from './recipes/recipe-page/recipe-page.component';
-import { SelectCustomUserPageComponent } from './core/select-custom-user-page/select-custom-user-page.component';
+import { SelectUserPageComponent } from './core/select-user-page/select-user-page.component';
 import { AuthGuard } from './core/classes/auth-guard';
 
 export const routes: Routes = [
@@ -37,7 +37,7 @@ export const routes: Routes = [
   },
   {
     path: 'userSelection',
-    component: SelectCustomUserPageComponent,
+    component: SelectUserPageComponent,
     title: 'Benutzer auswählen',
   },
   { path: '**', redirectTo: '', pathMatch: 'full' },

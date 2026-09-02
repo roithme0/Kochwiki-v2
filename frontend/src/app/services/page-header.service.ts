@@ -6,7 +6,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { ActiveCustomUserService } from './active-custom-user.service';
+import { ActiveUserService } from './active-user.service';
 
 const DEFAULT_SHOW_HOME: boolean = true;
 const DEFAULT_SHOW_BACK: boolean = true;
@@ -15,7 +15,7 @@ const DEFAULT_SHOW_BACK: boolean = true;
   providedIn: 'root',
 })
 export class PageHeaderService {
-  private readonly activeCustomUserService = inject(ActiveCustomUserService);
+  private readonly activeUserService = inject(ActiveUserService);
 
   private _showHome: WritableSignal<boolean> = signal(DEFAULT_SHOW_HOME);
   private _headline: WritableSignal<string> = signal('');
@@ -23,7 +23,7 @@ export class PageHeaderService {
   private _showBack: WritableSignal<boolean> = signal(DEFAULT_SHOW_BACK);
 
   showLogout = computed(
-    () => this.activeCustomUserService.activeCustomUser() !== null
+    () => this.activeUserService.activeUser() !== null
   );
 
   set headline(headline: string) {

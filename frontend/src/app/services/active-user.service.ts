@@ -5,7 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CustomUser } from '../interfaces/custom-user';
+import { User } from '../interfaces/user';
 import { CookieService } from 'ngx-cookie-service';
 import { SnackBarService } from './snack-bar.service';
 import { Router } from '@angular/router';
@@ -13,32 +13,32 @@ import { Router } from '@angular/router';
 @Injectable({
   providedIn: 'root',
 })
-export class ActiveCustomUserService {
+export class ActiveUserService {
   private readonly cookieService = inject(CookieService);
   private readonly snackBarService = inject(SnackBarService);
   private readonly router = inject(Router);
 
-  private _activeCustomUser: WritableSignal<CustomUser | null> = signal(null);
+  private _activeUser: WritableSignal<User | null> = signal(null);
 
   constructor() {
     this.restoreLogin();
   }
 
-  set activeCustomUser(value: CustomUser) {
-    this._activeCustomUser.set(value);
-    this.cookieService.set('activeCustomUser', JSON.stringify(value));
+  set activeUser(value: User) {
+    this._activeUser.set(value);
+    this.cookieService.set('activeUser', JSON.stringify(value));
     this.snackBarService.open('Als ' + value.username + ' angemeldet');
   }
 
-  get activeCustomUser(): Signal<CustomUser | null> {
-    return this._activeCustomUser;
+  get activeUser(): Signal<User | null> {
+    return this._activeUser;
   }
 
   //#region Public Methods
 
   logout(): void {
-    this._activeCustomUser.set(null);
-    this.cookieService.delete('activeCustomUser');
+    this._activeUser.set(null);
+    this.cookieService.delete('activeUser');
     this.snackBarService.open('Abgemeldet');
     this.router.navigate(['/userSelection']);
   }
@@ -48,10 +48,10 @@ export class ActiveCustomUserService {
   //#endregion Utilities
 
   private restoreLogin(): boolean {
-    const user = this.cookieService.get('activeCustomUser');
+    const user = this.cookieService.get('activeUser');
     if (user) {
       try {
-        this.activeCustomUser = JSON.parse(user);
+        this.activeUser = JSON.parse(user);
         return true;
       } catch (e) {
         console.error(e);
