@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatAutocompleteModule,
@@ -10,8 +10,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { RecipesGridControlsService } from '../services/recipes-grid-controls.service';
-import { RecipesService } from '../services/recipes-service.service';
 import { Router } from '@angular/router';
+import { Recipe } from '../../interfaces/recipe';
 
 @Component({
   selector: 'app-recipes-search',
@@ -30,22 +30,21 @@ import { Router } from '@angular/router';
 })
 export class RecipesSearchComponent {
   readonly recipesGridControlsService = inject(RecipesGridControlsService);
-  readonly recipesGridHelperService = inject(RecipesService);
   readonly router = inject(Router);
+  readonly recipes = input<Recipe[]>([]);
 
   readonly nameOptionsGroupLabel: string = 'Namen';
   readonly originOptionsGroupLabel: string = 'Ersteller*innen';
 
   namesMap = computed(
     (): Map<string, string> =>
-      this.recipesGridHelperService.recipes().reduce((acc, recipe) => {
+      this.recipes().reduce((acc, recipe) => {
         acc.set(recipe.id.toString(), recipe.name);
         return acc;
       }, new Map<string, string>())
   );
   origins = computed((): string[] =>
-    this.recipesGridHelperService
-      .recipes()
+    this.recipes()
       .map((recipe) => recipe.originName || '')
       .filter((origin) => origin != '')
   );

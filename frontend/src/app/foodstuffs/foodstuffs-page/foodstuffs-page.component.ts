@@ -1,12 +1,18 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { take } from 'rxjs';
+import { RecipeBackendService } from '../../recipes/services/recipe-backend.service';
+import { PageHeaderService } from '../../services/page-header.service';
+import { SnackBarService } from '../../services/snack-bar.service';
+import { Foodstuff } from '../interfaces/foodstuff';
+import { FoodstuffBackendService } from '../services/foodstuff-backend.service';
+import { FoodstuffsSearchComponent } from './foodstuffs-search/foodstuffs-search.component';
 import { FoodstuffsTableComponent } from './foodstuffs-table/foodstuffs-table.component';
 import { FoodstuffsTableCreateFoodstuffComponent } from './foodstuffs-table-create-foodstuff/foodstuffs-table-create-foodstuff.component';
-import { PageHeaderService } from '../../services/page-header.service';
-import { FoodstuffsService } from './services/foodstuffs.service';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { FoodstuffsSearchComponent } from './foodstuffs-search/foodstuffs-search.component';
+import { LoadState } from '../../utils/load-state';
 
 @Component({
   selector: 'app-foodstuffs-page',
@@ -22,10 +28,47 @@ import { FoodstuffsSearchComponent } from './foodstuffs-search/foodstuffs-search
   styleUrl: './foodstuffs-page.component.scss',
 })
 export class FoodstuffsPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly foodstuffBackendService = inject(FoodstuffBackendService);
+  private readonly recipeBackendService = inject(RecipeBackendService);
+  private readonly snackBarService = inject(SnackBarService);
   readonly pageHeaderService = inject(PageHeaderService);
-  readonly foodstuffsService = inject(FoodstuffsService);
 
-  ngOnInit() {
+  readonly foodstuffsState = signal<LoadState<Foodstuff[]>>({
+    status: 'loading',
+    data: [],
+  });
+
+  ngOnInit(): void {
     this.pageHeaderService.updateHeader(true, 'Lebensmittel', '', true);
+    this.keepFoodstuffsUpToDate();
+    this.fetchFoodstuffs();
+  }
+
+  private keepFoodstuffsUpToDate(): void {
+    this.foodstuffBackendService.foodstuffsChanged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.fetchFoodstuffs());
+
+    this.recipeBackendService.recipesChanged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.fetchFoodstuffs());
+  }
+
+  private fetchFoodstuffs(): void {
+    this.foodstuffsState.update(({ data }) => ({ status: 'loading', data }));
+    this.foodstuffBackendService
+      .getAllFoodstuffs()
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (foodstuffs) => {
+          this.foodstuffsState.set({ status: 'success', data: foodstuffs });
+        },
+        error: (error: unknown) => {
+          console.error('failed to fetch foodstuffs: ', error);
+          this.snackBarService.open('Zutaten konnten nicht geladen werden');
+          this.foodstuffsState.update(({ data }) => ({ status: 'error', data }));
+        },
+      });
   }
 }

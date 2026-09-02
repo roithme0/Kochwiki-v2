@@ -1,13 +1,4 @@
-import {
-  Injectable,
-  Signal,
-  WritableSignal,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
-import { Foodstuff } from '../../interfaces/foodstuff';
-import { FoodstuffsService } from './foodstuffs.service';
+import { Injectable, Signal, WritableSignal, signal } from '@angular/core';
 
 export const DEFAULT_SEARCH_BY: string = '';
 
@@ -15,16 +6,7 @@ export const DEFAULT_SEARCH_BY: string = '';
   providedIn: 'root',
 })
 export class FoodstuffTableControlService {
-  private readonly foodstuffsService = inject(FoodstuffsService);
-
   private _searchBy: WritableSignal<string> = signal(DEFAULT_SEARCH_BY);
-
-  foodstuffs = computed((): Foodstuff[] =>
-    [...this.foodstuffsService.foodstuffs()]
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-      )
-  );
 
   set searchBy(value: string) {
     this._searchBy.set(value);

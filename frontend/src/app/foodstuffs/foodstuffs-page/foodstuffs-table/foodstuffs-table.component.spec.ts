@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { FoodstuffsTableComponent } from './foodstuffs-table.component';
 import { FoodstuffTableDisplayedFieldsService } from '../services/foodstuff-table-displayed-fields.service';
-import { FoodstuffsService } from '../services/foodstuffs.service';
+import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
 import { FoodstuffTableControlService } from '../services/foodstuff-table-control.service';
 
 describe('FoodstuffsTableComponent', () => {
@@ -13,8 +13,8 @@ describe('FoodstuffsTableComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         {
-          provide: FoodstuffsService,
-          useValue: { foodstuffs: signal([]), verboseNames: signal(null) },
+          provide: FoodstuffMetadataService,
+          useValue: { verboseNames: signal(null) },
         },
         { provide: FoodstuffTableDisplayedFieldsService, useValue: {} },
         { provide: FoodstuffTableControlService, useValue: { searchBy: signal('') } },

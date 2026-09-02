@@ -6,6 +6,7 @@ import {
   inject,
   ElementRef,
   OnDestroy,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -15,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Foodstuff } from '../../interfaces/foodstuff';
 import { FoodstuffVerboseNames } from '../../interfaces/foodstuff-meta-data';
 import { FoodstuffTableDisplayedFieldsService } from '../services/foodstuff-table-displayed-fields.service';
-import { FoodstuffsService } from '../services/foodstuffs.service';
+import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
 import { FoodstuffPatchDialogComponent } from '../../dialogs/foodstuff-patch-dialog/foodstuff-patch-dialog.component';
 import { FoodstuffDeleteDialogComponent } from '../../dialogs/foodstuff-delete-dialog/foodstuff-delete-dialog.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -43,9 +44,10 @@ export class FoodstuffsTableComponent implements OnDestroy {
   readonly displayedFieldsService = inject(
     FoodstuffTableDisplayedFieldsService
   );
-  readonly foodstuffsService = inject(FoodstuffsService);
+  readonly foodstuffMetadataService = inject(FoodstuffMetadataService);
   readonly dialog = inject(MatDialog);
   readonly foodstuffTableControlService = inject(FoodstuffTableControlService);
+  readonly foodstuffs = input<Foodstuff[]>([]);
 
   @ViewChild('tableWrapper', { static: true })
   readonly tableWrapper!: ElementRef<HTMLElement>;
@@ -57,7 +59,7 @@ export class FoodstuffsTableComponent implements OnDestroy {
   );
 
   displayedFoodstuffs = computed((): Foodstuff[] => {
-    let displayedFoodstuffs = this.foodstuffsService.foodstuffs();
+    let displayedFoodstuffs = this.foodstuffs();
     displayedFoodstuffs =
       this.searchFoodstuffsByNameOrBrand(displayedFoodstuffs);
     return displayedFoodstuffs;
@@ -68,7 +70,7 @@ export class FoodstuffsTableComponent implements OnDestroy {
 
   displayedVerboseNames = computed((): FoodstuffVerboseNames => {
     const verboseNames: FoodstuffVerboseNames | null =
-      this.foodstuffsService.verboseNames();
+      this.foodstuffMetadataService.verboseNames();
     return verboseNames == null
       ? {
           name: 'Name',

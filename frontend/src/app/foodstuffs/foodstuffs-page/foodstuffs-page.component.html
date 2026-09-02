@@ -1,13 +1,13 @@
 <main>
   <!-- loading -->
-  @if(foodstuffsService.isLoading() == true){
+  @if (foodstuffsState().status === 'loading') {
   <div class="spinner-wrapper">
     <mat-spinner diameter="25" />
   </div>
   }
 
   <!-- error -->
-  @else if(foodstuffsService.hasError() == true){
+  @else if (foodstuffsState().status === 'error') {
   <div class="error-wrapper">
     <div class="error">
       <mat-icon aria-hidden="false" aria-label="Fehler" fontIcon="error" />
@@ -18,10 +18,13 @@
 
   <!-- loaded -->
   @else {
-  <app-foodstuffs-table class="foodstuffs-table" />
+  <app-foodstuffs-table
+    class="foodstuffs-table"
+    [foodstuffs]="foodstuffsState().data"
+  />
   <div class="bottom-elements-placeholder"></div>
   <div class="bottom-elements">
-    <app-foodstuffs-search />
+    <app-foodstuffs-search [foodstuffs]="foodstuffsState().data" />
     <app-foodstuffs-table-create-foodstuff />
   </div>
   }

@@ -1,12 +1,19 @@
-import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { take } from 'rxjs';
 import { PageHeaderService } from '../../services/page-header.service';
+import { SnackBarService } from '../../services/snack-bar.service';
+import { LoadState } from '../../utils/load-state';
+import { RecipeCreateDialogComponent } from '../dialogs/recipe-create-dialog/recipe-create-dialog.component';
+import { Recipe } from '../interfaces/recipe';
+import { RecipeBackendService } from '../services/recipe-backend.service';
 import { RecipesGridComponent } from './recipes-grid/recipes-grid.component';
 import { RecipesSearchComponent } from './recipes-search/recipes-search.component';
-import { MatDialog } from '@angular/material/dialog';
-import { RecipeCreateDialogComponent } from '../dialogs/recipe-create-dialog/recipe-create-dialog.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-recipes-page',
@@ -16,18 +23,30 @@ import { MatButtonModule } from '@angular/material/button';
     RecipesSearchComponent,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './recipes-page.component.html',
   styleUrl: './recipes-page.component.scss',
 })
 export class RecipesPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly recipeBackendService = inject(RecipeBackendService);
+  private readonly snackBarService = inject(SnackBarService);
   readonly dialog = inject(MatDialog);
   readonly pageHeaderService = inject(PageHeaderService);
 
-  showSearch: WritableSignal<boolean> = signal(false);
+  readonly showSearch = signal(false);
+  readonly recipesState = signal<LoadState<Recipe[]>>({
+    status: 'loading',
+    data: [],
+  });
 
   ngOnInit(): void {
     this.pageHeaderService.updateHeader(true, 'Rezepte', '', true);
+    this.recipeBackendService.recipesChanged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.fetchRecipes());
+    this.fetchRecipes();
   }
 
   openCreateRecipeDialog(): void {
@@ -39,5 +58,22 @@ export class RecipesPageComponent {
       autoFocus: false,
       disableClose: true,
     });
+  }
+
+  private fetchRecipes(): void {
+    this.recipesState.update(({ data }) => ({ status: 'loading', data }));
+    this.recipeBackendService
+      .getAllRecipes()
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (recipes) => {
+          this.recipesState.set({ status: 'success', data: recipes });
+        },
+        error: (error: unknown) => {
+          console.error('failed to fetch recipes: ', error);
+          this.snackBarService.open('Rezepte konnten nicht geladen werden');
+          this.recipesState.update(({ data }) => ({ status: 'error', data }));
+        },
+      });
   }
 }

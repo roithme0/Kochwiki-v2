@@ -17,6 +17,13 @@ main {
   gap: 0.5rem;
 }
 
+.spinner-wrapper {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
 .grid-wrapper {
   flex: 1;
   overflow-y: auto;

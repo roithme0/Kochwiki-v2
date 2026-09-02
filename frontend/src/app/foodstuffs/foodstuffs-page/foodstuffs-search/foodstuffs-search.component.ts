@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, Signal } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { FoodstuffTableControlService } from '../services/foodstuff-table-control.service';
-import { FoodstuffsService } from '../services/foodstuffs.service';
+import { Foodstuff } from '../../interfaces/foodstuff';
 
 @Component({
   selector: 'app-foodstuffs-search',
@@ -26,16 +26,20 @@ import { FoodstuffsService } from '../services/foodstuffs.service';
 })
 export class FoodstuffsSearchComponent {
   readonly foodstuffTableControlsService = inject(FoodstuffTableControlService);
-  readonly foodstuffsService = inject(FoodstuffsService);
+  readonly foodstuffs = input<Foodstuff[]>([]);
 
   names = computed((): string[] =>
-    this.foodstuffTableControlsService
-      .foodstuffs()
+    [...this.foodstuffs()]
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+      )
       .map((foodstuff) => foodstuff.name)
   );
   brands = computed((): string[] =>
-    this.foodstuffTableControlsService
-      .foodstuffs()
+    [...this.foodstuffs()]
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+      )
       .map((foodstuff) => foodstuff.brand || '')
       .filter((brand) => brand !== '')
   );

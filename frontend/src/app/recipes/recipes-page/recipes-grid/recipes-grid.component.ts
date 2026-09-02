@@ -1,13 +1,10 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RecipesGridElementComponent } from '../recipes-grid-element/recipes-grid-element.component';
 import { WindowWidthService } from '../../../services/window-width.service';
-import { RecipesService } from '../services/recipes-service.service';
 import { RecipesGridControlsService } from '../services/recipes-grid-controls.service';
 import { Recipe } from '../../interfaces/recipe';
 
@@ -18,20 +15,18 @@ import { Recipe } from '../../interfaces/recipe';
     RecipesGridElementComponent,
     MatIconModule,
     MatButtonModule,
-    MatProgressSpinnerModule,
   ],
   templateUrl: './recipes-grid.component.html',
   styleUrl: './recipes-grid.component.scss',
 })
 export class RecipesGridComponent {
-  readonly recipesGridHelperService = inject(RecipesService);
   readonly windowWidthService = inject(WindowWidthService);
   readonly router = inject(Router);
-  readonly dialog = inject(MatDialog);
   readonly recipesGridControlsService = inject(RecipesGridControlsService);
+  readonly recipes = input<Recipe[]>([]);
 
   displayedRecipes = computed((): Recipe[] => {
-    let displayedRecipes = this.recipesGridHelperService.recipes();
+    let displayedRecipes = this.recipes();
     displayedRecipes = this.filterRecipesByNameOrOrigin(displayedRecipes);
     displayedRecipes = this.sortRecipes('name', displayedRecipes);
     return displayedRecipes;

@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { SnackBarService } from '../../../services/snack-bar.service';
+import { signal } from '@angular/core';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
 import { FoodstuffFormComponent } from './foodstuff-form.component';
 
@@ -15,17 +14,13 @@ describe('FoodstuffFormComponent', () => {
         {
           provide: FoodstuffMetadataService,
           useValue: {
-            load: () =>
-              of({
-                verboseNames: {
-                  name: 'Name', brand: 'Marke', unit: 'Einheit', kcal: 'Kalorien',
-                  carbs: 'Kohlenhydrate', protein: 'Protein', fat: 'Fett',
-                },
-                unitChoices: { g: 'Gramm' },
-              }),
+            verboseNames: signal({
+              name: 'Name', brand: 'Marke', unit: 'Einheit', kcal: 'Kalorien',
+              carbs: 'Kohlenhydrate', protein: 'Protein', fat: 'Fett',
+            }),
+            unitChoices: signal({ g: 'Gramm' }),
           },
         },
-        { provide: SnackBarService, useValue: { open: jasmine.createSpy('open') } },
       ],
     }).compileComponents();
 
@@ -34,7 +29,7 @@ describe('FoodstuffFormComponent', () => {
     fixture.componentRef.setInput('submitLabel', 'Speichern');
   });
 
-  it('loads metadata and emits the typed foodstuff updates', () => {
+  it('uses metadata and emits the typed foodstuff updates', () => {
     const submitted = jasmine.createSpy('submitted');
     component.submitted.subscribe(submitted);
 
@@ -44,8 +39,8 @@ describe('FoodstuffFormComponent', () => {
     });
     component.onSubmit();
 
-    expect(component.verboseNames?.name).toBe('Name');
-    expect(component.unitChoices).toEqual({ g: 'Gramm' });
+    expect(component.verboseNames()?.name).toBe('Name');
+    expect(component.unitChoices()).toEqual({ g: 'Gramm' });
     expect(submitted).toHaveBeenCalledOnceWith({
       name: 'Linsen', brand: null, unit: 'g', kcal: 100, carbs: 12, protein: 8, fat: 1,
     });
