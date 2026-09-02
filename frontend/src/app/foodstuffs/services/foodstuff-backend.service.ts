@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { Foodstuff } from '../interfaces/foodstuff';
 import {
   FoodstuffVerboseNames,
@@ -23,31 +23,43 @@ export class FoodstuffBackendService {
     this._foodstuffsChanged$.next();
   }
 
-  getAllFoodstuffs = (): Observable<Foodstuff[]> =>
-    this.httpClient.get<Foodstuff[]>(backendUrl + '/foodstuffs');
+  getAllFoodstuffs = (): Promise<Foodstuff[]> =>
+    firstValueFrom(this.httpClient.get<Foodstuff[]>(backendUrl + '/foodstuffs'));
 
-  getFoodstuffById = (id: number): Observable<Foodstuff> =>
-    this.httpClient.get<Foodstuff>(backendUrl + '/foodstuffs/' + id);
+  getFoodstuffById = (id: number): Promise<Foodstuff> =>
+    firstValueFrom(
+      this.httpClient.get<Foodstuff>(backendUrl + '/foodstuffs/' + id)
+    );
 
   patchFoodstuff = (
     id: number,
     updates: Partial<Foodstuff>
-  ): Observable<Foodstuff> =>
-    this.httpClient.patch<Foodstuff>(backendUrl + '/foodstuffs/' + id, updates);
-
-  postFoodstuff = (foodstuff: Partial<Foodstuff>): Observable<Foodstuff> =>
-    this.httpClient.post<Foodstuff>(backendUrl + '/foodstuffs', foodstuff);
-
-  deleteFoodstuff = (id: number): Observable<number> =>
-    this.httpClient.delete<number>(backendUrl + '/foodstuffs/' + id);
-
-  fetchFoodstuffVerboseNames = (): Observable<FoodstuffVerboseNames> =>
-    this.httpClient.get<FoodstuffVerboseNames>(
-      backendUrl + '/foodstuffs-meta-data/verbose-names'
+  ): Promise<Foodstuff> =>
+    firstValueFrom(
+      this.httpClient.patch<Foodstuff>(backendUrl + '/foodstuffs/' + id, updates)
     );
 
-  fetchFoodstuffUnitChoices = (): Observable<FoodstuffUnitChoices> =>
-    this.httpClient.get<FoodstuffUnitChoices>(
-      backendUrl + '/foodstuffs-meta-data/unit-choices'
+  postFoodstuff = (foodstuff: Partial<Foodstuff>): Promise<Foodstuff> =>
+    firstValueFrom(
+      this.httpClient.post<Foodstuff>(backendUrl + '/foodstuffs', foodstuff)
+    );
+
+  deleteFoodstuff = (id: number): Promise<number> =>
+    firstValueFrom(
+      this.httpClient.delete<number>(backendUrl + '/foodstuffs/' + id)
+    );
+
+  fetchFoodstuffVerboseNames = (): Promise<FoodstuffVerboseNames> =>
+    firstValueFrom(
+      this.httpClient.get<FoodstuffVerboseNames>(
+        backendUrl + '/foodstuffs-meta-data/verbose-names'
+      )
+    );
+
+  fetchFoodstuffUnitChoices = (): Promise<FoodstuffUnitChoices> =>
+    firstValueFrom(
+      this.httpClient.get<FoodstuffUnitChoices>(
+        backendUrl + '/foodstuffs-meta-data/unit-choices'
+      )
     );
 }

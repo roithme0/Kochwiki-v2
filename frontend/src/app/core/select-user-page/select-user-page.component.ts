@@ -10,7 +10,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { take } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -35,7 +34,7 @@ export class SelectUserPageComponent {
 
   ngOnInit(): void {
     this.pageHeaderService.updateHeader(false, 'Benutzer auswählen', '', false);
-    this.fetchUsers();
+    void this.fetchUsers();
     this.keepUsersUpToDate();
   }
 
@@ -69,28 +68,21 @@ export class SelectUserPageComponent {
   private keepUsersUpToDate(): void {
     this.userBackendService.usersChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.fetchUsers());
+      .subscribe(() => void this.fetchUsers());
   }
 
-  private fetchUsers(): void {
+  private async fetchUsers(): Promise<void> {
     this.isLoading.set(true);
     this.hasError.set(false);
 
-    this.userBackendService
-      .getAllUsers()
-      .pipe(take(1))
-      .subscribe({
-        next: (users) => {
-          this.users.set(structuredClone(users));
-          this.isLoading.set(false);
-        },
-        // error seems to always occur once therefore don't show snackbar (not reproducible locally for some reason)
-        error: (error) => {
-          console.error('failed to fetch users: ', error);
-          this.hasError.set(true);
-          this.isLoading.set(false);
-        },
-      });
+    try {
+      this.users.set(structuredClone(await this.userBackendService.getAllUsers()));
+    } catch (error: unknown) {
+      console.error('failed to fetch users: ', error);
+      this.hasError.set(true);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   //#endregion

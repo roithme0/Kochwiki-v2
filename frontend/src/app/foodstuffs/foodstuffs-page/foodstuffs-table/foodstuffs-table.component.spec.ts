@@ -1,7 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
 import { ConfirmationDialogData } from '../../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
@@ -71,7 +70,7 @@ describe('FoodstuffsTableComponent', () => {
   });
 
   it('executes the foodstuff deletion and success side effects through the dialog action', async () => {
-    deleteFoodstuff.and.returnValue(of(foodstuff.id));
+    deleteFoodstuff.and.resolveTo(foodstuff.id);
 
     const action: () => Promise<void> = openConfirmationAction();
     await action();
@@ -83,7 +82,7 @@ describe('FoodstuffsTableComponent', () => {
 
   it('shows the existing error snackbar and rejects so the dialog remains open', async () => {
     const error = new Error('failed');
-    deleteFoodstuff.and.returnValue(throwError(() => error));
+    deleteFoodstuff.and.rejectWith(error);
     spyOn(console, 'error');
 
     const action: () => Promise<void> = openConfirmationAction();

@@ -17,7 +17,6 @@ import {
   ConfirmationDialogComponent,
   ConfirmationDialogData,
 } from '../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
-import { firstValueFrom, take } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
@@ -51,7 +50,7 @@ export class RecipePageComponent {
     this.id = Number(this.route.snapshot.paramMap.get('id'));
 
     this.keepRecipeUpToDate(this.id);
-    this.fetchRecipe(this.id);
+    void this.fetchRecipe(this.id);
   }
 
   ngOnInit(): void {
@@ -61,32 +60,26 @@ export class RecipePageComponent {
   keepRecipeUpToDate(id: number | undefined): void {
     this.recipeBackendService.recipesChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.fetchRecipe(id));
+      .subscribe(() => void this.fetchRecipe(id));
   }
 
-  fetchRecipe(id: number | undefined): void {
+  async fetchRecipe(id: number | undefined): Promise<void> {
     if (id === undefined) {
       console.error('no recipe id provided');
       return;
     }
 
     this.recipeIsLoading.set(true);
-    this.recipeBackendService
-      .getRecipeById(id)
-      .pipe(take(1))
-      .subscribe({
-        next: (recipe: Recipe) => {
-          this.recipe = recipe;
-          this.pageHeaderService.headline = this.recipe.name;
-          this.recipeIsLoading.set(false);
-        },
-        error: (error: unknown) => {
-          console.error('failed to fetch recipe: ', error);
-          this.snackBarService.open('Rezept konnte nicht geladen werden');
-          this.pageHeaderService.headline = 'Fehler';
-          this.recipeIsLoading.set(false);
-        },
-      });
+    try {
+      this.recipe = await this.recipeBackendService.getRecipeById(id);
+      this.pageHeaderService.headline = this.recipe.name;
+    } catch (error: unknown) {
+      console.error('failed to fetch recipe: ', error);
+      this.snackBarService.open('Rezept konnte nicht geladen werden');
+      this.pageHeaderService.headline = 'Fehler';
+    } finally {
+      this.recipeIsLoading.set(false);
+    }
   }
 
   openPatchRecipeDialog(): void {
@@ -125,14 +118,19 @@ export class RecipePageComponent {
 
   private async deleteRecipe(id: number): Promise<void> {
     try {
-      await firstValueFrom(this.recipeBackendService.deleteRecipe(id));
-      await this.router.navigate(['recipes']);
-      this.recipeBackendService.notifyRecipesChanged();
-      this.snackBarService.open('Rezept gelöscht');
+      await this.recipeBackendService.deleteRecipe(id);
     } catch (error: unknown) {
       console.error('failed to delete recipe: ', error);
       this.snackBarService.open('Rezept konnte nicht gelöscht werden');
       throw error;
     }
+
+    try {
+      await this.router.navigate(['recipes']);
+    } catch (error: unknown) {
+      console.error('failed to navigate after deleting recipe: ', error);
+    }
+    this.recipeBackendService.notifyRecipesChanged();
+    this.snackBarService.open('Rezept gelöscht');
   }
 }

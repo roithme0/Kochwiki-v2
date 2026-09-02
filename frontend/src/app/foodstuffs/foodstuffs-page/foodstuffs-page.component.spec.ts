@@ -1,5 +1,10 @@
+import {
+  createEnvironmentInjector,
+  EnvironmentInjector,
+  runInInjectionContext,
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of, Subject, throwError } from 'rxjs';
+import { Subject } from 'rxjs';
 import { RecipeBackendService } from '../../recipes/services/recipe-backend.service';
 import { PageHeaderService } from '../../services/page-header.service';
 import { SnackBarService } from '../../services/snack-bar.service';
@@ -18,6 +23,19 @@ const foodstuff = (id: number, name: string) => ({
   fat: null,
   recipeIds: [],
 });
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  reject: (reason: unknown) => void;
+}
+
+function createDeferred<T>(): Deferred<T> {
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((_, rejectPromise) => {
+    reject = rejectPromise;
+  });
+  return { promise, reject };
+}
 
 describe('FoodstuffsPageComponent', () => {
   let foodstuffsChanged$: Subject<void>;
@@ -43,11 +61,11 @@ describe('FoodstuffsPageComponent', () => {
     });
   });
 
-  it('loads foodstuffs initially and after foodstuff or recipe changes', () => {
+  it('loads foodstuffs initially and after foodstuff or recipe changes', async () => {
     getAllFoodstuffs.and.returnValues(
-      of([foodstuff(1, 'Linsen')]),
-      of([foodstuff(2, 'Bohnen')]),
-      of([foodstuff(3, 'Hafer')])
+      Promise.resolve([foodstuff(1, 'Linsen')]),
+      Promise.resolve([foodstuff(2, 'Bohnen')]),
+      Promise.resolve([foodstuff(3, 'Hafer')])
     );
     const component = TestBed.runInInjectionContext(
       () => new FoodstuffsPageComponent()
@@ -56,6 +74,7 @@ describe('FoodstuffsPageComponent', () => {
     component.ngOnInit();
     foodstuffsChanged$.next();
     recipesChanged$.next();
+    await Promise.resolve();
 
     expect(getAllFoodstuffs).toHaveBeenCalledTimes(3);
     expect(component.foodstuffsState()).toEqual({
@@ -64,18 +83,20 @@ describe('FoodstuffsPageComponent', () => {
     });
   });
 
-  it('retains loaded foodstuffs and reports a refresh error', () => {
+  it('retains loaded foodstuffs and reports a refresh error', async () => {
     const loadedFoodstuffs = [foodstuff(1, 'Linsen')];
     getAllFoodstuffs.and.returnValues(
-      of(loadedFoodstuffs),
-      throwError(() => new Error('request failed'))
+      Promise.resolve(loadedFoodstuffs),
+      Promise.reject(new Error('request failed'))
     );
     const component = TestBed.runInInjectionContext(
       () => new FoodstuffsPageComponent()
     );
 
     component.ngOnInit();
+    await Promise.resolve();
     foodstuffsChanged$.next();
+    await Promise.resolve();
 
     expect(component.foodstuffsState()).toEqual({
       status: 'error',
@@ -84,5 +105,26 @@ describe('FoodstuffsPageComponent', () => {
     expect(snackBarOpen).toHaveBeenCalledOnceWith(
       'Zutaten konnten nicht geladen werden'
     );
+  });
+
+  it('ignores a late request failure after destruction', async () => {
+    const deferred = createDeferred<ReturnType<typeof foodstuff>[]>();
+    getAllFoodstuffs.and.returnValue(deferred.promise);
+    const injector = createEnvironmentInjector(
+      [],
+      TestBed.inject(EnvironmentInjector)
+    );
+    const component = runInInjectionContext(
+      injector,
+      () => new FoodstuffsPageComponent()
+    );
+
+    component.ngOnInit();
+    injector.destroy();
+    deferred.reject(new Error('request failed'));
+    await Promise.resolve();
+
+    expect(component.foodstuffsState()).toEqual({ status: 'loading', data: [] });
+    expect(snackBarOpen).not.toHaveBeenCalled();
   });
 });

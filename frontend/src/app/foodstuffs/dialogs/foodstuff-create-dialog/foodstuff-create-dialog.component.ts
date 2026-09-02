@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { take } from 'rxjs';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { FoodstuffFormComponent } from '../../components/foodstuff-form/foodstuff-form.component';
@@ -18,17 +17,15 @@ export class FoodstuffCreateDialogComponent {
   private readonly foodstuffBackendService = inject(FoodstuffBackendService);
   private readonly snackBarService = inject(SnackBarService);
 
-  onSubmit(foodstuff: Partial<Foodstuff>): void {
-    this.foodstuffBackendService.postFoodstuff(foodstuff).pipe(take(1)).subscribe({
-      next: () => {
-        this.foodstuffBackendService.notifyFoodstuffsChanged();
-        this.dialogRef.close();
-        this.snackBarService.open('Lebensmittel erstellt');
-      },
-      error: (error: unknown) => {
-        console.error('failed to create foodstuff: ', error);
-        this.snackBarService.open('Lebensmittel konnte nicht erstellt werden');
-      },
-    });
+  async onSubmit(foodstuff: Partial<Foodstuff>): Promise<void> {
+    try {
+      await this.foodstuffBackendService.postFoodstuff(foodstuff);
+      this.foodstuffBackendService.notifyFoodstuffsChanged();
+      this.dialogRef.close();
+      this.snackBarService.open('Lebensmittel erstellt');
+    } catch (error: unknown) {
+      console.error('failed to create foodstuff: ', error);
+      this.snackBarService.open('Lebensmittel konnte nicht erstellt werden');
+    }
   }
 }

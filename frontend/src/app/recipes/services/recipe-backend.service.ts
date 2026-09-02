@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Recipe, RecipeWrite } from '../interfaces/recipe';
-import { Observable, Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 const backendUrl: string = environment.backendUrl;
@@ -19,18 +19,20 @@ export class RecipeBackendService {
     this._recipesChanged$.next();
   }
 
-  getAllRecipes = (): Observable<Recipe[]> =>
-    this.httpClient.get<Recipe[]>(backendUrl + '/recipes');
+  getAllRecipes = (): Promise<Recipe[]> =>
+    firstValueFrom(this.httpClient.get<Recipe[]>(backendUrl + '/recipes'));
 
-  getRecipeById = (id: number): Observable<Recipe> =>
-    this.httpClient.get<Recipe>(backendUrl + '/recipes/' + id);
+  getRecipeById = (id: number): Promise<Recipe> =>
+    firstValueFrom(this.httpClient.get<Recipe>(backendUrl + '/recipes/' + id));
 
-  patchRecipe = (id: number, updates: Partial<RecipeWrite>): Observable<Recipe> =>
-    this.httpClient.patch<Recipe>(backendUrl + '/recipes/' + id, updates);
+  patchRecipe = (id: number, updates: Partial<RecipeWrite>): Promise<Recipe> =>
+    firstValueFrom(
+      this.httpClient.patch<Recipe>(backendUrl + '/recipes/' + id, updates)
+    );
 
-  postRecipe = (recipe: RecipeWrite): Observable<Recipe> =>
-    this.httpClient.post<Recipe>(backendUrl + '/recipes', recipe);
+  postRecipe = (recipe: RecipeWrite): Promise<Recipe> =>
+    firstValueFrom(this.httpClient.post<Recipe>(backendUrl + '/recipes', recipe));
 
-  deleteRecipe = (id: number): Observable<number> =>
-    this.httpClient.delete<number>(backendUrl + '/recipes/' + id);
+  deleteRecipe = (id: number): Promise<number> =>
+    firstValueFrom(this.httpClient.delete<number>(backendUrl + '/recipes/' + id));
 }

@@ -28,7 +28,6 @@ import {
 } from '../../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
 import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
 import { SnackBarService } from '../../../services/snack-bar.service';
-import { firstValueFrom } from 'rxjs';
 
 const DEFAULT_PAGE_SIZE: number = 12;
 
@@ -142,7 +141,7 @@ export class FoodstuffsTableComponent implements OnDestroy {
 
   private async deleteFoodstuff(id: number): Promise<void> {
     try {
-      await firstValueFrom(this.foodstuffBackendService.deleteFoodstuff(id));
+      await this.foodstuffBackendService.deleteFoodstuff(id);
       this.foodstuffBackendService.notifyFoodstuffsChanged();
       this.snackBarService.open('Zutat gelöscht');
     } catch (error: unknown) {

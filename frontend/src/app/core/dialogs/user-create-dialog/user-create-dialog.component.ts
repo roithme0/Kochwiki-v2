@@ -6,7 +6,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { take } from 'rxjs';
 import { User } from '../../../interfaces/user';
 import { UserBackendService } from '../../../services/user-backend.service';
 import { SnackBarService } from '../../../services/snack-bar.service';
@@ -34,22 +33,17 @@ export class UserCreateDialogComponent {
     username: ['', Validators.required],
   });
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     const user: Partial<User> = this.userForm.value as User;
 
-    this.userBackendService
-      .postUser(user)
-      .pipe(take(1))
-      .subscribe({
-        next: () => {
-          this.snackBarService.open('Benutzer erstellt');
-          this.userBackendService.notifyUsersChanged();
-          this.dialogRef.close();
-        },
-        error: (error: unknown) => {
-          console.error('failed to create user: ', error);
-          this.snackBarService.open('Benutzer konnte nicht erstellt werden');
-        },
-      });
+    try {
+      await this.userBackendService.postUser(user);
+      this.snackBarService.open('Benutzer erstellt');
+      this.userBackendService.notifyUsersChanged();
+      this.dialogRef.close();
+    } catch (error: unknown) {
+      console.error('failed to create user: ', error);
+      this.snackBarService.open('Benutzer konnte nicht erstellt werden');
+    }
   }
 }

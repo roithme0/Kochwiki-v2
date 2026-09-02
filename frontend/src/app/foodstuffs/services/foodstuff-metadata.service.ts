@@ -5,7 +5,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { forkJoin, take } from 'rxjs';
 import { SnackBarService } from '../../services/snack-bar.service';
 import {
   FoodstuffUnitChoices,
@@ -24,7 +23,7 @@ export class FoodstuffMetadataService {
     signal(null);
 
   constructor() {
-    this.fetchMetadata();
+    void this.fetchMetadata();
   }
 
   get verboseNames(): Signal<FoodstuffVerboseNames | null> {
@@ -35,23 +34,19 @@ export class FoodstuffMetadataService {
     return this._unitChoices;
   }
 
-  private fetchMetadata(): void {
-    forkJoin({
-      verboseNames: this.foodstuffBackendService.fetchFoodstuffVerboseNames(),
-      unitChoices: this.foodstuffBackendService.fetchFoodstuffUnitChoices(),
-    })
-      .pipe(take(1))
-      .subscribe({
-        next: ({ verboseNames, unitChoices }) => {
-          this._verboseNames.set(verboseNames);
-          this._unitChoices.set(unitChoices);
-        },
-        error: (error: unknown) => {
-          console.error('failed to fetch foodstuff metadata: ', error);
-          this.snackBarService.open(
-            'Metadaten für Lebensmittel konnten nicht geladen werden'
-          );
-        },
-      });
+  private async fetchMetadata(): Promise<void> {
+    try {
+      const [verboseNames, unitChoices] = await Promise.all([
+        this.foodstuffBackendService.fetchFoodstuffVerboseNames(),
+        this.foodstuffBackendService.fetchFoodstuffUnitChoices(),
+      ]);
+      this._verboseNames.set(verboseNames);
+      this._unitChoices.set(unitChoices);
+    } catch (error: unknown) {
+      console.error('failed to fetch foodstuff metadata: ', error);
+      this.snackBarService.open(
+        'Metadaten für Lebensmittel konnten nicht geladen werden'
+      );
+    }
   }
 }

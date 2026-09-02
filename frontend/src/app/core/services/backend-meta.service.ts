@@ -6,7 +6,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { Observable, take } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 const backendUrl: string = environment.backendUrl;
@@ -21,17 +21,25 @@ export class BackendMetaService {
     signal(undefined);
 
   constructor() {
-    this.getBackendVersion()
-      .pipe(take(1))
-      .subscribe({
-        next: (version) => this._backendVersion.set(version),
-      });
+    void this.fetchBackendVersion();
   }
 
   get backendVersion(): Signal<string | undefined> {
     return this._backendVersion;
   }
 
-  private getBackendVersion = (): Observable<string> =>
-    this.httpClient.get(backendUrl + '/meta/version', { responseType: 'text' });
+  private async fetchBackendVersion(): Promise<void> {
+    try {
+      this._backendVersion.set(await this.getBackendVersion());
+    } catch (error: unknown) {
+      console.error('failed to fetch backend version: ', error);
+    }
+  }
+
+  private getBackendVersion = (): Promise<string> =>
+    firstValueFrom(
+      this.httpClient.get(backendUrl + '/meta/version', {
+        responseType: 'text',
+      })
+    );
 }

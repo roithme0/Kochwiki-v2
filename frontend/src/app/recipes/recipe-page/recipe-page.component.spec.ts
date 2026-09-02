@@ -1,6 +1,5 @@
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
 import { ConfirmationDialogData } from '../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
 import { SnackBarService } from '../../services/snack-bar.service';
 import { RecipeBackendService } from '../services/recipe-backend.service';
@@ -16,7 +15,7 @@ describe('RecipePageComponent', () => {
 
   beforeEach(() => {
     openDialog = jasmine.createSpy('open');
-    deleteRecipe = jasmine.createSpy('deleteRecipe').and.returnValue(of(7));
+    deleteRecipe = jasmine.createSpy('deleteRecipe').and.resolveTo(7);
     notifyRecipesChanged = jasmine.createSpy('notifyRecipesChanged');
     navigate = jasmine.createSpy('navigate').and.resolveTo(true);
     openSnackBar = jasmine.createSpy('open');
@@ -50,7 +49,7 @@ describe('RecipePageComponent', () => {
 
   it('shows the existing error snackbar and rejects without navigating after deletion fails', async () => {
     const error = new Error('failed');
-    deleteRecipe.and.returnValue(throwError(() => error));
+    deleteRecipe.and.rejectWith(error);
     const logError = spyOn(console, 'error');
     component.openDeleteRecipeDialog();
     const config = openDialog.calls.mostRecent().args[1] as {
@@ -64,6 +63,26 @@ describe('RecipePageComponent', () => {
     expect(logError).toHaveBeenCalledWith('failed to delete recipe: ', error);
     expect(openSnackBar).toHaveBeenCalledWith(
       'Rezept konnte nicht gelöscht werden'
+    );
+  });
+
+  it('keeps deletion successful when navigation fails after the delete', async () => {
+    const error = new Error('navigation failed');
+    navigate.and.rejectWith(error);
+    const logError = spyOn(console, 'error');
+    component.openDeleteRecipeDialog();
+    const config = openDialog.calls.mostRecent().args[1] as {
+      data: ConfirmationDialogData;
+    };
+
+    await expectAsync(config.data.action()).toBeResolved();
+
+    expect(deleteRecipe).toHaveBeenCalledWith(7);
+    expect(notifyRecipesChanged).toHaveBeenCalledTimes(1);
+    expect(openSnackBar).toHaveBeenCalledOnceWith('Rezept gelöscht');
+    expect(logError).toHaveBeenCalledWith(
+      'failed to navigate after deleting recipe: ',
+      error
     );
   });
 });

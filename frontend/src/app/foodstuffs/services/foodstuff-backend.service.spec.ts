@@ -21,7 +21,7 @@ describe('FoodstuffBackendService', () => {
     httpTesting.verify();
   });
 
-  it('sends foodstuff updates to the matching patch endpoint', () => {
+  it('sends foodstuff updates to the matching patch endpoint', async () => {
     const updates: Partial<Foodstuff> = { name: 'Updated foodstuff' };
     const foodstuff: Foodstuff = {
       id: 7,
@@ -36,9 +36,7 @@ describe('FoodstuffBackendService', () => {
       recipeIds: [],
     };
 
-    service.patchFoodstuff(foodstuff.id, updates).subscribe((response) => {
-      expect(response).toEqual(foodstuff);
-    });
+    const responsePromise = service.patchFoodstuff(foodstuff.id, updates);
 
     const request = httpTesting.expectOne(
       `${environment.backendUrl}/foodstuffs/${foodstuff.id}`
@@ -46,5 +44,7 @@ describe('FoodstuffBackendService', () => {
     expect(request.request.method).toBe('PATCH');
     expect(request.request.body).toEqual(updates);
     request.flush(foodstuff);
+
+    await expectAsync(responsePromise).toBeResolvedTo(foodstuff);
   });
 });

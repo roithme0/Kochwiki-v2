@@ -5,7 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { take } from 'rxjs';
 import { PageHeaderService } from '../../services/page-header.service';
 import { SnackBarService } from '../../services/snack-bar.service';
 import { LoadState } from '../../utils/load-state';
@@ -30,6 +29,7 @@ import { RecipesSearchComponent } from './recipes-search/recipes-search.componen
 })
 export class RecipesPageComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private isDestroyed = false;
   private readonly recipeBackendService = inject(RecipeBackendService);
   private readonly snackBarService = inject(SnackBarService);
   readonly dialog = inject(MatDialog);
@@ -41,12 +41,18 @@ export class RecipesPageComponent {
     data: [],
   });
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.isDestroyed = true;
+    });
+  }
+
   ngOnInit(): void {
     this.pageHeaderService.updateHeader(true, 'Rezepte', '', true);
     this.recipeBackendService.recipesChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.fetchRecipes());
-    this.fetchRecipes();
+      .subscribe(() => void this.fetchRecipes());
+    void this.fetchRecipes();
   }
 
   openCreateRecipeDialog(): void {
@@ -60,20 +66,20 @@ export class RecipesPageComponent {
     });
   }
 
-  private fetchRecipes(): void {
+  private async fetchRecipes(): Promise<void> {
     this.recipesState.update(({ data }) => ({ status: 'loading', data }));
-    this.recipeBackendService
-      .getAllRecipes()
-      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (recipes) => {
-          this.recipesState.set({ status: 'success', data: recipes });
-        },
-        error: (error: unknown) => {
-          console.error('failed to fetch recipes: ', error);
-          this.snackBarService.open('Rezepte konnten nicht geladen werden');
-          this.recipesState.update(({ data }) => ({ status: 'error', data }));
-        },
+    try {
+      const recipes = await this.recipeBackendService.getAllRecipes();
+      if (this.isDestroyed) return;
+      this.recipesState.set({
+        status: 'success',
+        data: recipes,
       });
+    } catch (error: unknown) {
+      if (this.isDestroyed) return;
+      console.error('failed to fetch recipes: ', error);
+      this.snackBarService.open('Rezepte konnten nicht geladen werden');
+      this.recipesState.update(({ data }) => ({ status: 'error', data }));
+    }
   }
 }

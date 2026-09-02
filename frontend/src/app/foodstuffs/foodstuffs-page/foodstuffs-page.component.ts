@@ -3,7 +3,6 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { take } from 'rxjs';
 import { RecipeBackendService } from '../../recipes/services/recipe-backend.service';
 import { PageHeaderService } from '../../services/page-header.service';
 import { SnackBarService } from '../../services/snack-bar.service';
@@ -29,6 +28,7 @@ import { LoadState } from '../../utils/load-state';
 })
 export class FoodstuffsPageComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private isDestroyed = false;
   private readonly foodstuffBackendService = inject(FoodstuffBackendService);
   private readonly recipeBackendService = inject(RecipeBackendService);
   private readonly snackBarService = inject(SnackBarService);
@@ -39,36 +39,42 @@ export class FoodstuffsPageComponent {
     data: [],
   });
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.isDestroyed = true;
+    });
+  }
+
   ngOnInit(): void {
     this.pageHeaderService.updateHeader(true, 'Lebensmittel', '', true);
     this.keepFoodstuffsUpToDate();
-    this.fetchFoodstuffs();
+    void this.fetchFoodstuffs();
   }
 
   private keepFoodstuffsUpToDate(): void {
     this.foodstuffBackendService.foodstuffsChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.fetchFoodstuffs());
+      .subscribe(() => void this.fetchFoodstuffs());
 
     this.recipeBackendService.recipesChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.fetchFoodstuffs());
+      .subscribe(() => void this.fetchFoodstuffs());
   }
 
-  private fetchFoodstuffs(): void {
+  private async fetchFoodstuffs(): Promise<void> {
     this.foodstuffsState.update(({ data }) => ({ status: 'loading', data }));
-    this.foodstuffBackendService
-      .getAllFoodstuffs()
-      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (foodstuffs) => {
-          this.foodstuffsState.set({ status: 'success', data: foodstuffs });
-        },
-        error: (error: unknown) => {
-          console.error('failed to fetch foodstuffs: ', error);
-          this.snackBarService.open('Zutaten konnten nicht geladen werden');
-          this.foodstuffsState.update(({ data }) => ({ status: 'error', data }));
-        },
+    try {
+      const foodstuffs = await this.foodstuffBackendService.getAllFoodstuffs();
+      if (this.isDestroyed) return;
+      this.foodstuffsState.set({
+        status: 'success',
+        data: foodstuffs,
       });
+    } catch (error: unknown) {
+      if (this.isDestroyed) return;
+      console.error('failed to fetch foodstuffs: ', error);
+      this.snackBarService.open('Zutaten konnten nicht geladen werden');
+      this.foodstuffsState.update(({ data }) => ({ status: 'error', data }));
+    }
   }
 }

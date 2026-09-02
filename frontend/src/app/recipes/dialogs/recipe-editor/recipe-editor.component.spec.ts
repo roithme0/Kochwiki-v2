@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, of, throwError } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FoodstuffBackendService } from '../../../foodstuffs/services/foodstuff-backend.service';
 import { Recipe } from '../../interfaces/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
@@ -30,11 +30,11 @@ describe('RecipeEditorComponent', () => {
 
   beforeEach(async () => {
     foodstuffBackend = {
-      getAllFoodstuffs: jasmine.createSpy('getAllFoodstuffs').and.returnValue(of([])),
+      getAllFoodstuffs: jasmine.createSpy('getAllFoodstuffs').and.resolveTo([]),
       foodstuffsChanged$: new Subject<void>(),
     };
     recipeBackend = {
-      getRecipeById: jasmine.createSpy('getRecipeById').and.returnValue(of(recipe)),
+      getRecipeById: jasmine.createSpy('getRecipeById').and.resolveTo(recipe),
     };
 
     await TestBed.configureTestingModule({
@@ -51,21 +51,21 @@ describe('RecipeEditorComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('becomes ready only after recipe and foodstuff data load', () => {
+  it('becomes ready only after recipe and foodstuff data load', async () => {
     fixture.componentRef.setInput('recipeId', recipe.id);
     fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(recipeBackend.getRecipeById).toHaveBeenCalledOnceWith(recipe.id);
     expect(component.recipe()).toEqual(recipe);
     expect(component.state()).toEqual({ status: 'ready' });
   });
 
-  it('reports a recipe-specific error when the recipe request fails', () => {
-    recipeBackend.getRecipeById.and.returnValue(
-      throwError(() => new Error('Recipe not found'))
-    );
+  it('reports a recipe-specific error when the recipe request fails', async () => {
+    recipeBackend.getRecipeById.and.rejectWith(new Error('Recipe not found'));
     fixture.componentRef.setInput('recipeId', recipe.id);
     fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.state()).toEqual({ status: 'error', source: 'recipe' });
     expect(component.errorMessage()).toBe('Rezept konnte nicht geladen werden.');

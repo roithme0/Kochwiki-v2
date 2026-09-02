@@ -15,7 +15,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
-import { catchError, forkJoin, map, of, take } from 'rxjs';
 import { Foodstuff } from '../../../foodstuffs/interfaces/foodstuff';
 import { FoodstuffBackendService } from '../../../foodstuffs/services/foodstuff-backend.service';
 import { Recipe, RecipeWrite } from '../../interfaces/recipe';
@@ -109,10 +108,10 @@ export class RecipeEditorComponent {
   });
 
   ngOnInit(): void {
-    this.loadInitialData();
+    void this.loadInitialData();
     this.foodstuffBackendService.foodstuffsChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.refreshFoodstuffs());
+      .subscribe(() => void this.refreshFoodstuffs());
   }
 
   onSubmit(): void {
@@ -160,45 +159,46 @@ export class RecipeEditorComponent {
       : 'Zutaten konnten nicht geladen werden.';
   }
 
-  private loadInitialData(): void {
+  private async loadInitialData(): Promise<void> {
     this.state.set({ status: 'loading' });
-    const foodstuffs = this.loadFoodstuffs();
     const recipeId = this.recipeId();
 
     if (recipeId === null) {
-      foodstuffs.subscribe((foodstuffResult) => this.applyInitialResults(foodstuffResult));
+      this.applyInitialResults(await this.loadFoodstuffs());
       return;
     }
 
-    forkJoin({ foodstuffs, recipe: this.loadRecipe(recipeId) }).subscribe(
-      ({ foodstuffs: foodstuffResult, recipe: recipeResult }) =>
-        this.applyInitialResults(foodstuffResult, recipeResult)
-    );
+    const [foodstuffResult, recipeResult] = await Promise.all([
+      this.loadFoodstuffs(),
+      this.loadRecipe(recipeId),
+    ]);
+    this.applyInitialResults(foodstuffResult, recipeResult);
   }
 
-  private loadFoodstuffs() {
-    return this.foodstuffBackendService.getAllFoodstuffs().pipe(
-      take(1),
-      map((foodstuffs): LoadResult<Foodstuff[]> => ({
+  private async loadFoodstuffs(): Promise<LoadResult<Foodstuff[]>> {
+    try {
+      return {
         status: 'success',
-        value: this.sortFoodstuffs(foodstuffs),
-      })),
-      catchError((error: unknown) => {
-        console.error('failed to fetch foodstuffs: ', error);
-        return of<LoadResult<Foodstuff[]>>({ status: 'error' });
-      })
-    );
+        value: this.sortFoodstuffs(
+          await this.foodstuffBackendService.getAllFoodstuffs()
+        ),
+      };
+    } catch (error: unknown) {
+      console.error('failed to fetch foodstuffs: ', error);
+      return { status: 'error' };
+    }
   }
 
-  private loadRecipe(id: number) {
-    return this.recipeBackendService.getRecipeById(id).pipe(
-      take(1),
-      map((recipe): LoadResult<Recipe> => ({ status: 'success', value: recipe })),
-      catchError((error: unknown) => {
-        console.error('failed to fetch recipe: ', error);
-        return of<LoadResult<Recipe>>({ status: 'error' });
-      })
-    );
+  private async loadRecipe(id: number): Promise<LoadResult<Recipe>> {
+    try {
+      return {
+        status: 'success',
+        value: await this.recipeBackendService.getRecipeById(id),
+      };
+    } catch (error: unknown) {
+      console.error('failed to fetch recipe: ', error);
+      return { status: 'error' };
+    }
   }
 
   private applyInitialResults(
@@ -222,14 +222,17 @@ export class RecipeEditorComponent {
     this.state.set({ status: 'ready' });
   }
 
-  private refreshFoodstuffs(): void {
-    this.foodstuffBackendService.getAllFoodstuffs().pipe(take(1)).subscribe({
-      next: (foodstuffs) => this.foodstuffs.set(this.sortFoodstuffs(foodstuffs)),
-      error: (error: unknown) => {
-        console.error('failed to refresh foodstuffs: ', error);
-        this.snackBarService.open('Zutaten konnten nicht aktualisiert werden');
-      },
-    });
+  private async refreshFoodstuffs(): Promise<void> {
+    try {
+      this.foodstuffs.set(
+        this.sortFoodstuffs(
+          await this.foodstuffBackendService.getAllFoodstuffs()
+        )
+      );
+    } catch (error: unknown) {
+      console.error('failed to refresh foodstuffs: ', error);
+      this.snackBarService.open('Zutaten konnten nicht aktualisiert werden');
+    }
   }
 
   private sortFoodstuffs(foodstuffs: Foodstuff[]): Foodstuff[] {

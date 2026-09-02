@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { take } from 'rxjs';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { FoodstuffFormComponent } from '../../components/foodstuff-form/foodstuff-form.component';
@@ -24,26 +23,29 @@ export class FoodstuffPatchDialogComponent {
   readonly foodstuff = signal<Foodstuff | null>(null);
 
   ngOnInit(): void {
-    this.foodstuffBackendService.getFoodstuffById(this.data.id).pipe(take(1)).subscribe({
-      next: (foodstuff) => this.foodstuff.set(foodstuff),
-      error: (error: unknown) => {
-        console.error('failed to fetch foodstuff: ', error);
-        this.snackBarService.open('Zutat konnte nicht geladen werden');
-      },
-    });
+    void this.fetchFoodstuff();
   }
 
-  onSubmit(updates: Partial<Foodstuff>): void {
-    this.foodstuffBackendService.patchFoodstuff(this.data.id, updates).pipe(take(1)).subscribe({
-      next: () => {
-        this.foodstuffBackendService.notifyFoodstuffsChanged();
-        this.dialogRef.close();
-        this.snackBarService.open('Zutat aktualisiert');
-      },
-      error: (error: unknown) => {
-        console.error('failed to patch foodstuff: ', error);
-        this.snackBarService.open('Zutat konnte nicht aktualisiert werden');
-      },
-    });
+  async onSubmit(updates: Partial<Foodstuff>): Promise<void> {
+    try {
+      await this.foodstuffBackendService.patchFoodstuff(this.data.id, updates);
+      this.foodstuffBackendService.notifyFoodstuffsChanged();
+      this.dialogRef.close();
+      this.snackBarService.open('Zutat aktualisiert');
+    } catch (error: unknown) {
+      console.error('failed to patch foodstuff: ', error);
+      this.snackBarService.open('Zutat konnte nicht aktualisiert werden');
+    }
+  }
+
+  private async fetchFoodstuff(): Promise<void> {
+    try {
+      this.foodstuff.set(
+        await this.foodstuffBackendService.getFoodstuffById(this.data.id)
+      );
+    } catch (error: unknown) {
+      console.error('failed to fetch foodstuff: ', error);
+      this.snackBarService.open('Zutat konnte nicht geladen werden');
+    }
   }
 }
