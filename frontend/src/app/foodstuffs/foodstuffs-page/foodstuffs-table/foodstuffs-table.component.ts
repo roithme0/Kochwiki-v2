@@ -18,11 +18,17 @@ import { FoodstuffVerboseNames } from '../../interfaces/foodstuff-meta-data';
 import { FoodstuffTableDisplayedFieldsService } from '../services/foodstuff-table-displayed-fields.service';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
 import { FoodstuffPatchDialogComponent } from '../../dialogs/foodstuff-patch-dialog/foodstuff-patch-dialog.component';
-import { FoodstuffDeleteDialogComponent } from '../../dialogs/foodstuff-delete-dialog/foodstuff-delete-dialog.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { FoodstuffTableControlService } from '../services/foodstuff-table-control.service';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MacroChartComponent } from '../../../core/components/macro-chart/macro-chart.component';
+import {
+  ConfirmationDialogComponent,
+  ConfirmationDialogData,
+} from '../../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
+import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
+import { SnackBarService } from '../../../services/snack-bar.service';
+import { firstValueFrom } from 'rxjs';
 
 const DEFAULT_PAGE_SIZE: number = 12;
 
@@ -45,6 +51,8 @@ export class FoodstuffsTableComponent implements OnDestroy {
     FoodstuffTableDisplayedFieldsService
   );
   readonly foodstuffMetadataService = inject(FoodstuffMetadataService);
+  readonly foodstuffBackendService = inject(FoodstuffBackendService);
+  readonly snackBarService = inject(SnackBarService);
   readonly dialog = inject(MatDialog);
   readonly foodstuffTableControlService = inject(FoodstuffTableControlService);
   readonly foodstuffs = input<Foodstuff[]>([]);
@@ -117,12 +125,31 @@ export class FoodstuffsTableComponent implements OnDestroy {
   }
 
   openDeleteFoodstuffDialog(foodstuff: Foodstuff): void {
-    this.dialog.open(FoodstuffDeleteDialogComponent, {
-      data: { id: foodstuff.id },
+    const data: ConfirmationDialogData = {
+      title: 'Lebensmittel löschen?',
+      confirmLabel: 'Ja',
+      cancelLabel: 'Nein',
+      action: () => this.deleteFoodstuff(foodstuff.id),
+    };
+
+    this.dialog.open(ConfirmationDialogComponent, {
+      data,
       maxWidth: '95vw',
       maxHeight: '95vh',
       autoFocus: false,
     });
+  }
+
+  private async deleteFoodstuff(id: number): Promise<void> {
+    try {
+      await firstValueFrom(this.foodstuffBackendService.deleteFoodstuff(id));
+      this.foodstuffBackendService.notifyFoodstuffsChanged();
+      this.snackBarService.open('Zutat gelöscht');
+    } catch (error: unknown) {
+      console.error('failed to delete foodstuff: ', error);
+      this.snackBarService.open('Zutat konnte nicht gelöscht werden');
+      throw error;
+    }
   }
 
   private searchFoodstuffsByNameOrBrand(foodstuffs: Foodstuff[]): Foodstuff[] {

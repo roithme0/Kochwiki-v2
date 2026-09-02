@@ -1,0 +1,24 @@
+<app-dialog-header [title]="data.title" [showCloseButon]="false" />
+
+<mat-dialog-actions>
+  <button
+    mat-stroked-button
+    color="warn"
+    [disabled]="isExecuting()"
+    (click)="confirm()"
+  >
+    @if (isExecuting()) {
+      <mat-spinner diameter="20" aria-label="Wird ausgeführt" />
+    } @else {
+      {{ data.confirmLabel }}
+    }
+  </button>
+  <button
+    mat-stroked-button
+    cdkFocusInitial
+    [disabled]="isExecuting()"
+    (click)="cancel()"
+  >
+    {{ data.cancelLabel }}
+  </button>
+</mat-dialog-actions>

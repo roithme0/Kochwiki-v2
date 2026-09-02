@@ -13,8 +13,11 @@ import { IngredientsGridComponent } from './ingredients-grid/ingredients-grid.co
 import { StepsGridComponent } from './steps-grid/steps-grid.component';
 import { RecipeMacroChartCardComponent } from './recipe-macro-chart-card/recipe-macro-chart-card.component';
 import { RecipePatchDialogComponent } from '../dialogs/recipe-patch-dialog/recipe-patch-dialog.component';
-import { RecipeDeleteDialogComponent } from '../dialogs/recipe-delete-dialog/recipe-delete-dialog.component';
-import { take } from 'rxjs';
+import {
+  ConfirmationDialogComponent,
+  ConfirmationDialogData,
+} from '../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
+import { firstValueFrom, take } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
@@ -99,11 +102,37 @@ export class RecipePageComponent {
   }
 
   openDeleteRecipeDialog(): void {
-    this.dialog.open(RecipeDeleteDialogComponent, {
-      data: { id: this.id },
+    const id: number | undefined = this.id;
+    if (id === undefined) {
+      console.error('no recipe id provided');
+      return;
+    }
+
+    const data: ConfirmationDialogData = {
+      title: 'Rezept löschen?',
+      confirmLabel: 'Ja',
+      cancelLabel: 'Nein',
+      action: () => this.deleteRecipe(id),
+    };
+
+    this.dialog.open(ConfirmationDialogComponent, {
+      data,
       maxWidth: '95vw',
       maxHeight: '95vh',
       autoFocus: false,
     });
+  }
+
+  private async deleteRecipe(id: number): Promise<void> {
+    try {
+      await firstValueFrom(this.recipeBackendService.deleteRecipe(id));
+      await this.router.navigate(['recipes']);
+      this.recipeBackendService.notifyRecipesChanged();
+      this.snackBarService.open('Rezept gelöscht');
+    } catch (error: unknown) {
+      console.error('failed to delete recipe: ', error);
+      this.snackBarService.open('Rezept konnte nicht gelöscht werden');
+      throw error;
+    }
   }
 }
