@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormBuilder,
@@ -14,12 +15,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
-import { catchError, forkJoin, map, of, take, takeUntil } from 'rxjs';
+import { catchError, forkJoin, map, of, take } from 'rxjs';
 import { Foodstuff } from '../../../foodstuffs/interfaces/foodstuff';
 import { FoodstuffBackendService } from '../../../foodstuffs/services/foodstuff-backend.service';
 import { Recipe, RecipeWrite } from '../../interfaces/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
-import { Unsubscribe } from '../../../utils/unsubsribe';
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { RecipeIngredientsFormComponent } from '../forms/recipe-ingredients-form/recipe-ingredients-form.component';
 import { RecipeMetaFormComponent } from '../forms/recipe-meta-form/recipe-meta-form.component';
@@ -79,7 +79,8 @@ interface StepFormControls {
   templateUrl: './recipe-editor.component.html',
   styleUrl: './recipe-editor.component.scss',
 })
-export class RecipeEditorComponent extends Unsubscribe {
+export class RecipeEditorComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly foodstuffBackendService = inject(FoodstuffBackendService);
   private readonly recipeBackendService = inject(RecipeBackendService);
@@ -110,7 +111,7 @@ export class RecipeEditorComponent extends Unsubscribe {
   ngOnInit(): void {
     this.loadInitialData();
     this.foodstuffBackendService.foodstuffsChanged$
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.refreshFoodstuffs());
   }
 

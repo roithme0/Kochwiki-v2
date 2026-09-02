@@ -1,4 +1,5 @@
-import { Component, WritableSignal, inject, signal } from '@angular/core';
+import { Component, DestroyRef, WritableSignal, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PageHeaderService } from '../../services/page-header.service';
 import { CustomUserBackendService } from '../../services/custom-user-backend.service';
 import { ActiveCustomUserService } from '../../services/active-custom-user.service';
@@ -9,8 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { take, takeUntil } from 'rxjs';
-import { Unsubscribe } from '../../utils/unsubsribe';
+import { take } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -19,7 +19,8 @@ import { Router } from '@angular/router';
   templateUrl: './select-custom-user-page.component.html',
   styleUrl: './select-custom-user-page.component.scss',
 })
-export class SelectCustomUserPageComponent extends Unsubscribe {
+export class SelectCustomUserPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   readonly pageHeaderService = inject(PageHeaderService);
   readonly customUserBackendService = inject(CustomUserBackendService);
   readonly activeCustomUserService = inject(ActiveCustomUserService);
@@ -67,7 +68,7 @@ export class SelectCustomUserPageComponent extends Unsubscribe {
 
   private keepCustomUsersUpToDate(): void {
     this.customUserBackendService.customUsersChanged$
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.fetchCustomUsers());
   }
 

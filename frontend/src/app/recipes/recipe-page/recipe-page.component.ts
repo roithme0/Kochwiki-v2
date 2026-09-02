@@ -1,4 +1,5 @@
-import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, WritableSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,8 +14,7 @@ import { StepsGridComponent } from './steps-grid/steps-grid.component';
 import { RecipeMacroChartCardComponent } from './recipe-macro-chart-card/recipe-macro-chart-card.component';
 import { RecipePatchDialogComponent } from '../dialogs/recipe-patch-dialog/recipe-patch-dialog.component';
 import { RecipeDeleteDialogComponent } from '../dialogs/recipe-delete-dialog/recipe-delete-dialog.component';
-import { Unsubscribe } from '../../utils/unsubsribe';
-import { take, takeUntil } from 'rxjs';
+import { take } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
@@ -31,7 +31,8 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
   templateUrl: './recipe-page.component.html',
   styleUrl: './recipe-page.component.scss',
 })
-export class RecipePageComponent extends Unsubscribe {
+export class RecipePageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   readonly route = inject(ActivatedRoute);
   readonly router = inject(Router);
   readonly pageHeaderService = inject(PageHeaderService);
@@ -44,8 +45,6 @@ export class RecipePageComponent extends Unsubscribe {
   recipeIsLoading: WritableSignal<boolean> = signal(true);
 
   constructor() {
-    super();
-
     this.id = Number(this.route.snapshot.paramMap.get('id'));
 
     this.keepRecipeUpToDate(this.id);
@@ -58,7 +57,7 @@ export class RecipePageComponent extends Unsubscribe {
 
   keepRecipeUpToDate(id: number | undefined): void {
     this.recipeBackendService.recipesChanged$
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.fetchRecipe(id));
   }
 
@@ -78,7 +77,7 @@ export class RecipePageComponent extends Unsubscribe {
           this.pageHeaderService.headline = this.recipe.name;
           this.recipeIsLoading.set(false);
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('failed to fetch recipe: ', error);
           this.snackBarService.open('Rezept konnte nicht geladen werden');
           this.pageHeaderService.headline = 'Fehler';
