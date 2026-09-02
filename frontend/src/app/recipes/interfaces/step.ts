@@ -4,3 +4,8 @@ export interface Step {
   description: string;
   recipeId: number;
 }
+
+export interface RecipeStepWrite {
+  index: number;
+  description: string;
+}

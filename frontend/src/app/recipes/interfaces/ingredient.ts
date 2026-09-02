@@ -7,3 +7,9 @@ export interface Ingredient {
   foodstuff: FoodstuffSummary;
   recipeId: number;
 }
+
+export interface RecipeIngredientWrite {
+  index: number;
+  amount: number;
+  foodstuffId: number;
+}

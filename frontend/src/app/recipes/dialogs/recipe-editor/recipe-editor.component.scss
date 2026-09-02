@@ -1,0 +1,15 @@
+:host { display: contents; }
+
+:host ::ng-deep .mat-horizontal-content-container {
+  padding: 0.75rem 24px 24px !important;
+}
+
+mat-spinner, .error { margin: 2rem; }
+
+.error { display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+
+.form { min-width: 0; max-width: 100%; display: flex; flex-direction: column; }
+
+.button-wrapper { padding: 24px; display: flex; }
+
+.button-wrapper button { flex: 1; }

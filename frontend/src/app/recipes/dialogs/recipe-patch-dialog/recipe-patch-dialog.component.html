@@ -1,52 +1,5 @@
 <app-dialog-header title="Rezept bearbeiten" [showCloseButon]="true" />
 
 <mat-dialog-content class="mat-dialog-content">
-  <!-- loading -->
-  @if (isLoadingRecipe() || isLoadingFoodstuffs()) {
-  <mat-spinner diameter="25" />
-  }
-
-  <!-- error -->
-  @else if(hasErrorRecipe() || hasErrorFoodstuffs()) {
-  <div class="error">
-    <mat-icon aria-hidden="false" aria-label="Fehler" fontIcon="error" />
-    <p>Zutaten konnten nicht geladen werden.</p>
-  </div>
-  }
-
-  <!-- loaded -->
-  @else {
-  <form [formGroup]="recipeForm" action="PATCH" class="form">
-    <mat-stepper #stepper>
-      <mat-step errorMessage="">
-        <app-recipe-meta-form [recipe]="recipe" />
-      </mat-step>
-
-      <mat-step errorMessage="">
-        <app-recipe-ingredients-form
-          [foodstuffs]="foodstuffs"
-          [recipe]="recipe"
-        />
-      </mat-step>
-
-      <mat-step errorMessage="">
-        <app-recipe-preparation-form [recipe]="recipe" />
-      </mat-step>
-    </mat-stepper>
-
-    <mat-divider />
-
-    <div class="button-wrapper">
-      <button
-        mat-stroked-button
-        type="submit"
-        color="primary"
-        [disabled]="!recipeForm.valid"
-        (click)="onSubmit()"
-      >
-        Speichern
-      </button>
-    </div>
-  </form>
-  }
+  <app-recipe-editor [recipeId]="data.id" (submitted)="onSubmit($event)" />
 </mat-dialog-content>

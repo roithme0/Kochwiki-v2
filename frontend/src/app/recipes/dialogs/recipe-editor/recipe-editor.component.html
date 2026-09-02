@@ -1,0 +1,35 @@
+@switch (state().status) {
+  @case ('loading') {
+    <mat-spinner diameter="25" />
+  }
+  @case ('error') {
+    <div class="error">
+      <mat-icon aria-label="Fehler" fontIcon="error" />
+      <p>{{ errorMessage() }}</p>
+    </div>
+  }
+  @case ('ready') {
+    <form [formGroup]="recipeForm" class="form" (ngSubmit)="onSubmit()">
+      <mat-stepper>
+        <mat-step>
+          <app-recipe-meta-form [recipe]="recipe() ?? undefined" />
+        </mat-step>
+        <mat-step>
+          <app-recipe-ingredients-form
+            [foodstuffs]="foodstuffs()"
+            [recipe]="recipe() ?? undefined"
+          />
+        </mat-step>
+        <mat-step>
+          <app-recipe-preparation-form [recipe]="recipe() ?? undefined" />
+        </mat-step>
+      </mat-stepper>
+      <mat-divider />
+      <div class="button-wrapper">
+        <button mat-stroked-button type="submit" color="primary" [disabled]="recipeForm.invalid">
+          Speichern
+        </button>
+      </div>
+    </form>
+  }
+}

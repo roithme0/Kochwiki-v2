@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Recipe } from '../interfaces/recipe';
+import { Recipe, RecipeWrite } from '../interfaces/recipe';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -25,10 +25,10 @@ export class RecipeBackendService {
   getRecipeById = (id: number): Observable<Recipe> =>
     this.httpClient.get<Recipe>(backendUrl + '/recipes/' + id);
 
-  patchRecipe = (id: number, updates: Partial<Recipe>): Observable<Recipe> =>
+  patchRecipe = (id: number, updates: Partial<RecipeWrite>): Observable<Recipe> =>
     this.httpClient.patch<Recipe>(backendUrl + '/recipes/' + id, updates);
 
-  postRecipe = (recipe: Partial<Recipe>): Observable<Recipe> =>
+  postRecipe = (recipe: RecipeWrite): Observable<Recipe> =>
     this.httpClient.post<Recipe>(backendUrl + '/recipes', recipe);
 
   deleteRecipe = (id: number): Observable<number> =>

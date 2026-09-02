@@ -1,5 +1,5 @@
-import { Ingredient } from './ingredient';
-import { Step } from './step';
+import { Ingredient, RecipeIngredientWrite } from './ingredient';
+import { RecipeStepWrite, Step } from './step';
 
 export interface Recipe {
   id: number;
@@ -14,4 +14,14 @@ export interface Recipe {
   fat: number | null;
   ingredients: Ingredient[];
   steps: Step[];
+}
+
+export interface RecipeWrite {
+  name: string;
+  servings: number;
+  preptime: number | null;
+  originName: string | null;
+  originUrl: string | null;
+  ingredients: RecipeIngredientWrite[];
+  steps: RecipeStepWrite[];
 }
