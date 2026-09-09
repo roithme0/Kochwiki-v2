@@ -31,6 +31,7 @@
   <div class="ingredients-array-buttons-wrapper">
     <button
       mat-flat-button
+      type="button"
       color="accent"
       (click)="addIngredient()"
       class="add-ingredient-button"
@@ -40,7 +41,8 @@
 
     <!-- create foodstuff -->
     <button
-      mat-flat-button
+      mat-stroked-button
+      type="button"
       color="accent"
       (click)="openCreateFoodstuffDialog()"
       class="create-foodstuff-button"
