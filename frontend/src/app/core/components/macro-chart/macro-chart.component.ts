@@ -11,7 +11,11 @@ import {
 import { Chart, DoughnutController, ArcElement } from 'chart.js';
 import { FoodstuffSummary } from '../../../foodstuffs/interfaces/foodstuff-summary';
 import { ChartLegendElement } from '../../../interfaces/chart-legend-element';
-import { Recipe } from '../../../recipes/interfaces/recipe';
+
+type NutritionValues = Pick<
+  FoodstuffSummary,
+  'kcal' | 'carbs' | 'protein' | 'fat'
+>;
 
 const PLACEHOLDER_VALUE: number = 1;
 const PLACEHOLDER_LEGEND: Record<string, ChartLegendElement> = {
@@ -29,7 +33,7 @@ const PLACEHOLDER_LEGEND: Record<string, ChartLegendElement> = {
   styleUrl: './macro-chart.component.scss',
 })
 export class MacroChartComponent implements OnDestroy {
-  recipeOrFoodstuff = input.required<Recipe | FoodstuffSummary>();
+  nutrition = input.required<NutritionValues>();
   showKcal = input<boolean>(true);
 
   legendUpdated = output<Record<string, ChartLegendElement>>();
@@ -41,27 +45,27 @@ export class MacroChartComponent implements OnDestroy {
 
   dataIncompleteOrInvalid = computed(
     (): boolean =>
-      this.recipeOrFoodstuff().carbs == null ||
-      this.recipeOrFoodstuff().protein == null ||
-      this.recipeOrFoodstuff().fat == null ||
-      (this.recipeOrFoodstuff().carbs == 0 &&
-        this.recipeOrFoodstuff().protein == 0 &&
-        this.recipeOrFoodstuff().fat == 0)
+      this.nutrition().carbs == null ||
+      this.nutrition().protein == null ||
+      this.nutrition().fat == null ||
+      (this.nutrition().carbs == 0 &&
+        this.nutrition().protein == 0 &&
+        this.nutrition().fat == 0)
   );
 
   legend = computed(
     (): Record<string, ChartLegendElement> =>
-      this.buildLegend(this.recipeOrFoodstuff())
+      this.buildLegend(this.nutrition())
   );
 
   constructor() {
     effect(() => {
-      const recipeOrFoodstuff = this.recipeOrFoodstuff();
+      const nutrition = this.nutrition();
       const legend = this.legend();
       const dataIncompleteOrInvalid = this.dataIncompleteOrInvalid();
 
       this.legendUpdated.emit(legend);
-      this.updateChart(recipeOrFoodstuff, legend, dataIncompleteOrInvalid);
+      this.updateChart(nutrition, legend, dataIncompleteOrInvalid);
     });
   }
 
@@ -71,7 +75,7 @@ export class MacroChartComponent implements OnDestroy {
     if (canvasElement != undefined) {
       this.createChart(
         canvasElement,
-        this.recipeOrFoodstuff(),
+        this.nutrition(),
         this.legend(),
         this.dataIncompleteOrInvalid()
       );
@@ -84,7 +88,7 @@ export class MacroChartComponent implements OnDestroy {
   }
 
   private updateChart(
-    recipeOrFoodstuff: Recipe | FoodstuffSummary,
+    nutrition: NutritionValues,
     legend: Record<string, ChartLegendElement>,
     dataIncompleteOrInvalid: boolean
   ): void {
@@ -93,7 +97,7 @@ export class MacroChartComponent implements OnDestroy {
     if (chart == null || dataSet == null) return;
 
     dataSet.data = this.getChartData(
-      recipeOrFoodstuff,
+      nutrition,
       dataIncompleteOrInvalid
     );
     dataSet.backgroundColor = this.getChartColors(
@@ -104,7 +108,7 @@ export class MacroChartComponent implements OnDestroy {
   }
 
   private buildLegend = (
-    recipeOrFoodstuff: Recipe | FoodstuffSummary
+    nutrition: NutritionValues
   ): Record<string, ChartLegendElement> =>
     this.dataIncompleteOrInvalid()
       ? PLACEHOLDER_LEGEND
@@ -112,35 +116,35 @@ export class MacroChartComponent implements OnDestroy {
           carbs: {
             displayName: 'Kohlenhydrate',
             color: 'rgb(19,154,155)',
-            valueAbsolute: recipeOrFoodstuff.carbs,
+            valueAbsolute: nutrition.carbs,
             valuePercentage: this.calculateValuePercentage(
-              recipeOrFoodstuff,
-              recipeOrFoodstuff.carbs
+              nutrition,
+              nutrition.carbs
             ),
           },
           protein: {
             displayName: 'Protein',
             color: 'rgb(155, 255, 117)',
-            valueAbsolute: recipeOrFoodstuff.protein,
+            valueAbsolute: nutrition.protein,
             valuePercentage: this.calculateValuePercentage(
-              recipeOrFoodstuff,
-              recipeOrFoodstuff.protein
+              nutrition,
+              nutrition.protein
             ),
           },
           fat: {
             displayName: 'Fett',
             color: 'rgb(255,97,97)',
-            valueAbsolute: recipeOrFoodstuff.fat,
+            valueAbsolute: nutrition.fat,
             valuePercentage: this.calculateValuePercentage(
-              recipeOrFoodstuff,
-              recipeOrFoodstuff.fat
+              nutrition,
+              nutrition.fat
             ),
           },
         };
 
   private createChart(
     canvas: HTMLCanvasElement,
-    recipeOrFoodstuff: Recipe | FoodstuffSummary,
+    nutrition: NutritionValues,
     legend: Record<string, ChartLegendElement>,
     dataIncompleteOrInvalid: boolean
   ): void {
@@ -154,7 +158,7 @@ export class MacroChartComponent implements OnDestroy {
         datasets: [
           {
             data: this.getChartData(
-              recipeOrFoodstuff,
+              nutrition,
               dataIncompleteOrInvalid
             ),
             backgroundColor: this.getChartColors(
@@ -169,15 +173,15 @@ export class MacroChartComponent implements OnDestroy {
   }
 
   private getChartData(
-    recipeOrFoodstuff: Recipe | FoodstuffSummary,
+    nutrition: NutritionValues,
     dataIncompleteOrInvalid: boolean
   ): number[] {
     return dataIncompleteOrInvalid
       ? [PLACEHOLDER_VALUE]
       : [
-          recipeOrFoodstuff.carbs ?? 0,
-          recipeOrFoodstuff.protein ?? 0,
-          recipeOrFoodstuff.fat ?? 0,
+          nutrition.carbs ?? 0,
+          nutrition.protein ?? 0,
+          nutrition.fat ?? 0,
         ];
   }
 
@@ -195,22 +199,22 @@ export class MacroChartComponent implements OnDestroy {
   }
 
   private calculateValuePercentage(
-    recipeOrFoodstuff: Recipe | FoodstuffSummary,
+    nutrition: NutritionValues,
     macroValue: number | null | undefined
   ): number | null {
     if (
-      recipeOrFoodstuff.carbs == null ||
-      recipeOrFoodstuff.protein == null ||
-      recipeOrFoodstuff.fat == null ||
+      nutrition.carbs == null ||
+      nutrition.protein == null ||
+      nutrition.fat == null ||
       macroValue == null
     ) {
       return null;
     }
 
     const macroSum: number =
-      recipeOrFoodstuff.carbs +
-      recipeOrFoodstuff.protein +
-      recipeOrFoodstuff.fat;
+      nutrition.carbs +
+      nutrition.protein +
+      nutrition.fat;
     return (macroValue / macroSum) * 100;
   }
 }

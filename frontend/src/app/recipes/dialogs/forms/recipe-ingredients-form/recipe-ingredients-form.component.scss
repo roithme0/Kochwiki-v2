@@ -4,6 +4,45 @@
   gap: 1rem;
 }
 
+.nutrition-section {
+  min-height: 13rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.nutrition-chart-area {
+  flex: 0 0 13rem;
+  box-sizing: border-box;
+  padding-block: 1rem;
+}
+
+.nutrition-preview {
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.macro-chart {
+  width: 11rem;
+}
+
+.details-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nutrition-message {
+  margin: auto 0;
+}
+
 .ingredients-wrapper {
   display: flex;
   flex-direction: column;

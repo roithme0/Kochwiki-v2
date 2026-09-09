@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { FoodstuffBackendService } from './foodstuff-backend.service';
 import { Foodstuff } from '../interfaces/foodstuff';
+import { FoodstuffUnit } from '../interfaces/foodstuff-unit';
 import { environment } from '../../../environments/environment';
 
 describe('FoodstuffBackendService', () => {
@@ -27,7 +28,7 @@ describe('FoodstuffBackendService', () => {
       id: 7,
       name: 'Updated foodstuff',
       brand: null,
-      unit: 'g',
+      unit: FoodstuffUnit.Gram,
       unitVerbose: 'Gramm',
       kcal: null,
       carbs: null,

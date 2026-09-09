@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Foodstuff } from '../../interfaces/foodstuff';
+import { FoodstuffUnit } from '../../interfaces/foodstuff-unit';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
 
 @Component({
@@ -35,7 +36,7 @@ export class FoodstuffFormComponent {
   readonly form = this.fb.group({
     name: this.fb.nonNullable.control('', Validators.required),
     brand: this.fb.control<string | null>(''),
-    unit: this.fb.nonNullable.control('', Validators.required),
+    unit: this.fb.control<FoodstuffUnit | null>(null, Validators.required),
     kcal: this.fb.control<number | null>(null),
     carbs: this.fb.control<number | null>(null),
     protein: this.fb.control<number | null>(null),
@@ -52,6 +53,7 @@ export class FoodstuffFormComponent {
   onSubmit(): void {
     const { name, brand, unit, kcal, carbs, protein, fat } =
       this.form.getRawValue();
+    if (unit === null) return;
     this.submitted.emit({ name, brand, unit, kcal, carbs, protein, fat });
   }
 

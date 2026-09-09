@@ -5,6 +5,7 @@ import { ConfirmationDialogData } from '../../../core/dialogs/confirmation-dialo
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
 import { Foodstuff } from '../../interfaces/foodstuff';
+import { FoodstuffUnit } from '../../interfaces/foodstuff-unit';
 import { FoodstuffsTableComponent } from './foodstuffs-table.component';
 import { FoodstuffTableDisplayedFieldsService } from '../services/foodstuff-table-displayed-fields.service';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
@@ -15,7 +16,7 @@ describe('FoodstuffsTableComponent', () => {
     id: 42,
     name: 'Tomate',
     brand: null,
-    unit: 'g',
+    unit: FoodstuffUnit.Gram,
     unitVerbose: 'Gramm',
     kcal: 18,
     carbs: 3,

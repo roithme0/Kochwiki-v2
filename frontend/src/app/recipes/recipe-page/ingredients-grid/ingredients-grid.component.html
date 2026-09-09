@@ -9,7 +9,7 @@
       @for(ingredient of recipe().ingredients; track ingredient.id){
       <app-macro-chart
         class="macro-chart"
-        [recipeOrFoodstuff]="ingredient.foodstuff"
+        [nutrition]="ingredient.foodstuff"
         [showKcal]="false"
       />
       <span>{{ ingredient.foodstuff.name }}</span>

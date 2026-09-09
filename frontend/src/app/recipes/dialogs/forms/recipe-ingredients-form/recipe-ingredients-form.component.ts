@@ -1,5 +1,15 @@
-import { Component, inject, input } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  WritableSignal,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormGroup,
@@ -20,6 +30,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
+import { ChartLegendElement } from '../../../../interfaces/chart-legend-element';
+import { ChartLegendElementComponent } from '../../../../core/components/chart-legend-element/chart-legend-element.component';
+import { MacroChartComponent } from '../../../../core/components/macro-chart/macro-chart.component';
+import {
+  DraftIngredientNutrition,
+  DraftNutritionState,
+  RecipeNutrition,
+  calculateDraftNutrition,
+} from '../../../utils/recipe-nutrition';
 
 @Component({
   selector: 'app-recipe-ingredients-form',
@@ -33,6 +52,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatIconModule,
     MatExpansionModule,
     MatSelectModule,
+    ChartLegendElementComponent,
+    MacroChartComponent,
   ],
   templateUrl: './recipe-ingredients-form.component.html',
   styleUrl: './recipe-ingredients-form.component.scss',
@@ -44,11 +65,56 @@ export class RecipeIngredientsFormComponent {
   readonly recipeFormDirective = inject(FormGroupDirective);
   readonly fb: FormBuilder = inject(FormBuilder);
   readonly dialog: MatDialog = inject(MatDialog);
+  readonly destroyRef = inject(DestroyRef);
 
   recipeForm!: FormGroup;
   ingredientsFormGroup!: FormGroup;
+  readonly ingredientDrafts = signal<DraftIngredientNutrition[]>([]);
+  readonly showLegend = signal(false);
+  readonly legend: WritableSignal<Record<string, ChartLegendElement>> = signal({});
+  readonly nutritionState = computed((): DraftNutritionState =>
+    calculateDraftNutrition(
+      this.ingredientDrafts(),
+      this.servings(),
+      this.foodstuffs()
+    )
+  );
+  readonly displayedNutritionState = computed((): DraftNutritionState => {
+    const nutritionState = this.nutritionState();
+    const lastValidNutrition = this.lastValidNutrition();
 
-  ngOnInit() {
+    return nutritionState.status === 'invalid' &&
+      this.isEditingNumericInput() &&
+      lastValidNutrition !== null
+      ? { status: 'complete', nutrition: lastValidNutrition }
+      : nutritionState;
+  });
+  readonly canShowLegend = computed((): boolean => {
+    const nutritionState = this.displayedNutritionState();
+    return (
+      nutritionState.status === 'complete' &&
+      (nutritionState.nutrition.carbs !== 0 ||
+        nutritionState.nutrition.protein !== 0 ||
+        nutritionState.nutrition.fat !== 0)
+    );
+  });
+
+  private readonly servings = signal<number | null>(null);
+  private readonly lastValidNutrition = signal<RecipeNutrition | null>(null);
+  private readonly isEditingNumericInput = signal(false);
+
+  constructor() {
+    effect(() => {
+      const nutritionState = this.nutritionState();
+      if (nutritionState.status === 'complete') {
+        this.lastValidNutrition.set(nutritionState.nutrition);
+      } else if (nutritionState.status === 'incomplete') {
+        this.lastValidNutrition.set(null);
+      }
+    });
+  }
+
+  ngOnInit(): void {
     this.recipeForm = this.recipeFormDirective.control;
     this.ingredientsFormGroup = this.recipeForm.get(
       'ingredientsFormGroup'
@@ -63,6 +129,11 @@ export class RecipeIngredientsFormComponent {
         this.addIngredient(ingredient)
       );
     }
+
+    this.ingredientsFormGroup.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateNutritionDraft());
+    this.updateNutritionDraft();
   }
 
   get ingredients(): FormArray {
@@ -78,10 +149,30 @@ export class RecipeIngredientsFormComponent {
         amount: [ingredient?.amount ?? null, Validators.required],
       })
     );
+    this.updateNutritionDraft();
   }
 
   removeIngredient(index: number): void {
     this.ingredients.removeAt(index);
+    this.updateNutritionDraft();
+  }
+
+  toggleLegend(): void {
+    this.showLegend.update((showLegend) => !showLegend);
+  }
+
+  onNutritionPreviewFocusIn(event: FocusEvent): void {
+    if (isNumericInput(event.target)) this.isEditingNumericInput.set(true);
+  }
+
+  onNutritionPreviewFocusOut(event: FocusEvent): void {
+    if (!isNumericInput(event.target) || isNumericInput(event.relatedTarget)) {
+      return;
+    }
+    this.isEditingNumericInput.set(false);
+    if (this.nutritionState().status === 'invalid') {
+      this.lastValidNutrition.set(null);
+    }
   }
 
   openCreateFoodstuffDialog(): void {
@@ -94,4 +185,17 @@ export class RecipeIngredientsFormComponent {
       disableClose: true,
     });
   }
+
+  private updateNutritionDraft(): void {
+    const rawValue = this.ingredientsFormGroup.getRawValue() as {
+      servings: number | null;
+      ingredients: DraftIngredientNutrition[];
+    };
+    this.servings.set(rawValue.servings);
+    this.ingredientDrafts.set(rawValue.ingredients);
+  }
+}
+
+function isNumericInput(target: EventTarget | null): target is HTMLInputElement {
+  return target instanceof HTMLInputElement && target.type === 'number';
 }

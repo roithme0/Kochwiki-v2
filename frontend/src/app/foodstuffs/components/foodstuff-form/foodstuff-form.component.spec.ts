@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
+import { FoodstuffUnit } from '../../interfaces/foodstuff-unit';
 import { FoodstuffFormComponent } from './foodstuff-form.component';
 
 describe('FoodstuffFormComponent', () => {
@@ -18,7 +19,7 @@ describe('FoodstuffFormComponent', () => {
               name: 'Name', brand: 'Marke', unit: 'Einheit', kcal: 'Kalorien',
               carbs: 'Kohlenhydrate', protein: 'Protein', fat: 'Fett',
             }),
-            unitChoices: signal({ g: 'Gramm' }),
+            unitChoices: signal({ [FoodstuffUnit.Gram]: 'Gramm' }),
           },
         },
       ],
@@ -35,25 +36,25 @@ describe('FoodstuffFormComponent', () => {
 
     fixture.detectChanges();
     component.form.setValue({
-      name: 'Linsen', brand: null, unit: 'g', kcal: 100, carbs: 12, protein: 8, fat: 1,
+      name: 'Linsen', brand: null, unit: FoodstuffUnit.Gram, kcal: 100, carbs: 12, protein: 8, fat: 1,
     });
     component.onSubmit();
 
     expect(component.verboseNames()?.name).toBe('Name');
-    expect(component.unitChoices()).toEqual({ g: 'Gramm' });
+    expect(component.unitChoices()).toEqual({ [FoodstuffUnit.Gram]: 'Gramm' });
     expect(submitted).toHaveBeenCalledOnceWith({
-      name: 'Linsen', brand: null, unit: 'g', kcal: 100, carbs: 12, protein: 8, fat: 1,
+      name: 'Linsen', brand: null, unit: FoodstuffUnit.Gram, kcal: 100, carbs: 12, protein: 8, fat: 1,
     });
   });
 
   it('patches the form when an existing foodstuff is supplied', () => {
     fixture.componentRef.setInput('foodstuff', {
-      name: 'Bohnen', brand: 'Bio', unit: 'g', kcal: 110, carbs: 15, protein: 7, fat: 1,
+      name: 'Bohnen', brand: 'Bio', unit: FoodstuffUnit.Gram, kcal: 110, carbs: 15, protein: 7, fat: 1,
     });
     fixture.detectChanges();
 
     expect(component.form.getRawValue()).toEqual({
-      name: 'Bohnen', brand: 'Bio', unit: 'g', kcal: 110, carbs: 15, protein: 7, fat: 1,
+      name: 'Bohnen', brand: 'Bio', unit: FoodstuffUnit.Gram, kcal: 110, carbs: 15, protein: 7, fat: 1,
     });
   });
 });

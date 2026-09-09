@@ -10,12 +10,13 @@ import { PageHeaderService } from '../../services/page-header.service';
 import { SnackBarService } from '../../services/snack-bar.service';
 import { FoodstuffBackendService } from '../services/foodstuff-backend.service';
 import { FoodstuffsPageComponent } from './foodstuffs-page.component';
+import { FoodstuffUnit } from '../interfaces/foodstuff-unit';
 
 const foodstuff = (id: number, name: string) => ({
   id,
   name,
   brand: null,
-  unit: 'g',
+  unit: FoodstuffUnit.Gram,
   unitVerbose: 'Gramm',
   kcal: null,
   carbs: null,

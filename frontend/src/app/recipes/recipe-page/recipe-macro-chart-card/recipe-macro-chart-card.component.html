@@ -13,7 +13,7 @@
       <div class="chart-wrapper">
         <app-macro-chart
           class="macro-chart"
-          [recipeOrFoodstuff]="recipe()"
+          [nutrition]="recipe()"
           (legendUpdated)="legend.set($event)"
         />
         @if(showLegend()){

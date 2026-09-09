@@ -1,4 +1,9 @@
-<div class="ingredients-mat-step" [formGroup]="ingredientsFormGroup">
+<div
+  class="ingredients-mat-step"
+  [formGroup]="ingredientsFormGroup"
+  (focusin)="onNutritionPreviewFocusIn($event)"
+  (focusout)="onNutritionPreviewFocusOut($event)"
+>
   <!-- servings -->
   <mat-form-field appearance="outline" floatLabel="always">
     <mat-label>Portionen</mat-label>
@@ -7,25 +12,25 @@
 
   <!-- ingredients -->
   <div class="ingredients-wrapper" formArrayName="ingredients">
-    @for(ingredient of ingredients.controls; track ingredient){
-    <div class="ingredient-wrapper" formGroupName="{{ $index }}">
-      <button mat-icon-button color="warn" (click)="removeIngredient($index)">
-        <mat-icon
-          aria-hidden="false"
-          aria-label="Löschen"
-          fontIcon="close"
-        ></mat-icon>
-      </button>
+    @for (ingredient of ingredients.controls; track ingredient) {
+      <div class="ingredient-wrapper" formGroupName="{{ $index }}">
+        <button mat-icon-button color="warn" (click)="removeIngredient($index)">
+          <mat-icon
+            aria-hidden="false"
+            aria-label="Löschen"
+            fontIcon="close"
+          ></mat-icon>
+        </button>
 
-      <app-ingredient-field [foodstuffs]="foodstuffs()" [index]="$index" />
-    </div>
+        <app-ingredient-field [foodstuffs]="foodstuffs()" [index]="$index" />
+      </div>
     }
   </div>
 
   <!-- add ingredient -->
   <div class="ingredients-array-buttons-wrapper">
     <button
-      mat-stroked-button
+      mat-flat-button
       color="accent"
       (click)="addIngredient()"
       class="add-ingredient-button"
@@ -35,12 +40,59 @@
 
     <!-- create foodstuff -->
     <button
-      mat-stroked-button
+      mat-flat-button
       color="accent"
       (click)="openCreateFoodstuffDialog()"
       class="create-foodstuff-button"
     >
       Erstellen
     </button>
+  </div>
+
+  <div class="nutrition-section">
+    @if (displayedNutritionState(); as state) {
+      @if (state.status === "complete") {
+        <div class="nutrition-chart-area">
+          <div class="nutrition-preview">
+            <app-macro-chart
+              class="macro-chart"
+              [nutrition]="state.nutrition"
+              (legendUpdated)="legend.set($event)"
+            />
+            @if (canShowLegend()) {
+              <button
+                mat-button
+                type="button"
+                class="details-button"
+                aria-controls="recipe-draft-macro-legend"
+                [attr.aria-expanded]="showLegend()"
+                (click)="toggleLegend()"
+              >
+                Details
+              </button>
+            }
+          </div>
+        </div>
+        @if (showLegend() && canShowLegend()) {
+          <div id="recipe-draft-macro-legend" class="legend">
+            <app-chart-legend-element [legendElement]="legend()['carbs']" />
+            <app-chart-legend-element [legendElement]="legend()['protein']" />
+            <app-chart-legend-element [legendElement]="legend()['fat']" />
+          </div>
+        }
+      } @else if (state.status === "incomplete") {
+        <p class="nutrition-message">
+          Nährwertangaben der einzelnen Zutaten unvollständig.
+        </p>
+      } @else if (state.status === "empty") {
+        <p class="nutrition-message">
+          Füge Zutaten hinzu, um Nährwerte zu sehen.
+        </p>
+      } @else {
+        <p class="nutrition-message">
+          Nährwerte werden angezeigt, sobald Mengen und Portionen gültig sind.
+        </p>
+      }
+    }
   </div>
 </div>
