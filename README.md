@@ -30,3 +30,11 @@ The initial service layout intentionally stays small: FastAPI, PostgreSQL, and S
 ## Scope
 
 Kochwiki is for personal, private use. It is also a learning environment for applying production-minded AI and full-stack practices.
+
+## AI Workflows
+
+Use workflow skills only when explicitly invoked by the user.
+
+- `$prepare-spec`: pressure-test a scoped change and create or refine its lightweight spec.
+- `$deliver-spec`: plan and implement an approved spec continuously, pausing only for material exceptions.
+- `$review-delivery`: perform the final spec-conformance, validation, and broader codebase review.

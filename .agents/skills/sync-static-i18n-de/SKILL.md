@@ -24,14 +24,14 @@ This skill only covers static-content localization handled by Angular localize. 
 ## Workflow
 
 1. Run `npm run extract-i18n`.
-2. Run `node .codex/skills/sync-static-i18n-de/scripts/sync-static-i18n-de.mjs --write`.
+2. Run `node .agents/skills/sync-static-i18n-de/scripts/sync-static-i18n-de.mjs --write`.
    - Treat a non-zero exit as expected if duplicate-ID review or translation review is still required.
 3. Review the sync report:
    - Translate every unit that fell back to English because the ID is new or changed.
    - For changed IDs, reuse the previous German wording when the old and new source are clearly equivalent in meaning, placeholders, and tone.
    - If equivalence is not clear, retranslate from the current English source.
 4. Keep English context groups mirrored into the German file.
-5. Run `node .codex/skills/sync-static-i18n-de/scripts/check-static-i18n-de.mjs`.
+5. Run `node .agents/skills/sync-static-i18n-de/scripts/check-static-i18n-de.mjs`.
 6. Summarize:
    - which units were translated or reused
    - any units that remain uncertain and need human review
