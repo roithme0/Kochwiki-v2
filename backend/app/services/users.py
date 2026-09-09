@@ -13,13 +13,6 @@ def list_users(session: Session) -> Sequence[User]:
     return session.scalars(select(User).order_by(User.id)).all()
 
 
-def get_user_by_username(session: Session, username: str) -> User:
-    user = session.scalar(select(User).where(User.username == username))
-    if user is None:
-        raise NotFoundError(f"User with username {username} not found")
-    return user
-
-
 def get_user(session: Session, user_id: int) -> User:
     user = session.get(User, user_id)
     if user is None:

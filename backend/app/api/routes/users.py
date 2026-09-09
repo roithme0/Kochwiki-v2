@@ -15,9 +15,9 @@ def get_users(session: Session = Depends(get_db)) -> Sequence[UserOut]:
     return [UserOut.model_validate(user) for user in users.list_users(session)]
 
 
-@router.get("/users/{username}", response_model=UserOut)
-def get_user(username: str, session: Session = Depends(get_db)) -> UserOut:
-    return UserOut.model_validate(users.get_user_by_username(session, username))
+@router.get("/users/{user_id}", response_model=UserOut)
+def get_user(user_id: int, session: Session = Depends(get_db)) -> UserOut:
+    return UserOut.model_validate(users.get_user(session, user_id))
 
 
 @router.post("/users", response_model=UserOut, status_code=status.HTTP_201_CREATED)

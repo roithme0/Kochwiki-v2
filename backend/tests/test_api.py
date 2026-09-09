@@ -141,8 +141,8 @@ def test_user_has_no_shopping_list_side_effect(client: TestClient) -> None:
 
     assert created.status_code == 201
     assert created.json() == {"id": 1, "username": "Roi"}
-    assert client.get("/users/Roi").status_code == 200
-    assert client.get("/users/missing").status_code == 404
+    assert client.get("/users/1").json() == {"id": 1, "username": "Roi"}
+    assert client.get("/users/999").status_code == 404
     assert client.get("/shoppingLists/1").status_code == 404
 
 

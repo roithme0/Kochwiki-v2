@@ -33,3 +33,7 @@
 .spacer {
   flex: 1 1 auto;
 }
+
+.user-options-username {
+  padding-inline: var(--mat-menu-item-leading-spacing, 12px);
+}

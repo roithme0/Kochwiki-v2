@@ -24,7 +24,9 @@ import { SnackBarService } from '../../../services/snack-bar.service';
   styleUrl: './user-create-dialog.component.scss',
 })
 export class UserCreateDialogComponent {
-  readonly dialogRef = inject(MatDialogRef);
+  readonly dialogRef = inject<MatDialogRef<UserCreateDialogComponent, User>>(
+    MatDialogRef
+  );
   readonly userBackendService = inject(UserBackendService);
   readonly snackBarService = inject(SnackBarService);
   readonly fb = inject(FormBuilder);
@@ -37,10 +39,10 @@ export class UserCreateDialogComponent {
     const user: Partial<User> = this.userForm.value as User;
 
     try {
-      await this.userBackendService.postUser(user);
+      const createdUser: User = await this.userBackendService.postUser(user);
       this.snackBarService.open('Benutzer erstellt');
       this.userBackendService.notifyUsersChanged();
-      this.dialogRef.close();
+      this.dialogRef.close(createdUser);
     } catch (error: unknown) {
       console.error('failed to create user: ', error);
       this.snackBarService.open('Benutzer konnte nicht erstellt werden');

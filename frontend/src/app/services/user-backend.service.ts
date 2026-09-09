@@ -22,8 +22,8 @@ export class UserBackendService {
   getAllUsers = (): Promise<User[]> =>
     firstValueFrom(this.httpClient.get<User[]>(backendUrl + '/users'));
 
-  getUserByUsername = (username: string): Promise<User> =>
-    firstValueFrom(this.httpClient.get<User>(backendUrl + '/users/' + username));
+  getUserById = (userId: number): Promise<User> =>
+    firstValueFrom(this.httpClient.get<User>(backendUrl + '/users/' + userId));
 
   postUser = (user: Partial<User>): Promise<User> =>
     firstValueFrom(

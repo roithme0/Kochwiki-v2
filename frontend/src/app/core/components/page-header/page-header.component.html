@@ -35,18 +35,24 @@
   </button>
   }
 
-  <!-- logout -->
-  @if(pageHeaderService.showLogout()){
+  @if(pageHeaderService.showUserOptions()){
   <button
     mat-icon-button
     color="accent"
-    (click)="activeUserService.logout()"
+    [matMenuTriggerFor]="userOptionsMenu"
+    aria-label="Benutzeroptionen öffnen"
     class="medium-size-button"
   >
-    <mat-icon
-      aria-hidden="false"
-      aria-label="Logout"
-      fontIcon="logout"
-    /></button
-  >}
+    <mat-icon aria-hidden="true" fontIcon="more_vert" />
+  </button>
+
+  <mat-menu #userOptionsMenu="matMenu">
+    <div class="user-options-username" aria-label="Aktiver Benutzer">
+      {{ activeUserService.activeUser()?.username }}
+    </div>
+    <button mat-menu-item (click)="activeUserService.switchUser()">
+      Benutzer wechseln
+    </button>
+  </mat-menu>
+  }
 </mat-toolbar>

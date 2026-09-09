@@ -9,7 +9,7 @@ import { User } from '../../interfaces/user';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 @Component({
@@ -41,7 +41,7 @@ export class SelectUserPageComponent {
   //#region Event Handlers
 
   onUserSelected(selectedUser: User): void {
-    this.activeUserService.activeUser = selectedUser;
+    this.activeUserService.selectUser(selectedUser);
     this.router.navigate(['']);
   }
 
@@ -50,15 +50,27 @@ export class SelectUserPageComponent {
   //#region Public Methods
 
   openUserCreateDialog(): void {
-    this.dialog.open(UserCreateDialogComponent, {
-      data: {},
-      minWidth: 'calc(100vw - 1rem)',
-      maxWidth: 'calc(100vw - 1rem)',
-      maxHeight: 'calc(100vh - 1rem)',
-      position: { top: '0.5rem', left: '0.5rem' },
-      autoFocus: false,
-      disableClose: true,
-    });
+    const dialogRef: MatDialogRef<UserCreateDialogComponent, User> =
+      this.dialog.open<UserCreateDialogComponent, unknown, User>(
+        UserCreateDialogComponent,
+        {
+          minWidth: 'calc(100vw - 1rem)',
+          maxWidth: 'calc(100vw - 1rem)',
+          maxHeight: 'calc(100vh - 1rem)',
+          position: { top: '0.5rem', left: '0.5rem' },
+          autoFocus: 'input[formControlName="username"]',
+          disableClose: true,
+        }
+      );
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((createdUser: User | undefined) => {
+        if (createdUser !== undefined) {
+          this.onUserSelected(createdUser);
+        }
+      });
   }
 
   //#endregion

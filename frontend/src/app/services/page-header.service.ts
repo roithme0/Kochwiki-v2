@@ -22,7 +22,7 @@ export class PageHeaderService {
   private _back: WritableSignal<string> = signal('');
   private _showBack: WritableSignal<boolean> = signal(DEFAULT_SHOW_BACK);
 
-  showLogout = computed(
+  showUserOptions = computed(
     () => this.activeUserService.activeUser() !== null
   );
 
