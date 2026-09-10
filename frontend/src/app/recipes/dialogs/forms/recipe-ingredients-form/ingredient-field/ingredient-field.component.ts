@@ -18,7 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
-import { Foodstuff } from '../../../../../foodstuffs/interfaces/foodstuff';
+import { Foodstuff } from '../../../../../foodstuffs/models/foodstuff';
 
 @Component({
   selector: 'app-ingredient-field',

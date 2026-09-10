@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
-import { SnackBarService } from '../../../services/snack-bar.service';
+import { SnackBarService } from '../../../core/services/snack-bar.service';
 import { FoodstuffFormComponent } from '../../components/foodstuff-form/foodstuff-form.component';
-import { Foodstuff } from '../../interfaces/foodstuff';
+import { Foodstuff } from '../../models/foodstuff';
 import { FoodstuffBackendService } from '../../services/foodstuff-backend.service';
 
 interface FoodstuffPatchDialogData { id: number; }

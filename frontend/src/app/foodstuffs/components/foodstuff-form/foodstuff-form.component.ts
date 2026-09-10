@@ -5,8 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { Foodstuff } from '../../interfaces/foodstuff';
-import { FoodstuffUnit } from '../../interfaces/foodstuff-unit';
+import { Foodstuff } from '../../models/foodstuff';
+import { FoodstuffUnit } from '../../models/foodstuff-unit';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
 
 @Component({

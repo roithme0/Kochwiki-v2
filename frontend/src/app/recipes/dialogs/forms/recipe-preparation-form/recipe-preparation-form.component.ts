@@ -10,8 +10,8 @@ import {
 } from '@angular/forms';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { take } from 'rxjs';
-import { Step } from '../../../interfaces/step';
-import { RecipeVersion } from '../../../interfaces/recipe';
+import { Step } from '../../../models/step';
+import { RecipeVersion } from '../../../models/recipe';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';

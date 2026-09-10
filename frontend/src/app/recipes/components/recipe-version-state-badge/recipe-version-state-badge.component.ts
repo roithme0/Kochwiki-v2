@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { RecipeVersionState } from '../../interfaces/recipe';
+import { RecipeVersionState } from '../../models/recipe';
 
 @Component({
   selector: 'app-recipe-version-state-badge',

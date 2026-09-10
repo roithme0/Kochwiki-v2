@@ -9,9 +9,9 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { ChartLegendElementComponent } from '../../../../core/components/chart-legend-element/chart-legend-element.component';
 import { MacroChartComponent } from '../../../../core/components/macro-chart/macro-chart.component';
-import { ChartLegendElement } from '../../../../interfaces/chart-legend-element';
-import { Foodstuff } from '../../../../foodstuffs/interfaces/foodstuff';
-import { FoodstuffUnit } from '../../../../foodstuffs/interfaces/foodstuff-unit';
+import { ChartLegendElement } from '../../../../core/models/chart-legend-element';
+import { Foodstuff } from '../../../../foodstuffs/models/foodstuff';
+import { FoodstuffUnit } from '../../../../foodstuffs/models/foodstuff-unit';
 import { IngredientFieldComponent } from './ingredient-field/ingredient-field.component';
 import { RecipeIngredientsFormComponent } from './recipe-ingredients-form.component';
 

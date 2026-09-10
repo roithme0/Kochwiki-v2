@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { ChartLegendElement } from '../../../interfaces/chart-legend-element';
+import { ChartLegendElement } from '../../models/chart-legend-element';
 
 @Component({
   selector: 'app-chart-legend-element',

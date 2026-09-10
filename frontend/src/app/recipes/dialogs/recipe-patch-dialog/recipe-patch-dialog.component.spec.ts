@@ -1,8 +1,8 @@
 import { MatDialogRef } from '@angular/material/dialog';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { SnackBarService } from '../../../services/snack-bar.service';
-import { RecipeVersion, RecipeVersionWrite } from '../../interfaces/recipe';
+import { SnackBarService } from '../../../core/services/snack-bar.service';
+import { RecipeVersion, RecipeVersionWrite } from '../../models/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
 import { RecipeEditorSubmission } from '../recipe-editor/recipe-editor.component';
 import { RecipePatchDialogComponent } from './recipe-patch-dialog.component';

@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Subject } from 'rxjs';
-import { Foodstuff } from '../interfaces/foodstuff';
+import { Foodstuff } from '../models/foodstuff';
 import {
   FoodstuffVerboseNames,
   FoodstuffUnitChoices,
-} from '../interfaces/foodstuff-meta-data';
+} from '../models/foodstuff-meta-data';
 import { environment } from '../../../environments/environment';
 
 const backendUrl: string = environment.backendUrl;

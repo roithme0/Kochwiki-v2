@@ -4,10 +4,10 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatMenuHarness } from '@angular/material/menu/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { PageHeaderComponent } from './page-header.component';
-import { ActiveUserService } from '../../../services/active-user.service';
-import { PageHeaderService } from '../../../services/page-header.service';
+import { ActiveUserService } from '../../services/active-user.service';
+import { PageHeaderService } from '../../services/page-header.service';
 import { BackendMetaService } from '../../services/backend-meta.service';
-import { User } from '../../../interfaces/user';
+import { User } from '../../models/user';
 
 const USER: User = { id: 7, username: 'Roi' };
 

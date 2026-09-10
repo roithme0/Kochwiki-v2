@@ -1,0 +1,64 @@
+@use "../../../../styles/style-tokens" as tokens;
+
+:host {
+  /* stretch hole page */
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+}
+
+main,
+article {
+  /* stretch hole page */
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  position: relative;
+}
+
+.spinner-wrapper {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.spacer {
+  flex: 0 0 4rem;
+}
+
+.version-state-badge {
+  align-self: flex-end;
+  margin: 0;
+  width: min-content;
+}
+
+img {
+  flex: 0 0 40%;
+}
+
+.buttons-wrapper {
+  position: absolute;
+  right: tokens.$floating-button-position;
+  bottom: tokens.$floating-button-position;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.recipe-not-found-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
-import { SnackBarService } from '../../../services/snack-bar.service';
+import { SnackBarService } from '../../../core/services/snack-bar.service';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
 import { RecipeEditorComponent, RecipeEditorSubmission } from '../recipe-editor/recipe-editor.component';
 

@@ -2,8 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
-import { SnackBarService } from '../../../services/snack-bar.service';
-import { RecipeVersion } from '../../interfaces/recipe';
+import { SnackBarService } from '../../../core/services/snack-bar.service';
+import { RecipeVersion } from '../../models/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
 import { RecipeEditorComponent, RecipeEditorSubmission } from '../recipe-editor/recipe-editor.component';
 

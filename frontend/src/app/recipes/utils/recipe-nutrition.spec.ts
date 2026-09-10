@@ -2,8 +2,8 @@ import {
   DraftIngredientNutrition,
   calculateDraftNutrition,
 } from './recipe-nutrition';
-import { Foodstuff } from '../../foodstuffs/interfaces/foodstuff';
-import { FoodstuffUnit } from '../../foodstuffs/interfaces/foodstuff-unit';
+import { Foodstuff } from '../../foodstuffs/models/foodstuff';
+import { FoodstuffUnit } from '../../foodstuffs/models/foodstuff-unit';
 
 describe('calculateDraftNutrition', () => {
   const foodstuffs: Foodstuff[] = [

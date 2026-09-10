@@ -5,11 +5,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { SnackBarService } from '../../services/snack-bar.service';
+import { SnackBarService } from '../../core/services/snack-bar.service';
 import {
   FoodstuffUnitChoices,
   FoodstuffVerboseNames,
-} from '../interfaces/foodstuff-meta-data';
+} from '../models/foodstuff-meta-data';
 import { FoodstuffBackendService } from './foodstuff-backend.service';
 
 @Injectable({ providedIn: 'root' })

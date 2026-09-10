@@ -9,8 +9,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Chart, DoughnutController, ArcElement } from 'chart.js';
-import { FoodstuffSummary } from '../../../foodstuffs/interfaces/foodstuff-summary';
-import { ChartLegendElement } from '../../../interfaces/chart-legend-element';
+import { FoodstuffSummary } from '../../../foodstuffs/models/foodstuff-summary';
+import { ChartLegendElement } from '../../models/chart-legend-element';
 
 type NutritionValues = Pick<
   FoodstuffSummary,

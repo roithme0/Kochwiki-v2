@@ -5,7 +5,7 @@ import {
   FormGroupDirective,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { RecipeVersion } from '../../../interfaces/recipe';
+import { RecipeVersion } from '../../../models/recipe';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 

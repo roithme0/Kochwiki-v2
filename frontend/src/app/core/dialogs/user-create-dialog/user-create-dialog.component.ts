@@ -6,9 +6,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { User } from '../../../interfaces/user';
-import { UserBackendService } from '../../../services/user-backend.service';
-import { SnackBarService } from '../../../services/snack-bar.service';
+import { User } from '../../models/user';
+import { UserBackendService } from '../../services/user-backend.service';
+import { SnackBarService } from '../../services/snack-bar.service';
 
 @Component({
   selector: 'app-user-create-dialog',

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
-import { FoodstuffUnit } from '../../interfaces/foodstuff-unit';
+import { FoodstuffUnit } from '../../models/foodstuff-unit';
 import { FoodstuffFormComponent } from './foodstuff-form.component';
 
 describe('FoodstuffFormComponent', () => {

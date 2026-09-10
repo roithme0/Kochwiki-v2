@@ -1,0 +1,68 @@
+@use "../../../../styles/style-tokens" as tokens;
+
+:host {
+  /* stretch hole page */
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  /* stretch hole page */
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 0.5rem;
+}
+
+.spinner-wrapper {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.grid-wrapper {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.recipes-grid {
+  min-height: 100%;
+
+  &::after {
+    content: "";
+    display: block;
+    height: 70px;
+  }
+}
+
+.fade-effect-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.2rem;
+  background-color: var(--mat-app-background-color);
+  box-shadow: 0 -1rem 1rem 1rem var(--mat-app-background-color);
+  pointer-events: none;
+  transition: opacity tokens.$transform-duration ease-out;
+
+  &.hide {
+    opacity: 0;
+  }
+}
+
+.bottom-elements {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  width: calc(100% - 2 * tokens.$floating-button-position);
+  max-width: 30rem;
+  position: absolute;
+  right: tokens.$floating-button-position;
+  bottom: tokens.$floating-button-position;
+}

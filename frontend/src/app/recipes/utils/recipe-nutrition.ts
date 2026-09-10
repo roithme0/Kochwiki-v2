@@ -1,5 +1,5 @@
-import { Foodstuff } from '../../foodstuffs/interfaces/foodstuff';
-import { FoodstuffUnit } from '../../foodstuffs/interfaces/foodstuff-unit';
+import { Foodstuff } from '../../foodstuffs/models/foodstuff';
+import { FoodstuffUnit } from '../../foodstuffs/models/foodstuff-unit';
 
 export interface DraftIngredientNutrition {
   foodstuffId: number | null;

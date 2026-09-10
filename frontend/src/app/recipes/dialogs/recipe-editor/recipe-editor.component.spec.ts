@@ -2,9 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { FoodstuffBackendService } from '../../../foodstuffs/services/foodstuff-backend.service';
-import { RecipeVersion } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../models/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
-import { SnackBarService } from '../../../services/snack-bar.service';
+import { SnackBarService } from '../../../core/services/snack-bar.service';
 import { RecipeEditorComponent } from './recipe-editor.component';
 
 describe('RecipeEditorComponent', () => {

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { HomePageComponent } from './core/home-page/home-page.component';
+import { HomePageComponent } from './core/pages/home-page/home-page.component';
 import { AuthGuard } from './core/classes/auth-guard';
 
 export const routes: Routes = [
@@ -12,7 +12,7 @@ export const routes: Routes = [
   {
     path: 'foodstuffs',
     loadComponent: () =>
-      import('./foodstuffs/foodstuffs-page/foodstuffs-page.component').then(
+      import('./foodstuffs/pages/foodstuffs-page/foodstuffs-page.component').then(
         ({ FoodstuffsPageComponent }) => FoodstuffsPageComponent,
       ),
     title: 'Lebensmittel',
@@ -25,7 +25,7 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('./recipes/recipes-page/recipes-page.component').then(
+          import('./recipes/pages/recipes-page/recipes-page.component').then(
             ({ RecipesPageComponent }) => RecipesPageComponent,
           ),
         title: 'Rezepte',
@@ -33,7 +33,7 @@ export const routes: Routes = [
       {
         path: ':lineageId/versions/:recipeVersionId',
         loadComponent: () =>
-          import('./recipes/recipe-page/recipe-page.component').then(
+          import('./recipes/pages/recipe-page/recipe-page.component').then(
             ({ RecipePageComponent }) => RecipePageComponent,
           ),
         title: 'Rezeptversion',
@@ -41,7 +41,7 @@ export const routes: Routes = [
       {
         path: ':lineageId',
         loadComponent: () =>
-          import('./recipes/recipe-page/recipe-page.component').then(
+          import('./recipes/pages/recipe-page/recipe-page.component').then(
             ({ RecipePageComponent }) => RecipePageComponent,
           ),
         title: 'Rezept',
@@ -51,7 +51,7 @@ export const routes: Routes = [
   {
     path: 'userSelection',
     loadComponent: () =>
-      import('./core/select-user-page/select-user-page.component').then(
+      import('./core/pages/select-user-page/select-user-page.component').then(
         ({ SelectUserPageComponent }) => SelectUserPageComponent,
       ),
     title: 'Benutzer auswählen',

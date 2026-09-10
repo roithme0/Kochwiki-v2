@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { RecipeVersion, RecipeVersionWrite } from '../interfaces/recipe';
+import { RecipeVersion, RecipeVersionWrite } from '../models/recipe';
 import { firstValueFrom, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 

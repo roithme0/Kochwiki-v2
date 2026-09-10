@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
-import { User } from '../../../interfaces/user';
-import { SnackBarService } from '../../../services/snack-bar.service';
-import { UserBackendService } from '../../../services/user-backend.service';
+import { User } from '../../models/user';
+import { SnackBarService } from '../../services/snack-bar.service';
+import { UserBackendService } from '../../services/user-backend.service';
 import { UserCreateDialogComponent } from './user-create-dialog.component';
 
 describe('UserCreateDialogComponent', () => {

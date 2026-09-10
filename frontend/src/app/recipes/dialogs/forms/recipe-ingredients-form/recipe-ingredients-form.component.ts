@@ -18,9 +18,9 @@ import {
   Validators,
   FormBuilder,
 } from '@angular/forms';
-import { Foodstuff } from '../../../../foodstuffs/interfaces/foodstuff';
-import { Ingredient } from '../../../interfaces/ingredient';
-import { RecipeVersion } from '../../../interfaces/recipe';
+import { Foodstuff } from '../../../../foodstuffs/models/foodstuff';
+import { Ingredient } from '../../../models/ingredient';
+import { RecipeVersion } from '../../../models/recipe';
 import { FoodstuffCreateDialogComponent } from '../../../../foodstuffs/dialogs/foodstuff-create-dialog/foodstuff-create-dialog.component';
 import { IngredientFieldComponent } from './ingredient-field/ingredient-field.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -30,7 +30,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
-import { ChartLegendElement } from '../../../../interfaces/chart-legend-element';
+import { ChartLegendElement } from '../../../../core/models/chart-legend-element';
 import { ChartLegendElementComponent } from '../../../../core/components/chart-legend-element/chart-legend-element.component';
 import { MacroChartComponent } from '../../../../core/components/macro-chart/macro-chart.component';
 import {

@@ -2,8 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { FoodstuffBackendService } from './foodstuff-backend.service';
-import { Foodstuff } from '../interfaces/foodstuff';
-import { FoodstuffUnit } from '../interfaces/foodstuff-unit';
+import { Foodstuff } from '../models/foodstuff';
+import { FoodstuffUnit } from '../models/foodstuff-unit';
 import { environment } from '../../../environments/environment';
 
 describe('FoodstuffBackendService', () => {
