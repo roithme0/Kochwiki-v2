@@ -1,11 +1,19 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <div class="fields">
     <div class="required-fields">
-      <mat-form-field appearance="outline" floatLabel="always" class="name-field">
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="name-field"
+      >
         <mat-label>{{ verboseNames()?.name }}</mat-label>
         <input matInput formControlName="name" />
       </mat-form-field>
-      <mat-form-field appearance="outline" floatLabel="always" class="unit-select">
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="unit-select"
+      >
         <mat-label>{{ verboseNames()?.unit }}</mat-label>
         <mat-select formControlName="unit">
           @if (unitChoices(); as choices) {
@@ -45,7 +53,13 @@
       </div>
     </div>
   </div>
-  <button mat-flat-button type="submit" color="primary" [disabled]="form.invalid">
+  <button
+    mat-flat-button
+    type="submit"
+    color="primary"
+    [disabled]="form.invalid"
+  >
+    <mat-icon aria-hidden="true" fontIcon="save" />
     {{ submitLabel() }}
   </button>
 </form>

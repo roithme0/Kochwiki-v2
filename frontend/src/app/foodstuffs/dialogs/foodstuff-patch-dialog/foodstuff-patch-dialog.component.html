@@ -1,5 +1,9 @@
 <app-dialog-header title="Lebensmittel bearbeiten" [showCloseButon]="true" />
 
 <mat-dialog-content>
-  <app-foodstuff-form [foodstuff]="foodstuff()" submitLabel="Speichern" (submitted)="onSubmit($event)" />
+  <app-foodstuff-form
+    [foodstuff]="foodstuff()"
+    submitLabel="Speichern"
+    (submitted)="onSubmit($event)"
+  />
 </mat-dialog-content>

@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Foodstuff } from '../../models/foodstuff';
 import { FoodstuffUnit } from '../../models/foodstuff-unit';
 import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-foodstuff-form',
@@ -18,6 +19,7 @@ import { FoodstuffMetadataService } from '../../services/foodstuff-metadata.serv
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatIconModule,
   ],
   templateUrl: './foodstuff-form.component.html',
   styleUrl: './foodstuff-form.component.scss',

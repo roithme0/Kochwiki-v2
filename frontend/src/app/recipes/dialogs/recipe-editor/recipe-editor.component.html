@@ -1,18 +1,20 @@
 @switch (state().status) {
-  @case ('loading') {
+  @case ("loading") {
     <mat-spinner diameter="25" />
   }
-  @case ('error') {
+  @case ("error") {
     <div class="error">
       <mat-icon aria-label="Fehler" fontIcon="error" />
       <p>{{ errorMessage() }}</p>
     </div>
   }
-  @case ('ready') {
+  @case ("ready") {
     <form [formGroup]="recipeForm" class="form">
       <mat-stepper>
         <mat-step>
-          <app-recipe-meta-form [recipeVersion]="recipeVersion() ?? undefined" />
+          <app-recipe-meta-form
+            [recipeVersion]="recipeVersion() ?? undefined"
+          />
         </mat-step>
         <mat-step>
           <app-recipe-ingredients-form
@@ -21,18 +23,32 @@
           />
         </mat-step>
         <mat-step>
-          <app-recipe-preparation-form [recipeVersion]="recipeVersion() ?? undefined" />
+          <app-recipe-preparation-form
+            [recipeVersion]="recipeVersion() ?? undefined"
+          />
         </mat-step>
       </mat-stepper>
       <mat-divider />
       <div class="button-wrapper">
-        <button mat-flat-button type="button" color="primary" [disabled]="recipeForm.invalid || submitting()" (click)="onSubmit('publish')">
-          {{ mode() === 'draft' ? 'Entwurf speichern' : 'Speichern' }}
+        <button
+          mat-flat-button
+          type="button"
+          color="primary"
+          [disabled]="recipeForm.invalid || submitting()"
+          (click)="onSubmit('publish')"
+        >
+          <mat-icon aria-hidden="true" fontIcon="save" />
+          {{ mode() === "draft" ? "Entwurf speichern" : "Speichern" }}
         </button>
-        @if (mode() === 'active') {
-        <button mat-stroked-button type="button" [disabled]="recipeForm.invalid || submitting()" (click)="onSubmit('draft')">
-          Als Entwurf speichern
-        </button>
+        @if (mode() === "active") {
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="recipeForm.invalid || submitting()"
+            (click)="onSubmit('draft')"
+          >
+            Als Entwurf speichern
+          </button>
         }
       </div>
     </form>

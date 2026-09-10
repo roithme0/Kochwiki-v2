@@ -39,15 +39,6 @@
   flex: 1;
 }
 
-.button-wrapper {
-  padding: 0 24px 24px;
-  display: flex;
-
-  button {
-    flex: 1;
-  }
-}
-
 /* remove arrows from input number field */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

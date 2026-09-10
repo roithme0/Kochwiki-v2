@@ -27,7 +27,6 @@
     }
   </div>
 
-  <!-- add ingredient -->
   <div class="ingredients-array-buttons-wrapper">
     <button
       mat-flat-button
@@ -36,10 +35,9 @@
       (click)="addIngredient()"
       class="add-ingredient-button"
     >
-      Hinzufügen
+      <mat-icon aria-hidden="true" fontIcon="add" />
+      Zutat hinzufügen
     </button>
-
-    <!-- create foodstuff -->
     <button
       mat-stroked-button
       type="button"
@@ -47,7 +45,7 @@
       (click)="openCreateFoodstuffDialog()"
       class="create-foodstuff-button"
     >
-      Erstellen
+      Lebensmittel erstellen
     </button>
   </div>
 
