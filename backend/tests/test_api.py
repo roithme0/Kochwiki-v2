@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi.testclient import TestClient
 
 from app.models.enums import Unit
@@ -19,124 +21,252 @@ def create_foodstuff(client: TestClient, **overrides: object) -> dict[str, objec
     return response.json()
 
 
-def test_recipe_contract_persists_order_and_derives_nutrition(client: TestClient) -> None:
+def recipe_version_payload(name: str, foodstuff_id: object | None = None, **overrides: object) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "name": name,
+        "servings": 2,
+        "preptime": 10,
+        "originName": "Home",
+        "originUrl": "https://example.com/recipe",
+        "ingredients": [],
+        "steps": [{"index": 1, "description": "Cook"}],
+    }
+    if foodstuff_id is not None:
+        payload["ingredients"] = [{"index": 1, "amount": 100, "foodstuffId": foodstuff_id}]
+    payload.update(overrides)
+    return payload
+
+
+def create_recipe(client: TestClient, name: str, foodstuff_id: object | None = None) -> dict[str, object]:
+    response = client.post("/recipes", json=recipe_version_payload(name, foodstuff_id))
+    assert response.status_code == 201
+    return response.json()
+
+
+def test_recipe_contract_creates_active_lineage_and_derives_nutrition(client: TestClient) -> None:
     oats = create_foodstuff(client)
-    egg = create_foodstuff(
-        client,
-        name="Egg",
-        unit="PIECE",
-        kcal=78,
-        carbs=1,
-        protein=6,
-        fat=5,
+    recipe_version = create_recipe(client, "Oat breakfast", oats["id"])
+
+    assert recipe_version["state"] == "active"
+    assert UUID(recipe_version["recipeLineageId"]).version == 4
+    assert UUID(recipe_version["recipeVersionId"]).version == 4
+    assert recipe_version["kcal"] == 185
+    assert recipe_version["carbs"] == 30
+    assert set(recipe_version) >= {"recipeLineageId", "recipeVersionId", "state", "createdAt", "lastModified"}
+    assert recipe_version["ingredients"][0]["recipeVersionId"] == recipe_version["recipeVersionId"]
+    assert client.get(f"/foodstuffs/{oats['id']}").json()["recipeVersionIds"] == [recipe_version["recipeVersionId"]]
+    assert client.get(f"/recipes/{recipe_version['recipeLineageId']}").json() == recipe_version
+    assert client.get(f"/recipes/{recipe_version['recipeLineageId']}/history").json() == []
+
+
+def test_active_edits_create_history_and_drafts_are_separate(client: TestClient) -> None:
+    active_version = create_recipe(client, "Original")
+    lineage_id = active_version["recipeLineageId"]
+
+    draft_response = client.post(
+        f"/recipes/{lineage_id}/drafts", json=recipe_version_payload("Alternative draft")
     )
+    assert draft_response.status_code == 201
+    draft_version = draft_response.json()
+    assert draft_version["state"] == "draft"
+    assert client.get(f"/recipes/{lineage_id}").json()["recipeVersionId"] == active_version["recipeVersionId"]
 
-    response = client.post(
-        "/recipes",
-        json={
-            "name": "Oat breakfast",
-            "servings": 2,
-            "preptime": 10,
-            "originName": "Home",
-            "originUrl": "https://example.com/oats",
-            "ingredients": [
-                {"index": 2, "amount": 2, "foodstuffId": egg["id"]},
-                {"index": 1, "amount": 50, "foodstuffId": oats["id"]},
-            ],
-            "steps": [
-                {"index": 2, "description": "Serve"},
-                {"index": 1, "description": "Cook"},
-            ],
-        },
+    published_version_response = client.post(
+        f"/recipes/{lineage_id}/publish", json=recipe_version_payload("Published revision")
     )
+    assert published_version_response.status_code == 200
+    assert published_version_response.json()["state"] == "active"
+    assert published_version_response.json()["recipeVersionId"] != active_version["recipeVersionId"]
+    history = client.get(f"/recipes/{lineage_id}/history")
+    assert history.status_code == 200
+    assert [version["recipeVersionId"] for version in history.json()] == [active_version["recipeVersionId"]]
+    assert history.json()[0]["name"] == "Original"
 
-    assert response.status_code == 201
-    recipe = response.json()
-    assert recipe["kcal"] == 170.5
-    assert recipe["carbs"] == 16
-    assert recipe["protein"] == 9.25
-    assert recipe["fat"] == 6.75
-    assert [ingredient["foodstuff"]["name"] for ingredient in recipe["ingredients"]] == ["Oats", "Egg"]
-    assert set(recipe["ingredients"][0]) == {"id", "index", "amount", "foodstuff", "recipeId"}
-    assert "recipeIds" not in recipe["ingredients"][0]["foodstuff"]
-    assert [step["description"] for step in recipe["steps"]] == ["Cook", "Serve"]
-
-    persisted = client.get(f"/recipes/{recipe['id']}")
-    assert persisted.status_code == 200
-    assert persisted.json() == recipe
-    assert client.get("/ingredients").json()[0]["recipeId"] == recipe["id"]
-    assert client.get("/steps").json()[0]["recipeId"] == recipe["id"]
+    listed = client.get("/recipes").json()
+    assert {version["recipeVersionId"] for version in listed} == {published_version_response.json()["recipeVersionId"], draft_version["recipeVersionId"]}
+    assert client.get(f"/recipes/{lineage_id}/versions/{active_version['recipeVersionId']}").json()["state"] == "historical"
 
 
-def test_missing_nutrition_makes_recipe_total_unknown(client: TestClient) -> None:
-    foodstuff = create_foodstuff(client, kcal=None)
-    response = client.post(
-        "/recipes",
-        json={
-            "name": "Unknown calories",
-            "servings": 1,
-            "ingredients": [{"index": 1, "amount": 100, "foodstuffId": foodstuff["id"]}],
-        },
+def test_drafts_update_in_place_and_publish_without_affecting_other_drafts(client: TestClient) -> None:
+    active_version = create_recipe(client, "Active")
+    lineage_id = active_version["recipeLineageId"]
+    first_draft_version = client.post(f"/recipes/{lineage_id}/drafts", json=recipe_version_payload("First draft")).json()
+    second_draft_version = client.post(f"/recipes/{lineage_id}/drafts", json=recipe_version_payload("Second draft")).json()
+
+    updated_draft_version_response = client.put(
+        f"/recipes/{lineage_id}/drafts/{first_draft_version['recipeVersionId']}",
+        json=recipe_version_payload("First draft updated"),
     )
+    assert updated_draft_version_response.status_code == 200
+    assert updated_draft_version_response.json()["recipeVersionId"] == first_draft_version["recipeVersionId"]
+    assert updated_draft_version_response.json()["state"] == "draft"
+    assert updated_draft_version_response.json()["lastModified"] >= first_draft_version["lastModified"]
 
-    assert response.status_code == 201
-    assert response.json()["kcal"] is None
-    assert response.json()["carbs"] == 60
+    publication = client.post(f"/recipes/{lineage_id}/drafts/{first_draft_version['recipeVersionId']}/publish")
+    assert publication.status_code == 200
+    assert publication.json()["recipeVersionId"] == first_draft_version["recipeVersionId"]
+    assert publication.json()["state"] == "active"
+    assert client.get(f"/recipes/{lineage_id}/versions/{second_draft_version['recipeVersionId']}").json()["state"] == "draft"
+    assert client.get(f"/recipes/{lineage_id}/history").json()[0]["recipeVersionId"] == active_version["recipeVersionId"]
+
+    assert client.put(
+        f"/recipes/{lineage_id}/drafts/{active_version['recipeVersionId']}", json=recipe_version_payload("Invalid")
+    ).status_code == 409
+    assert client.delete(f"/recipes/{lineage_id}/drafts/{active_version['recipeVersionId']}").status_code == 409
 
 
-def test_referenced_foodstuff_cannot_be_deleted(client: TestClient) -> None:
+def test_duplicate_names_and_foodstuff_references_across_history_and_drafts(client: TestClient) -> None:
     foodstuff = create_foodstuff(client)
-    recipe = client.post(
-        "/recipes",
-        json={
-            "name": "Uses oats",
-            "servings": 1,
-            "ingredients": [{"index": 1, "amount": 100, "foodstuffId": foodstuff["id"]}],
-        },
-    ).json()
+    first_recipe_version = create_recipe(client, "Same name", foodstuff["id"])
+    second_recipe_version = create_recipe(client, "Same name", foodstuff["id"])
+    assert first_recipe_version["recipeLineageId"] != second_recipe_version["recipeLineageId"]
 
-    conflict = client.delete(f"/foodstuffs/{foodstuff['id']}")
-    assert conflict.status_code == 409
-    assert conflict.json()["statusCode"] == 409
-    assert client.delete(f"/recipes/{recipe['id']}").status_code == 204
+    direct_publish = client.post(
+        f"/recipes/{first_recipe_version['recipeLineageId']}/publish", json=recipe_version_payload("Same name", foodstuff["id"])
+    )
+    assert direct_publish.status_code == 200
+    draft_version_response = client.post(
+        f"/recipes/{first_recipe_version['recipeLineageId']}/drafts", json=recipe_version_payload("Same name", foodstuff["id"])
+    )
+    assert draft_version_response.status_code == 201
+    assert client.delete(f"/foodstuffs/{foodstuff['id']}").status_code == 409
+
+    assert client.delete(f"/recipes/{first_recipe_version['recipeLineageId']}/drafts/{draft_version_response.json()['recipeVersionId']}").status_code == 204
+    assert client.delete(f"/recipes/{first_recipe_version['recipeLineageId']}").status_code == 204
+    assert client.delete(f"/recipes/{second_recipe_version['recipeLineageId']}").status_code == 204
     assert client.delete(f"/foodstuffs/{foodstuff['id']}").status_code == 204
 
 
-def test_typed_patch_replaces_recipe_ingredients_and_keeps_totals_derived(client: TestClient) -> None:
-    oats = create_foodstuff(client)
-    egg = create_foodstuff(client, name="Egg", unit="PIECE", kcal=78, carbs=1, protein=6, fat=5)
-    recipe = client.post(
-        "/recipes",
-        json={
-            "name": "Patchable recipe",
-            "servings": 1,
-            "ingredients": [{"index": 1, "amount": 100, "foodstuffId": oats["id"]}],
-        },
+def test_foodstuff_lists_all_referencing_recipe_versions(client: TestClient) -> None:
+    foodstuff = create_foodstuff(client)
+    initial_recipe_version = create_recipe(client, "Initial", foodstuff["id"])
+    draft_recipe_version = client.post(
+        f"/recipes/{initial_recipe_version['recipeLineageId']}/drafts", json=recipe_version_payload("Draft", foodstuff["id"])
+    ).json()
+    active_recipe_version = client.post(
+        f"/recipes/{initial_recipe_version['recipeLineageId']}/publish", json=recipe_version_payload("Published", foodstuff["id"])
     ).json()
 
-    patched_recipe = client.patch(
-        f"/recipes/{recipe['id']}",
-        json={
-            "servings": 2,
-            "originName": "Family cookbook",
-            "originUrl": "https://example.com/patchable-recipe",
-            "ingredients": [{"index": 1, "amount": 3, "foodstuffId": egg["id"]}],
-            "steps": [{"index": 1, "description": "Mix"}],
+    response = client.get(f"/foodstuffs/{foodstuff['id']}")
+
+    assert response.status_code == 200
+    assert response.json()["recipeVersionIds"] == sorted(
+        [initial_recipe_version["recipeVersionId"], draft_recipe_version["recipeVersionId"], active_recipe_version["recipeVersionId"]]
+    )
+
+
+def test_validation_and_metadata_contracts(client: TestClient) -> None:
+    invalid = client.post("/foodstuffs", json={"name": "Missing required values"})
+    assert invalid.status_code == 422
+    assert invalid.json()["statusCode"] == 422
+    assert client.post("/recipes", json={"name": "Incomplete"}).status_code == 422
+    assert client.post("/recipes", json=recipe_version_payload("Bad index", steps=[{"index": 1, "description": "A"}, {"index": 1, "description": "B"}])).status_code == 422
+    assert client.patch("/foodstuffs/1", json={"name": None}).status_code == 422
+    assert client.patch("/foodstuffs/1", json={"unit": None}).status_code == 422
+    assert client.post("/recipes", json=recipe_version_payload("Invalid origin", originUrl="not a valid URL")).status_code == 422
+    recipe_paths = client.get("/openapi.json").json()["paths"]
+    assert "/recipes/{lineage_id}" in recipe_paths
+    assert "/recipes/{lineage_id}/versions/{version_id}" in recipe_paths
+    assert "/recipes/{recipe_id}" not in recipe_paths
+    assert client.get("/foodstuffs-meta-data/unit-choices").json() == {unit.value: unit.verbose_name for unit in Unit}
+    assert client.get("/meta/version").headers["content-type"].startswith("text/plain")
+
+
+def test_put_draft_preflight_allows_browser_update(client: TestClient) -> None:
+    response = client.options(
+        "/recipes/1/drafts/00000000-0000-0000-0000-000000000001",
+        headers={
+            "Origin": "http://localhost:4200",
+            "Access-Control-Request-Method": "PUT",
+            "Access-Control-Request-Headers": "content-type",
         },
     )
 
-    assert patched_recipe.status_code == 200
-    assert patched_recipe.json()["kcal"] == 117
-    assert patched_recipe.json()["originName"] == "Family cookbook"
-    assert patched_recipe.json()["originUrl"] == "https://example.com/patchable-recipe"
-    assert [ingredient["foodstuff"]["name"] for ingredient in patched_recipe.json()["ingredients"]] == ["Egg"]
-    patched_foodstuff = client.patch(f"/foodstuffs/{egg['id']}", json={"kcal": 80, "brand": ""})
-    assert patched_foodstuff.status_code == 200
-    assert patched_foodstuff.json()["brand"] is None
-    assert client.get(f"/recipes/{recipe['id']}").json()["kcal"] == 120
+    assert response.status_code == 200
+    assert "PUT" in response.headers["access-control-allow-methods"]
 
 
-def test_user_has_no_shopping_list_side_effect(client: TestClient) -> None:
+def test_recipe_orders_ingredients_and_steps(client: TestClient) -> None:
+    oats = create_foodstuff(client)
+    egg = create_foodstuff(client, name="Egg", unit="PIECE", kcal=78, carbs=1, protein=6, fat=5)
+    response = client.post(
+        "/recipes",
+        json=recipe_version_payload(
+            "Ordered recipe",
+            ingredients=[
+                {"index": 2, "amount": 2, "foodstuffId": egg["id"]},
+                {"index": 1, "amount": 50, "foodstuffId": oats["id"]},
+            ],
+            steps=[{"index": 2, "description": "Serve"}, {"index": 1, "description": "Cook"}],
+        ),
+    )
+
+    assert response.status_code == 201
+    recipe_version = response.json()
+    assert recipe_version["kcal"] == 170.5
+    assert recipe_version["carbs"] == 16
+    assert recipe_version["protein"] == 9.25
+    assert recipe_version["fat"] == 6.75
+    assert [ingredient["foodstuff"]["name"] for ingredient in recipe_version["ingredients"]] == ["Oats", "Egg"]
+    assert [step["description"] for step in recipe_version["steps"]] == ["Cook", "Serve"]
+    assert set(recipe_version["ingredients"][0]) == {"id", "index", "amount", "foodstuff", "recipeVersionId"}
+    assert "recipeVersionIds" not in recipe_version["ingredients"][0]["foodstuff"]
+    assert client.get("/ingredients").json()[0]["recipeVersionId"] == recipe_version["recipeVersionId"]
+    assert client.get("/steps").json()[0]["recipeVersionId"] == recipe_version["recipeVersionId"]
+
+
+def test_missing_nutrition_and_live_foodstuff_updates_affect_versions(client: TestClient) -> None:
+    foodstuff = create_foodstuff(client, kcal=None)
+    recipe_version = create_recipe(client, "Unknown calories", foodstuff["id"])
+    assert recipe_version["kcal"] is None
+    assert recipe_version["carbs"] == 30
+
+    updated_foodstuff = client.patch(f"/foodstuffs/{foodstuff['id']}", json={"kcal": 400, "brand": ""})
+    assert updated_foodstuff.status_code == 200
+    assert updated_foodstuff.json()["brand"] is None
+    assert client.get(f"/recipes/{recipe_version['recipeLineageId']}").json()["kcal"] == 200
+
+
+def test_duplicate_foodstuff_membership_and_positions_are_rejected(client: TestClient) -> None:
+    oats = create_foodstuff(client)
+    egg = create_foodstuff(client, name="Egg")
+    duplicate_foodstuff = client.post(
+        "/recipes",
+        json=recipe_version_payload(
+            "Duplicate foodstuff",
+            ingredients=[
+                {"index": 1, "amount": 50, "foodstuffId": oats["id"]},
+                {"index": 2, "amount": 50, "foodstuffId": oats["id"]},
+            ],
+        ),
+    )
+    assert duplicate_foodstuff.status_code == 409
+    assert duplicate_foodstuff.json() == {
+        "statusCode": 409,
+        "message": "A foodstuff may only occur once per recipe",
+    }
+    duplicate_ingredient_position = client.post(
+        "/recipes",
+        json=recipe_version_payload(
+            "Duplicate ingredient position",
+            ingredients=[
+                {"index": 1, "amount": 50, "foodstuffId": oats["id"]},
+                {"index": 1, "amount": 50, "foodstuffId": egg["id"]},
+            ],
+        ),
+    )
+    assert duplicate_ingredient_position.status_code == 422
+    duplicate_step_position = client.post(
+        "/recipes",
+        json=recipe_version_payload(
+            "Duplicate step position",
+            steps=[{"index": 1, "description": "Cook"}, {"index": 1, "description": "Serve"}],
+        ),
+    )
+    assert duplicate_step_position.status_code == 422
+
+
+def test_user_contract_has_no_shopping_list_side_effect(client: TestClient) -> None:
     created = client.post("/users", json={"username": "Roi"})
 
     assert created.status_code == 201
@@ -146,117 +276,64 @@ def test_user_has_no_shopping_list_side_effect(client: TestClient) -> None:
     assert client.get("/shoppingLists/1").status_code == 404
 
 
-def test_recipe_name_and_foodstuff_membership_are_unique(client: TestClient) -> None:
-    foodstuff = create_foodstuff(client)
-    recipe_payload = {
-        "name": "Unique recipe",
-        "servings": 1,
-        "ingredients": [{"index": 1, "amount": 100, "foodstuffId": foodstuff["id"]}],
+def test_draft_can_publish_after_a_newer_active_version(client: TestClient) -> None:
+    initial_recipe_version = create_recipe(client, "Initial")
+    lineage_id = initial_recipe_version["recipeLineageId"]
+    draft_recipe_version = client.post(f"/recipes/{lineage_id}/drafts", json=recipe_version_payload("Older alternative")).json()
+    newer_active_version_response = client.post(f"/recipes/{lineage_id}/publish", json=recipe_version_payload("Newer active"))
+    assert newer_active_version_response.status_code == 200
+
+    published_draft_version_response = client.post(f"/recipes/{lineage_id}/drafts/{draft_recipe_version['recipeVersionId']}/publish")
+
+    assert published_draft_version_response.status_code == 200
+    assert published_draft_version_response.json()["recipeVersionId"] == draft_recipe_version["recipeVersionId"]
+    assert client.get(f"/recipes/{lineage_id}").json()["name"] == "Older alternative"
+    assert {version["name"] for version in client.get(f"/recipes/{lineage_id}/history").json()} == {
+        "Initial",
+        "Newer active",
     }
 
-    assert client.post("/recipes", json=recipe_payload).status_code == 201
-    duplicate_recipe = client.post("/recipes", json=recipe_payload)
-    assert duplicate_recipe.status_code == 409
-    duplicate_foodstuff = client.post(
-        "/recipes",
-        json={
-            "name": "Duplicate membership",
-            "servings": 1,
-            "ingredients": [
-                {"index": 1, "amount": 50, "foodstuffId": foodstuff["id"]},
-                {"index": 2, "amount": 50, "foodstuffId": foodstuff["id"]},
-            ],
-        },
+
+def test_failed_direct_publication_preserves_active_version(client: TestClient) -> None:
+    active_recipe_version = create_recipe(client, "Original")
+
+    failed_publication = client.post(
+        f"/recipes/{active_recipe_version['recipeLineageId']}/publish",
+        json=recipe_version_payload("Broken", ingredients=[{"index": 1, "amount": 1, "foodstuffId": 999}]),
     )
-    assert duplicate_foodstuff.status_code == 409
+
+    assert failed_publication.status_code == 404
+    assert client.get(f"/recipes/{active_recipe_version['recipeLineageId']}").json()["recipeVersionId"] == active_recipe_version["recipeVersionId"]
+    assert client.get(f"/recipes/{active_recipe_version['recipeLineageId']}/history").json() == []
 
 
-def test_failed_recipe_update_rolls_back_all_changes(client: TestClient) -> None:
-    oats = create_foodstuff(client)
-    recipe = client.post(
-        "/recipes",
-        json={
-            "name": "Original recipe",
-            "servings": 1,
-            "ingredients": [{"index": 1, "amount": 100, "foodstuffId": oats["id"]}],
-        },
+def test_historical_versions_reject_draft_mutation_endpoints(client: TestClient) -> None:
+    initial_recipe_version = create_recipe(client, "Initial")
+    lineage_id = initial_recipe_version["recipeLineageId"]
+    assert client.post(f"/recipes/{lineage_id}/publish", json=recipe_version_payload("Current")).status_code == 200
+
+    assert client.put(
+        f"/recipes/{lineage_id}/drafts/{initial_recipe_version['recipeVersionId']}", json=recipe_version_payload("Mutated history")
+    ).status_code == 409
+    assert client.delete(f"/recipes/{lineage_id}/drafts/{initial_recipe_version['recipeVersionId']}").status_code == 409
+    assert client.get(f"/recipes/{lineage_id}/versions/{initial_recipe_version['recipeVersionId']}").json()["name"] == "Initial"
+
+
+def test_foodstuff_deletion_is_blocked_by_historical_or_draft_only_references(client: TestClient) -> None:
+    historical_foodstuff = create_foodstuff(client, name="Historical")
+    replacement_foodstuff = create_foodstuff(client, name="Replacement")
+    historical_recipe_version = create_recipe(client, "Historical reference", historical_foodstuff["id"])
+    assert client.post(
+        f"/recipes/{historical_recipe_version['recipeLineageId']}/publish",
+        json=recipe_version_payload("Replacement reference", replacement_foodstuff["id"]),
+    ).status_code == 200
+    assert client.delete(f"/foodstuffs/{historical_foodstuff['id']}").status_code == 409
+
+    draft_foodstuff = create_foodstuff(client, name="Draft only")
+    draft_recipe_version = create_recipe(client, "Draft reference")
+    draft_version = client.post(
+        f"/recipes/{draft_recipe_version['recipeLineageId']}/drafts", json=recipe_version_payload("Draft reference", draft_foodstuff["id"])
     ).json()
-    client.post("/recipes", json={"name": "Taken recipe name", "servings": 1})
-
-    response = client.patch(
-        f"/recipes/{recipe['id']}",
-        json={"name": "Taken recipe name", "ingredients": []},
-    )
-
-    assert response.status_code == 409
-    persisted_recipe = client.get(f"/recipes/{recipe['id']}").json()
-    assert persisted_recipe["name"] == "Original recipe"
-    assert len(persisted_recipe["ingredients"]) == 1
-
-
-def test_recipe_positions_must_be_unique(client: TestClient) -> None:
-    oats = create_foodstuff(client)
-    egg = create_foodstuff(client, name="Egg")
-
-    duplicate_ingredient_index = client.post(
-        "/recipes",
-        json={
-            "name": "Duplicate ingredient position",
-            "servings": 1,
-            "ingredients": [
-                {"index": 1, "amount": 100, "foodstuffId": oats["id"]},
-                {"index": 1, "amount": 1, "foodstuffId": egg["id"]},
-            ],
-        },
-    )
-    assert duplicate_ingredient_index.status_code == 422
-
-    duplicate_step_index = client.post(
-        "/recipes",
-        json={
-            "name": "Duplicate step position",
-            "servings": 1,
-            "steps": [
-                {"index": 1, "description": "Mix"},
-                {"index": 1, "description": "Bake"},
-            ],
-        },
-    )
-    assert duplicate_step_index.status_code == 422
-
-    recipe = client.post(
-        "/recipes",
-        json={
-            "name": "Patch positions",
-            "servings": 1,
-            "steps": [{"index": 1, "description": "Mix"}],
-        },
-    ).json()
-    duplicate_patch_index = client.patch(
-        f"/recipes/{recipe['id']}",
-        json={
-            "steps": [
-                {"index": 1, "description": "Mix"},
-                {"index": 1, "description": "Bake"},
-            ]
-        },
-    )
-    assert duplicate_patch_index.status_code == 422
-
-
-def test_validation_and_metadata_contracts(client: TestClient) -> None:
-    invalid = client.post("/foodstuffs", json={"name": "Missing required values"})
-
-    assert invalid.status_code == 422
-    assert invalid.json()["statusCode"] == 422
-    null_name = client.patch("/foodstuffs/1", json={"name": None})
-    assert null_name.status_code == 422
-    assert null_name.json()["details"][0]["msg"] == "Value error, name cannot be null"
-    assert client.patch("/foodstuffs/1", json={"unit": None}).status_code == 422
-    assert client.patch("/recipes/1", json={"name": None}).status_code == 422
-    assert client.patch("/recipes/1", json={"servings": None}).status_code == 422
-    assert client.patch("/recipes/1", json={"originUrl": "not a valid URL"}).status_code == 422
-    assert client.get("/foodstuffs-meta-data/unit-choices").json() == {
-        unit.value: unit.verbose_name for unit in Unit
-    }
-    assert client.get("/meta/version").headers["content-type"].startswith("text/plain")
+    assert client.delete(f"/foodstuffs/{draft_foodstuff['id']}").status_code == 409
+    assert client.delete(f"/recipes/{draft_recipe_version['recipeLineageId']}/drafts/{draft_version['recipeVersionId']}").status_code == 204
+    assert client.delete(f"/foodstuffs/{draft_foodstuff['id']}").status_code == 204

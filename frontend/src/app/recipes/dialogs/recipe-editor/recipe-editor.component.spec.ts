@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { FoodstuffBackendService } from '../../../foodstuffs/services/foodstuff-backend.service';
-import { Recipe } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { RecipeEditorComponent } from './recipe-editor.component';
@@ -11,10 +11,14 @@ describe('RecipeEditorComponent', () => {
   let fixture: ComponentFixture<RecipeEditorComponent>;
   let component: RecipeEditorComponent;
   let foodstuffBackend: { getAllFoodstuffs: jasmine.Spy; foodstuffsChanged$: Subject<void> };
-  let recipeBackend: { getRecipeById: jasmine.Spy };
+  let recipeBackend: { getActiveRecipeVersion: jasmine.Spy; getRecipeVersion: jasmine.Spy };
 
-  const recipe: Recipe = {
-    id: 1,
+  const recipeVersion: RecipeVersion = {
+    recipeLineageId: '00000000-0000-4000-8000-000000000001',
+    recipeVersionId: '00000000-0000-0000-0000-000000000001',
+    state: 'active',
+    createdAt: '2026-09-10T10:00:00Z',
+    lastModified: '2026-09-10T10:00:00Z',
     name: 'Linsensuppe',
     servings: 2,
     preptime: 20,
@@ -34,7 +38,8 @@ describe('RecipeEditorComponent', () => {
       foodstuffsChanged$: new Subject<void>(),
     };
     recipeBackend = {
-      getRecipeById: jasmine.createSpy('getRecipeById').and.resolveTo(recipe),
+      getActiveRecipeVersion: jasmine.createSpy('getActiveRecipeVersion').and.resolveTo(recipeVersion),
+      getRecipeVersion: jasmine.createSpy('getRecipeVersion').and.resolveTo(recipeVersion),
     };
 
     await TestBed.configureTestingModule({
@@ -52,22 +57,22 @@ describe('RecipeEditorComponent', () => {
   });
 
   it('becomes ready only after recipe and foodstuff data load', async () => {
-    fixture.componentRef.setInput('recipeId', recipe.id);
+    fixture.componentRef.setInput('recipeLineageId', recipeVersion.recipeLineageId);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(recipeBackend.getRecipeById).toHaveBeenCalledOnceWith(recipe.id);
-    expect(component.recipe()).toEqual(recipe);
+    expect(recipeBackend.getActiveRecipeVersion).toHaveBeenCalledOnceWith(recipeVersion.recipeLineageId);
+    expect(component.recipeVersion()).toEqual(recipeVersion);
     expect(component.state()).toEqual({ status: 'ready' });
   });
 
   it('reports a recipe-specific error when the recipe request fails', async () => {
-    recipeBackend.getRecipeById.and.rejectWith(new Error('Recipe not found'));
-    fixture.componentRef.setInput('recipeId', recipe.id);
+    recipeBackend.getActiveRecipeVersion.and.rejectWith(new Error('Recipe not found'));
+    fixture.componentRef.setInput('recipeLineageId', recipeVersion.recipeLineageId);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(component.state()).toEqual({ status: 'error', source: 'recipe' });
+    expect(component.state()).toEqual({ status: 'error', source: 'recipeVersion' });
     expect(component.errorMessage()).toBe('Rezept konnte nicht geladen werden.');
   });
 });

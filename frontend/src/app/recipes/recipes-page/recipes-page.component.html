@@ -1,15 +1,15 @@
 <main>
-  @if (recipesState().status === 'loading') {
+  @if (recipeVersionsState().status === 'loading') {
   <div class="spinner-wrapper">
     <mat-spinner diameter="25" />
   </div>
-  } @else if (recipesState().status === 'error') {
+  } @else if (recipeVersionsState().status === 'error') {
   <p>Ein Fehler ist aufgetreten</p>
   } @else {
   <div class="grid-wrapper">
     <app-recipes-grid
       class="recipes-grid"
-      [recipes]="recipesState().data"
+      [recipeVersions]="recipeVersionsState().data"
     />
     <div
       class="fade-effect-wrapper"
@@ -18,7 +18,7 @@
   </div>
 
   <div class="bottom-elements">
-    <app-recipes-search [recipes]="recipesState().data" />
+    <app-recipes-search [recipeVersions]="recipeVersionsState().data" />
 
     <button
       mat-mini-fab

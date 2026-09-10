@@ -22,7 +22,7 @@ const foodstuff = (id: number, name: string) => ({
   carbs: null,
   protein: null,
   fat: null,
-  recipeIds: [],
+  recipeVersionIds: [],
 });
 
 interface Deferred<T> {

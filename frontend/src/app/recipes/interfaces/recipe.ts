@@ -1,8 +1,12 @@
 import { Ingredient, RecipeIngredientWrite } from './ingredient';
 import { RecipeStepWrite, Step } from './step';
 
-export interface Recipe {
-  id: number;
+export interface RecipeVersion {
+  recipeLineageId: string;
+  recipeVersionId: string;
+  state: RecipeVersionState;
+  createdAt: string;
+  lastModified: string;
   name: string;
   servings: number;
   preptime: number | null;
@@ -16,7 +20,9 @@ export interface Recipe {
   steps: Step[];
 }
 
-export interface RecipeWrite {
+export type RecipeVersionState = 'active' | 'draft' | 'historical';
+
+export interface RecipeVersionWrite {
   name: string;
   servings: number;
   preptime: number | null;

@@ -1,12 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { SnackBarService } from '../../../services/snack-bar.service';
-import { RecipeWrite } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
-import { RecipeEditorComponent } from '../recipe-editor/recipe-editor.component';
+import { RecipeEditorComponent, RecipeEditorSubmission } from '../recipe-editor/recipe-editor.component';
 
-interface RecipePatchDialogData { id: number; }
+interface RecipePatchDialogData { recipeVersion: RecipeVersion; }
 
 @Component({
   selector: 'app-recipe-patch-dialog',
@@ -18,17 +19,42 @@ export class RecipePatchDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<RecipePatchDialogComponent>);
   private readonly recipeBackendService = inject(RecipeBackendService);
   private readonly snackBarService = inject(SnackBarService);
+  private readonly router = inject(Router);
   readonly data = inject<RecipePatchDialogData>(MAT_DIALOG_DATA);
+  readonly isSubmitting = signal(false);
 
-  async onSubmit(recipe: RecipeWrite): Promise<void> {
+  async onSubmit(submission: RecipeEditorSubmission): Promise<void> {
+    if (this.isSubmitting()) return;
+    this.isSubmitting.set(true);
+    let savedRecipeVersion: RecipeVersion;
     try {
-      await this.recipeBackendService.patchRecipe(this.data.id, recipe);
-      this.recipeBackendService.notifyRecipesChanged();
-      this.dialogRef.close();
-      this.snackBarService.open('Rezept aktualisiert');
+      savedRecipeVersion = this.data.recipeVersion.state === 'draft'
+        ? await this.recipeBackendService.updateRecipeDraft(
+            this.data.recipeVersion.recipeLineageId,
+            this.data.recipeVersion.recipeVersionId,
+            submission.recipeVersion,
+          )
+        : submission.action === 'draft'
+          ? await this.recipeBackendService.createRecipeDraft(this.data.recipeVersion.recipeLineageId, submission.recipeVersion)
+          : await this.recipeBackendService.publishActiveRecipeEdit(this.data.recipeVersion.recipeLineageId, submission.recipeVersion);
     } catch (error: unknown) {
-      console.error('failed to patch recipe: ', error);
-      this.snackBarService.open('Rezept konnte nicht aktualisiert werden');
+      console.error('failed to save recipe version: ', error);
+      this.snackBarService.open(this.data.recipeVersion.state === 'draft' ? 'Entwurf konnte nicht gespeichert werden' : 'Rezept konnte nicht aktualisiert werden');
+      this.isSubmitting.set(false);
+      return;
     }
+
+    this.recipeBackendService.notifyRecipesChanged();
+    this.dialogRef.close();
+    if (savedRecipeVersion.state === 'draft' && this.data.recipeVersion.state === 'active') {
+      this.snackBarService.open('Entwurf gespeichert');
+      try {
+        await this.router.navigate(['recipes', savedRecipeVersion.recipeLineageId, 'versions', savedRecipeVersion.recipeVersionId]);
+      } catch (error: unknown) {
+        console.error('failed to navigate to draft: ', error);
+      }
+      return;
+    }
+    this.snackBarService.open(this.data.recipeVersion.state === 'draft' ? 'Entwurf gespeichert' : 'Rezept aktualisiert');
   }
 }

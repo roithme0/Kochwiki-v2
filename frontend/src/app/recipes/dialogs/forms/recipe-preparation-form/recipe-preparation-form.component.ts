@@ -11,7 +11,7 @@ import {
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { take } from 'rxjs';
 import { Step } from '../../../interfaces/step';
-import { Recipe } from '../../../interfaces/recipe';
+import { RecipeVersion } from '../../../interfaces/recipe';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,7 +31,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './recipe-preparation-form.component.scss',
 })
 export class RecipePreparationFormComponent {
-  recipe = input<Recipe>();
+  recipeVersion = input<RecipeVersion>();
 
   readonly recipeFormDirective = inject(FormGroupDirective);
   readonly fb = inject(FormBuilder);
@@ -50,12 +50,12 @@ export class RecipePreparationFormComponent {
       'preparationFormGroup'
     ) as FormGroup;
 
-    const recipe: Recipe | undefined = this.recipe();
-    if (recipe !== undefined) {
+    const recipeVersion: RecipeVersion | undefined = this.recipeVersion();
+    if (recipeVersion !== undefined) {
       this.recipeForm.get('preparationFormGroup')?.patchValue({
-        preptime: recipe.preptime,
+        preptime: recipeVersion.preptime,
       });
-      this.stepsSorted = [...recipe.steps].sort((a, b) => a.index - b.index);
+      this.stepsSorted = [...recipeVersion.steps].sort((a, b) => a.index - b.index);
       this.stepsSorted.forEach((step) => this.addStep(step));
     }
   }

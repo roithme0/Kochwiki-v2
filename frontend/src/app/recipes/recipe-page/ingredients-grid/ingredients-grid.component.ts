@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Recipe } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 import { MatCardModule } from '@angular/material/card';
 import { MacroChartComponent } from '../../../core/components/macro-chart/macro-chart.component';
 
@@ -15,5 +15,5 @@ import { MacroChartComponent } from '../../../core/components/macro-chart/macro-
   styleUrl: './ingredients-grid.component.scss',
 })
 export class IngredientsGridComponent {
-  recipe = input.required<Recipe>();
+  recipeVersion = input.required<RecipeVersion>();
 }

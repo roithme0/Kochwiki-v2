@@ -20,7 +20,7 @@ import {
 } from '@angular/forms';
 import { Foodstuff } from '../../../../foodstuffs/interfaces/foodstuff';
 import { Ingredient } from '../../../interfaces/ingredient';
-import { Recipe } from '../../../interfaces/recipe';
+import { RecipeVersion } from '../../../interfaces/recipe';
 import { FoodstuffCreateDialogComponent } from '../../../../foodstuffs/dialogs/foodstuff-create-dialog/foodstuff-create-dialog.component';
 import { IngredientFieldComponent } from './ingredient-field/ingredient-field.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -60,7 +60,7 @@ import {
 })
 export class RecipeIngredientsFormComponent {
   foodstuffs = input.required<Foodstuff[]>();
-  recipe = input<Recipe>();
+  recipeVersion = input<RecipeVersion>();
 
   readonly recipeFormDirective = inject(FormGroupDirective);
   readonly fb: FormBuilder = inject(FormBuilder);
@@ -120,12 +120,12 @@ export class RecipeIngredientsFormComponent {
       'ingredientsFormGroup'
     ) as FormGroup;
 
-    const recipe: Recipe | undefined = this.recipe();
-    if (recipe != undefined) {
+    const recipeVersion: RecipeVersion | undefined = this.recipeVersion();
+    if (recipeVersion != undefined) {
       this.recipeForm.get('ingredientsFormGroup')?.patchValue({
-        servings: recipe.servings,
+        servings: recipeVersion.servings,
       });
-      recipe.ingredients.forEach((ingredient: Ingredient) =>
+      recipeVersion.ingredients.forEach((ingredient: Ingredient) =>
         this.addIngredient(ingredient)
       );
     }
@@ -143,8 +143,7 @@ export class RecipeIngredientsFormComponent {
   addIngredient(ingredient?: Ingredient): void {
     this.ingredients.push(
       this.fb.group({
-        index: [1, Validators.required],
-        // index: [ingredient?.index ?? null, Validators.required],
+        index: [this.ingredients.length + 1, Validators.required],
         foodstuffId: [ingredient?.foodstuff.id ?? null, Validators.required],
         amount: [ingredient?.amount ?? null, Validators.required],
       })
@@ -154,6 +153,7 @@ export class RecipeIngredientsFormComponent {
 
   removeIngredient(index: number): void {
     this.ingredients.removeAt(index);
+    this.reindexIngredients();
     this.updateNutritionDraft();
   }
 
@@ -193,6 +193,12 @@ export class RecipeIngredientsFormComponent {
     };
     this.servings.set(rawValue.servings);
     this.ingredientDrafts.set(rawValue.ingredients);
+  }
+
+  private reindexIngredients(): void {
+    this.ingredients.controls.forEach((ingredient, index) => {
+      ingredient.get('index')?.setValue(index + 1, { emitEvent: false });
+    });
   }
 }
 

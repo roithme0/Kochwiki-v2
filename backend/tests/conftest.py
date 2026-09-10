@@ -23,7 +23,9 @@ def migrate_database() -> None:
 @pytest.fixture(autouse=True)
 def clear_database() -> None:
     with engine.begin() as connection:
-        connection.execute(text('TRUNCATE TABLE ingredient, step, recipe, foodstuff, custom_user RESTART IDENTITY CASCADE'))
+        connection.execute(
+            text('TRUNCATE TABLE ingredient, step, recipe_version, recipe_lineage, foodstuff, custom_user RESTART IDENTITY CASCADE')
+        )
 
 
 @pytest.fixture

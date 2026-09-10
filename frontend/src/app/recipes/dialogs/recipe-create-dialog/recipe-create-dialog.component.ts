@@ -1,11 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { SnackBarService } from '../../../services/snack-bar.service';
-import { RecipeWrite } from '../../interfaces/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
-import { RecipeEditorComponent } from '../recipe-editor/recipe-editor.component';
+import { RecipeEditorComponent, RecipeEditorSubmission } from '../recipe-editor/recipe-editor.component';
 
 @Component({
   selector: 'app-recipe-create-dialog',
@@ -18,26 +17,30 @@ export class RecipeCreateDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<RecipeCreateDialogComponent>);
   private readonly recipeBackendService = inject(RecipeBackendService);
   private readonly snackBarService = inject(SnackBarService);
+  readonly isSubmitting = signal(false);
 
-  async onSubmit(recipe: RecipeWrite): Promise<void> {
-    let createdRecipeId: number;
+  async onSubmit(submission: RecipeEditorSubmission): Promise<void> {
+    if (this.isSubmitting()) return;
+    this.isSubmitting.set(true);
+    let createdRecipeLineageId: string;
     try {
-      createdRecipeId = (await this.recipeBackendService.postRecipe(recipe)).id;
+      createdRecipeLineageId = (await this.recipeBackendService.createRecipe(submission.recipeVersion)).recipeLineageId;
     } catch (error: unknown) {
       console.error('failed to create recipe: ', error);
       this.snackBarService.open('Rezept konnte nicht erstellt werden');
+      this.isSubmitting.set(false);
       return;
     }
 
     this.recipeBackendService.notifyRecipesChanged();
     this.dialogRef.close();
-    void this.navigateToRecipe(createdRecipeId);
+    void this.navigateToRecipe(createdRecipeLineageId);
     this.snackBarService.open('Rezept erstellt');
   }
 
-  private async navigateToRecipe(id: number): Promise<void> {
+  private async navigateToRecipe(recipeLineageId: string): Promise<void> {
     try {
-      await this.router.navigate(['recipes/', id]);
+      await this.router.navigate(['recipes/', recipeLineageId]);
     } catch (error: unknown) {
       console.error('failed to navigate to created recipe: ', error);
     }

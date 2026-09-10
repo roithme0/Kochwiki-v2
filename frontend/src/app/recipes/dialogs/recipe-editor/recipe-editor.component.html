@@ -9,26 +9,31 @@
     </div>
   }
   @case ('ready') {
-    <form [formGroup]="recipeForm" class="form" (ngSubmit)="onSubmit()">
+    <form [formGroup]="recipeForm" class="form">
       <mat-stepper>
         <mat-step>
-          <app-recipe-meta-form [recipe]="recipe() ?? undefined" />
+          <app-recipe-meta-form [recipeVersion]="recipeVersion() ?? undefined" />
         </mat-step>
         <mat-step>
           <app-recipe-ingredients-form
             [foodstuffs]="foodstuffs()"
-            [recipe]="recipe() ?? undefined"
+            [recipeVersion]="recipeVersion() ?? undefined"
           />
         </mat-step>
         <mat-step>
-          <app-recipe-preparation-form [recipe]="recipe() ?? undefined" />
+          <app-recipe-preparation-form [recipeVersion]="recipeVersion() ?? undefined" />
         </mat-step>
       </mat-stepper>
       <mat-divider />
       <div class="button-wrapper">
-        <button mat-flat-button type="submit" color="primary" [disabled]="recipeForm.invalid">
-          Speichern
+        <button mat-flat-button type="button" color="primary" [disabled]="recipeForm.invalid || submitting()" (click)="onSubmit('publish')">
+          {{ mode() === 'draft' ? 'Entwurf speichern' : 'Speichern' }}
         </button>
+        @if (mode() === 'active') {
+        <button mat-stroked-button type="button" [disabled]="recipeForm.invalid || submitting()" (click)="onSubmit('draft')">
+          Als Entwurf speichern
+        </button>
+        }
       </div>
     </form>
   }

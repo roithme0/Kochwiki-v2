@@ -29,7 +29,12 @@ export const routes: Routes = [
         title: 'Rezepte',
       },
       {
-        path: ':id',
+        path: ':lineageId/versions/:recipeVersionId',
+        component: RecipePageComponent,
+        title: 'Rezeptversion',
+      },
+      {
+        path: ':lineageId',
         component: RecipePageComponent,
         title: 'Rezept',
       },

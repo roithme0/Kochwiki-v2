@@ -6,6 +6,7 @@ import { DialogHeaderComponent } from '../../components/dialog-header/dialog-hea
 
 export interface ConfirmationDialogData {
   title: string;
+  description?: string;
   confirmLabel: string;
   cancelLabel: string;
   action: () => Promise<void>;

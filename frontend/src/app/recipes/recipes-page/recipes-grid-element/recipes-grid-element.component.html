@@ -2,17 +2,23 @@
   <mat-card-content>
     <app-macro-chart
       class="macro-chart"
-      [nutrition]="recipe()"
+      [nutrition]="recipeVersion()"
       [showKcal]="false"
+    />
+    <app-recipe-version-state-badge
+      class="version-state-badge"
+      [state]="recipeVersion().state"
     />
   </mat-card-content>
 
   <mat-card-header>
-    <mat-card-title>{{ recipe().name }}</mat-card-title>
+    <mat-card-title>
+      {{ recipeVersion().name }}
+    </mat-card-title>
 
     <!-- preptime -->
-    @if(recipe().preptime != null){
-    <mat-card-subtitle>{{ recipe().preptime }} min</mat-card-subtitle>
+    @if(recipeVersion().preptime != null){
+    <mat-card-subtitle>{{ recipeVersion().preptime }} min</mat-card-subtitle>
     }
 
     <!-- no preptime -->

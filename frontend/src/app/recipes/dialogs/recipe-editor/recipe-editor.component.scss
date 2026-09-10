@@ -1,13 +1,17 @@
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
   inline-size: 100%;
+  min-block-size: 100%;
 }
 
 :host ::ng-deep .mat-horizontal-content-container {
   padding: 0.75rem 24px 24px !important;
 }
 
-mat-spinner, .error { margin: 2rem; }
+mat-spinner { margin: auto; }
+
+.error { margin: 2rem; }
 
 .error { display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
 
@@ -19,6 +23,14 @@ mat-spinner, .error { margin: 2rem; }
   flex-direction: column;
 }
 
-.button-wrapper { padding: 24px; display: flex; }
+.button-wrapper { padding: 24px; display: flex; gap: 0.5rem; }
 
-.button-wrapper button { flex: 1; }
+.button-wrapper button {
+  flex: 1;
+  min-inline-size: 0;
+  block-size: auto;
+  min-block-size: 2.25rem;
+  padding-block: 0.375rem;
+  line-height: 1.25;
+  white-space: normal;
+}

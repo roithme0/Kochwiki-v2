@@ -6,7 +6,7 @@ mat-card {
 
 .grid {
   display: grid;
-  grid-template-columns: min-content 1fr min-content min-content;
+  grid-template-columns: min-content 1fr min-content;
   align-items: center;
   gap: 0.25rem 0.75rem;
 }

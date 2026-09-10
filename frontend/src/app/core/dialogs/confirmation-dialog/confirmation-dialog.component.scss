@@ -4,6 +4,10 @@
   flex-direction: column;
 }
 
+mat-dialog-content {
+  padding: 0.75rem 0 0.5rem !important;
+}
+
 mat-dialog-actions {
   padding: 0 !important;
 }

@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Step } from '../../interfaces/step';
-import { Recipe } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
@@ -11,9 +11,9 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './steps-grid.component.scss',
 })
 export class StepsGridComponent {
-  recipe = input.required<Recipe>();
+  recipeVersion = input.required<RecipeVersion>();
 
   stepsSorted = computed((): Step[] =>
-    [...this.recipe().steps].sort((a: Step, b: Step) => a.index - b.index)
+    [...this.recipeVersion().steps].sort((a: Step, b: Step) => a.index - b.index)
   );
 }

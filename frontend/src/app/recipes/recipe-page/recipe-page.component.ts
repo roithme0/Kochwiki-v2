@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Recipe } from '../interfaces/recipe';
+import { RecipeVersion } from '../interfaces/recipe';
 import { RecipeBackendService } from '../services/recipe-backend.service';
 import { PageHeaderService } from '../../services/page-header.service';
 import { SnackBarService } from '../../services/snack-bar.service';
@@ -18,6 +18,7 @@ import {
   ConfirmationDialogData,
 } from '../../core/dialogs/confirmation-dialog/confirmation-dialog.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { RecipeVersionStateBadgeComponent } from '../components/recipe-version-state-badge/recipe-version-state-badge.component';
 
 @Component({
   selector: 'app-recipe-page',
@@ -29,6 +30,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinner,
+    RecipeVersionStateBadgeComponent,
   ],
   templateUrl: './recipe-page.component.html',
   styleUrl: './recipe-page.component.scss',
@@ -42,49 +44,54 @@ export class RecipePageComponent {
   readonly snackBarService = inject(SnackBarService);
   readonly dialog = inject(MatDialog);
 
-  id: number | undefined;
-  recipe: Recipe | undefined;
-  recipeIsLoading: WritableSignal<boolean> = signal(true);
+  recipeLineageId: string | undefined;
+  recipeVersionId: string | null;
+  recipeVersion: RecipeVersion | undefined;
+  recipeVersionIsLoading: WritableSignal<boolean> = signal(true);
 
   constructor() {
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    this.recipeLineageId = this.route.snapshot.paramMap.get('lineageId') ?? undefined;
+    this.recipeVersionId = this.route.snapshot.paramMap.get('recipeVersionId');
 
-    this.keepRecipeUpToDate(this.id);
-    void this.fetchRecipe(this.id);
+    this.keepRecipeVersionUpToDate(this.recipeLineageId);
+    void this.fetchRecipeVersion(this.recipeLineageId);
   }
 
   ngOnInit(): void {
     this.pageHeaderService.updateHeader(true, '', 'recipes', true);
   }
 
-  keepRecipeUpToDate(id: number | undefined): void {
+  keepRecipeVersionUpToDate(recipeLineageId: string | undefined): void {
     this.recipeBackendService.recipesChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => void this.fetchRecipe(id));
+      .subscribe(() => void this.fetchRecipeVersion(recipeLineageId));
   }
 
-  async fetchRecipe(id: number | undefined): Promise<void> {
-    if (id === undefined) {
-      console.error('no recipe id provided');
+  async fetchRecipeVersion(recipeLineageId: string | undefined): Promise<void> {
+    if (recipeLineageId === undefined) {
+      console.error('no recipe lineage id provided');
       return;
     }
 
-    this.recipeIsLoading.set(true);
+    this.recipeVersionIsLoading.set(true);
     try {
-      this.recipe = await this.recipeBackendService.getRecipeById(id);
-      this.pageHeaderService.headline = this.recipe.name;
+      this.recipeVersion = this.recipeVersionId === null
+        ? await this.recipeBackendService.getActiveRecipeVersion(recipeLineageId)
+        : await this.recipeBackendService.getRecipeVersion(recipeLineageId, this.recipeVersionId);
+      this.pageHeaderService.headline = this.recipeVersion.name;
     } catch (error: unknown) {
-      console.error('failed to fetch recipe: ', error);
+      console.error('failed to fetch recipe version: ', error);
       this.snackBarService.open('Rezept konnte nicht geladen werden');
       this.pageHeaderService.headline = 'Fehler';
     } finally {
-      this.recipeIsLoading.set(false);
+      this.recipeVersionIsLoading.set(false);
     }
   }
 
   openPatchRecipeDialog(): void {
+    if (this.recipeVersion === undefined || this.recipeVersion.state === 'historical') return;
     this.dialog.open(RecipePatchDialogComponent, {
-      data: { id: this.id },
+      data: { recipeVersion: this.recipeVersion },
       minWidth: 'calc(100vw - 1rem)',
       maxWidth: 'calc(100vw - 1rem)',
       height: 'calc(100dvh - 1rem)',
@@ -96,17 +103,18 @@ export class RecipePageComponent {
   }
 
   openDeleteRecipeDialog(): void {
-    const id: number | undefined = this.id;
-    if (id === undefined) {
-      console.error('no recipe id provided');
+    const recipeLineageId: string | undefined = this.recipeLineageId;
+    if (recipeLineageId === undefined) {
+      console.error('no recipe lineage id provided');
       return;
     }
 
     const data: ConfirmationDialogData = {
-      title: 'Rezept löschen?',
+      title: 'Gesamte Rezeptlinie löschen?',
+      description: 'Das aktive Rezept, alle Entwürfe und der Versionsverlauf werden gelöscht.',
       confirmLabel: 'Ja',
       cancelLabel: 'Nein',
-      action: () => this.deleteRecipe(id),
+      action: () => this.deleteRecipeLineage(recipeLineageId),
     };
 
     this.dialog.open(ConfirmationDialogComponent, {
@@ -117,11 +125,46 @@ export class RecipePageComponent {
     });
   }
 
-  private async deleteRecipe(id: number): Promise<void> {
+  openPublishDraftDialog(): void {
+    const recipeVersion = this.recipeVersion;
+    if (recipeVersion === undefined || recipeVersion.state !== 'draft') return;
+    const data: ConfirmationDialogData = {
+      title: 'Entwurf als aktive Version übernehmen?',
+      description: 'Die aktuelle aktive Version wird in den Verlauf verschoben. Andere Entwürfe bleiben erhalten.',
+      confirmLabel: 'Übernehmen',
+      cancelLabel: 'Abbrechen',
+      action: () => this.publishRecipeDraft(recipeVersion),
+    };
+    this.dialog.open(ConfirmationDialogComponent, {
+      data,
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      autoFocus: false,
+    });
+  }
+
+  openDiscardDraftDialog(): void {
+    const recipeVersion = this.recipeVersion;
+    if (recipeVersion === undefined || recipeVersion.state !== 'draft') return;
+    const data: ConfirmationDialogData = {
+      title: 'Entwurf verwerfen?',
+      confirmLabel: 'Verwerfen',
+      cancelLabel: 'Abbrechen',
+      action: () => this.discardRecipeDraft(recipeVersion),
+    };
+    this.dialog.open(ConfirmationDialogComponent, {
+      data,
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      autoFocus: false,
+    });
+  }
+
+  private async deleteRecipeLineage(recipeLineageId: string): Promise<void> {
     try {
-      await this.recipeBackendService.deleteRecipe(id);
+      await this.recipeBackendService.deleteRecipeLineage(recipeLineageId);
     } catch (error: unknown) {
-      console.error('failed to delete recipe: ', error);
+      console.error('failed to delete recipe lineage: ', error);
       this.snackBarService.open('Rezept konnte nicht gelöscht werden');
       throw error;
     }
@@ -129,9 +172,45 @@ export class RecipePageComponent {
     try {
       await this.router.navigate(['recipes']);
     } catch (error: unknown) {
-      console.error('failed to navigate after deleting recipe: ', error);
+      console.error('failed to navigate after deleting recipe lineage: ', error);
     }
     this.recipeBackendService.notifyRecipesChanged();
-    this.snackBarService.open('Rezept gelöscht');
+    this.snackBarService.open('Rezeptlinie gelöscht');
+  }
+
+  private async publishRecipeDraft(recipeVersion: RecipeVersion): Promise<void> {
+    try {
+      await this.recipeBackendService.publishRecipeDraft(recipeVersion.recipeLineageId, recipeVersion.recipeVersionId);
+    } catch (error: unknown) {
+      console.error('failed to publish draft: ', error);
+      this.snackBarService.open('Entwurf konnte nicht übernommen werden');
+      throw error;
+    }
+
+    try {
+      await this.router.navigate(['recipes', recipeVersion.recipeLineageId]);
+    } catch (error: unknown) {
+      console.error('failed to navigate after publishing draft: ', error);
+    }
+    this.recipeBackendService.notifyRecipesChanged();
+    this.snackBarService.open('Entwurf als aktive Version übernommen');
+  }
+
+  private async discardRecipeDraft(recipeVersion: RecipeVersion): Promise<void> {
+    try {
+      await this.recipeBackendService.discardRecipeDraft(recipeVersion.recipeLineageId, recipeVersion.recipeVersionId);
+    } catch (error: unknown) {
+      console.error('failed to discard draft: ', error);
+      this.snackBarService.open('Entwurf konnte nicht verworfen werden');
+      throw error;
+    }
+
+    try {
+      await this.router.navigate(['recipes']);
+    } catch (error: unknown) {
+      console.error('failed to navigate after discarding draft: ', error);
+    }
+    this.recipeBackendService.notifyRecipesChanged();
+    this.snackBarService.open('Entwurf verworfen');
   }
 }

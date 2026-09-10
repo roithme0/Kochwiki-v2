@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { RecipesGridControlsService } from '../services/recipes-grid-controls.service';
 import { Router } from '@angular/router';
-import { Recipe } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 
 @Component({
   selector: 'app-recipes-search',
@@ -31,21 +31,24 @@ import { Recipe } from '../../interfaces/recipe';
 export class RecipesSearchComponent {
   readonly recipesGridControlsService = inject(RecipesGridControlsService);
   readonly router = inject(Router);
-  readonly recipes = input<Recipe[]>([]);
+  readonly recipeVersions = input<RecipeVersion[]>([]);
 
   readonly nameOptionsGroupLabel: string = 'Namen';
   readonly originOptionsGroupLabel: string = 'Ersteller*innen';
 
   namesMap = computed(
     (): Map<string, string> =>
-      this.recipes().reduce((acc, recipe) => {
-        acc.set(recipe.id.toString(), recipe.name);
+      this.recipeVersions().reduce((acc, recipeVersion) => {
+        acc.set(recipeVersion.recipeVersionId, recipeVersion.name);
         return acc;
       }, new Map<string, string>())
   );
+  readonly recipeVersionsById = computed(
+    (): Map<string, RecipeVersion> => new Map(this.recipeVersions().map((recipeVersion) => [recipeVersion.recipeVersionId, recipeVersion]))
+  );
   origins = computed((): string[] =>
-    this.recipes()
-      .map((recipe) => recipe.originName || '')
+    this.recipeVersions()
+      .map((recipeVersion) => recipeVersion.originName || '')
       .filter((origin) => origin != '')
   );
   filteredNamesMap = computed(
@@ -77,7 +80,14 @@ export class RecipesSearchComponent {
 
   onSearchOptionSelected(event: MatAutocompleteSelectedEvent): void {
     if (event.option.group?.label === this.nameOptionsGroupLabel) {
-      this.router.navigate(['/recipes/', event.option.value]);
+      const recipeVersion = this.recipeVersionsById().get(event.option.value as string);
+      if (recipeVersion !== undefined) {
+        void this.router.navigate(
+          recipeVersion.state === 'active'
+            ? ['recipes', recipeVersion.recipeLineageId]
+            : ['recipes', recipeVersion.recipeLineageId, 'versions', recipeVersion.recipeVersionId]
+        );
+      }
     }
   }
 

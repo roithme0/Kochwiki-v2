@@ -36,6 +36,12 @@ article {
   flex: 0 0 4rem;
 }
 
+.version-state-badge {
+  align-self: flex-end;
+  margin: 0;
+  width: min-content;
+}
+
 img {
   flex: 0 0 40%;
 }

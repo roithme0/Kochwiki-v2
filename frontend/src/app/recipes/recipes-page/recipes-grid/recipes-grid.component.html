@@ -1,11 +1,13 @@
 <!-- recipes -->
-@if(displayedRecipes().length > 0){
+@if(displayedRecipeVersions().length > 0){
 <div class="grid" [style.--columns]="displayedColumns()">
-  @for(recipe of displayedRecipes(); track recipe.id){
-  <app-recipes-grid-element
-    [recipe]="recipe"
-    (click)="router.navigate(['recipes', recipe.id])"
-  />
+  @for(recipeVersion of displayedRecipeVersions(); track recipeVersion.recipeVersionId){
+  <a
+    class="recipe-link"
+    [routerLink]="recipeVersionLink(recipeVersion)"
+  >
+    <app-recipes-grid-element [recipeVersion]="recipeVersion" />
+  </a>
   }
 </div>
 }

@@ -45,7 +45,7 @@ describe('RecipeIngredientsFormComponent', () => {
     carbs: 60,
     protein: 13,
     fat: 7,
-    recipeIds: [],
+    recipeVersionIds: [],
   };
 
   beforeEach(async () => {
@@ -142,6 +142,18 @@ describe('RecipeIngredientsFormComponent', () => {
     expect(getNutritionMessage()).toBeNull();
   });
 
+  it('keeps ingredient indexes unique and sequential after adding and removing rows', () => {
+    fixture.componentInstance.addIngredient();
+    fixture.componentInstance.addIngredient();
+
+    expect(ingredientIndexes()).toEqual([1, 2, 3]);
+
+    fixture.componentInstance.removeIngredient(1);
+    fixture.componentInstance.addIngredient();
+
+    expect(ingredientIndexes()).toEqual([1, 2, 3]);
+  });
+
   it('keeps the last valid chart while a focused numeric field is invalid', () => {
     const servingsInput = fixture.nativeElement.querySelector(
       'input[formControlName="servings"]'
@@ -225,6 +237,13 @@ describe('RecipeIngredientsFormComponent', () => {
 
   function getNutritionMessage(): HTMLElement | null {
     return fixture.nativeElement.querySelector('.nutrition-message');
+  }
+
+  function ingredientIndexes(): Array<number | null> {
+    return fixture.componentInstance.ingredients.controls.map((ingredient) => {
+      const value: unknown = ingredient.get('index')?.value;
+      return typeof value === 'number' ? value : null;
+    });
   }
 });
 

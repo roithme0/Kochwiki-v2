@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Recipe, RecipeWrite } from '../interfaces/recipe';
+import { RecipeVersion, RecipeVersionWrite } from '../interfaces/recipe';
 import { firstValueFrom, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -19,20 +19,35 @@ export class RecipeBackendService {
     this._recipesChanged$.next();
   }
 
-  getAllRecipes = (): Promise<Recipe[]> =>
-    firstValueFrom(this.httpClient.get<Recipe[]>(backendUrl + '/recipes'));
+  getAllRecipeVersions = (): Promise<RecipeVersion[]> =>
+    firstValueFrom(this.httpClient.get<RecipeVersion[]>(backendUrl + '/recipes'));
 
-  getRecipeById = (id: number): Promise<Recipe> =>
-    firstValueFrom(this.httpClient.get<Recipe>(backendUrl + '/recipes/' + id));
+  getActiveRecipeVersion = (recipeLineageId: string): Promise<RecipeVersion> =>
+    firstValueFrom(this.httpClient.get<RecipeVersion>(backendUrl + '/recipes/' + recipeLineageId));
 
-  patchRecipe = (id: number, updates: Partial<RecipeWrite>): Promise<Recipe> =>
+  getRecipeVersion = (recipeLineageId: string, recipeVersionId: string): Promise<RecipeVersion> =>
     firstValueFrom(
-      this.httpClient.patch<Recipe>(backendUrl + '/recipes/' + id, updates)
+      this.httpClient.get<RecipeVersion>(backendUrl + '/recipes/' + recipeLineageId + '/versions/' + recipeVersionId)
     );
 
-  postRecipe = (recipe: RecipeWrite): Promise<Recipe> =>
-    firstValueFrom(this.httpClient.post<Recipe>(backendUrl + '/recipes', recipe));
+  createRecipe = (recipeVersion: RecipeVersionWrite): Promise<RecipeVersion> =>
+    firstValueFrom(this.httpClient.post<RecipeVersion>(backendUrl + '/recipes', recipeVersion));
 
-  deleteRecipe = (id: number): Promise<number> =>
-    firstValueFrom(this.httpClient.delete<number>(backendUrl + '/recipes/' + id));
+  publishActiveRecipeEdit = (recipeLineageId: string, recipeVersion: RecipeVersionWrite): Promise<RecipeVersion> =>
+    firstValueFrom(this.httpClient.post<RecipeVersion>(backendUrl + '/recipes/' + recipeLineageId + '/publish', recipeVersion));
+
+  createRecipeDraft = (recipeLineageId: string, recipeVersion: RecipeVersionWrite): Promise<RecipeVersion> =>
+    firstValueFrom(this.httpClient.post<RecipeVersion>(backendUrl + '/recipes/' + recipeLineageId + '/drafts', recipeVersion));
+
+  updateRecipeDraft = (recipeLineageId: string, recipeVersionId: string, recipeVersion: RecipeVersionWrite): Promise<RecipeVersion> =>
+    firstValueFrom(this.httpClient.put<RecipeVersion>(backendUrl + '/recipes/' + recipeLineageId + '/drafts/' + recipeVersionId, recipeVersion));
+
+  publishRecipeDraft = (recipeLineageId: string, recipeVersionId: string): Promise<RecipeVersion> =>
+    firstValueFrom(this.httpClient.post<RecipeVersion>(backendUrl + '/recipes/' + recipeLineageId + '/drafts/' + recipeVersionId + '/publish', {}));
+
+  discardRecipeDraft = (recipeLineageId: string, recipeVersionId: string): Promise<void> =>
+    firstValueFrom(this.httpClient.delete<void>(backendUrl + '/recipes/' + recipeLineageId + '/drafts/' + recipeVersionId));
+
+  deleteRecipeLineage = (recipeLineageId: string): Promise<void> =>
+    firstValueFrom(this.httpClient.delete<void>(backendUrl + '/recipes/' + recipeLineageId));
 }

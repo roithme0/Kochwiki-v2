@@ -17,7 +17,7 @@ describe('calculateDraftNutrition', () => {
       carbs: 60,
       protein: 13,
       fat: 7,
-      recipeIds: [],
+      recipeVersionIds: [],
     },
     {
       id: 2,
@@ -29,7 +29,7 @@ describe('calculateDraftNutrition', () => {
       carbs: 1,
       protein: 7,
       fat: 5,
-      recipeIds: [],
+      recipeVersionIds: [],
     },
     {
       id: 3,
@@ -41,7 +41,7 @@ describe('calculateDraftNutrition', () => {
       carbs: 5,
       protein: 3,
       fat: 2,
-      recipeIds: [],
+      recipeVersionIds: [],
     },
   ];
 

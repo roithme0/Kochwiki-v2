@@ -5,6 +5,7 @@ mat-card {
 }
 
 mat-card-content {
+  position: relative;
   padding: 1rem 1rem 0 !important;
 }
 
@@ -20,4 +21,10 @@ mat-card-header {
 
 mat-card-subtitle {
   height: 1lh;
+}
+
+.version-state-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }

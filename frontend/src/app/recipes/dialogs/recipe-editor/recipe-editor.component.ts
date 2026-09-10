@@ -17,7 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { Foodstuff } from '../../../foodstuffs/interfaces/foodstuff';
 import { FoodstuffBackendService } from '../../../foodstuffs/services/foodstuff-backend.service';
-import { Recipe, RecipeWrite } from '../../interfaces/recipe';
+import { RecipeVersion, RecipeVersionWrite } from '../../interfaces/recipe';
 import { RecipeBackendService } from '../../services/recipe-backend.service';
 import { SnackBarService } from '../../../services/snack-bar.service';
 import { RecipeIngredientsFormComponent } from '../forms/recipe-ingredients-form/recipe-ingredients-form.component';
@@ -27,7 +27,7 @@ import { RecipePreparationFormComponent } from '../forms/recipe-preparation-form
 type RecipeEditorState =
   | { status: 'loading' }
   | { status: 'ready' }
-  | { status: 'error'; source: 'foodstuffs' | 'recipe' };
+  | { status: 'error'; source: 'foodstuffs' | 'recipeVersion' };
 
 type LoadResult<T> =
   | { status: 'success'; value: T }
@@ -60,6 +60,13 @@ interface StepFormControls {
   description: FormControl<string | null>;
 }
 
+export type RecipeEditorMode = 'create' | 'active' | 'draft';
+
+export interface RecipeEditorSubmission {
+  recipeVersion: RecipeVersionWrite;
+  action: 'publish' | 'draft';
+}
+
 @Component({
   selector: 'app-recipe-editor',
   imports: [
@@ -85,11 +92,14 @@ export class RecipeEditorComponent {
   private readonly recipeBackendService = inject(RecipeBackendService);
   private readonly snackBarService = inject(SnackBarService);
 
-  readonly recipeId = input<number | null>(null);
-  readonly submitted = output<RecipeWrite>();
+  readonly recipeLineageId = input<string | null>(null);
+  readonly recipeVersionId = input<string | null>(null);
+  readonly mode = input<RecipeEditorMode>('create');
+  readonly submitting = input(false);
+  readonly submitted = output<RecipeEditorSubmission>();
   readonly state = signal<RecipeEditorState>({ status: 'loading' });
   readonly foodstuffs = signal<Foodstuff[]>([]);
-  readonly recipe = signal<Recipe | null>(null);
+  readonly recipeVersion = signal<RecipeVersion | null>(null);
 
   readonly recipeForm = this.fb.group<RecipeFormControls>({
     metaFormGroup: this.fb.group({
@@ -114,7 +124,8 @@ export class RecipeEditorComponent {
       .subscribe(() => void this.refreshFoodstuffs());
   }
 
-  onSubmit(): void {
+  onSubmit(action: 'publish' | 'draft'): void {
+    if (this.submitting()) return;
     const value = this.recipeForm.getRawValue();
     const { metaFormGroup, ingredientsFormGroup, preparationFormGroup } = value;
 
@@ -135,44 +146,47 @@ export class RecipeEditorComponent {
     }
 
     this.submitted.emit({
-      name: metaFormGroup.name,
-      originName: metaFormGroup.originName || null,
-      originUrl: metaFormGroup.originUrl || null,
-      servings: ingredientsFormGroup.servings,
-      ingredients: ingredientsFormGroup.ingredients.map((ingredient) => ({
-        index: ingredient.index!,
-        amount: ingredient.amount!,
-        foodstuffId: ingredient.foodstuffId!,
-      })),
-      preptime: preparationFormGroup.preptime,
-      steps: preparationFormGroup.steps.map((step) => ({
-        index: step.index!,
-        description: step.description!,
-      })),
+      action,
+      recipeVersion: {
+        name: metaFormGroup.name,
+        originName: metaFormGroup.originName || null,
+        originUrl: metaFormGroup.originUrl || null,
+        servings: ingredientsFormGroup.servings,
+        ingredients: ingredientsFormGroup.ingredients.map((ingredient) => ({
+          index: ingredient.index!,
+          amount: ingredient.amount!,
+          foodstuffId: ingredient.foodstuffId!,
+        })),
+        preptime: preparationFormGroup.preptime,
+        steps: preparationFormGroup.steps.map((step) => ({
+          index: step.index!,
+          description: step.description!,
+        })),
+      },
     });
   }
 
   errorMessage(): string {
     const state = this.state();
-    return state.status === 'error' && state.source === 'recipe'
+    return state.status === 'error' && state.source === 'recipeVersion'
       ? 'Rezept konnte nicht geladen werden.'
       : 'Zutaten konnten nicht geladen werden.';
   }
 
   private async loadInitialData(): Promise<void> {
     this.state.set({ status: 'loading' });
-    const recipeId = this.recipeId();
+    const recipeLineageId = this.recipeLineageId();
 
-    if (recipeId === null) {
+    if (recipeLineageId === null) {
       this.applyInitialResults(await this.loadFoodstuffs());
       return;
     }
 
-    const [foodstuffResult, recipeResult] = await Promise.all([
+    const [foodstuffResult, recipeVersionResult] = await Promise.all([
       this.loadFoodstuffs(),
-      this.loadRecipe(recipeId),
+      this.loadRecipeVersion(recipeLineageId, this.recipeVersionId()),
     ]);
-    this.applyInitialResults(foodstuffResult, recipeResult);
+    this.applyInitialResults(foodstuffResult, recipeVersionResult);
   }
 
   private async loadFoodstuffs(): Promise<LoadResult<Foodstuff[]>> {
@@ -189,21 +203,23 @@ export class RecipeEditorComponent {
     }
   }
 
-  private async loadRecipe(id: number): Promise<LoadResult<Recipe>> {
+  private async loadRecipeVersion(recipeLineageId: string, recipeVersionId: string | null): Promise<LoadResult<RecipeVersion>> {
     try {
       return {
         status: 'success',
-        value: await this.recipeBackendService.getRecipeById(id),
+        value: recipeVersionId === null
+          ? await this.recipeBackendService.getActiveRecipeVersion(recipeLineageId)
+          : await this.recipeBackendService.getRecipeVersion(recipeLineageId, recipeVersionId),
       };
     } catch (error: unknown) {
-      console.error('failed to fetch recipe: ', error);
+      console.error('failed to fetch recipe version: ', error);
       return { status: 'error' };
     }
   }
 
   private applyInitialResults(
     foodstuffResult: LoadResult<Foodstuff[]>,
-    recipeResult?: LoadResult<Recipe>
+    recipeVersionResult?: LoadResult<RecipeVersion>
   ): void {
     if (foodstuffResult.status === 'error') {
       this.state.set({ status: 'error', source: 'foodstuffs' });
@@ -211,14 +227,14 @@ export class RecipeEditorComponent {
       return;
     }
 
-    if (recipeResult?.status === 'error') {
-      this.state.set({ status: 'error', source: 'recipe' });
+    if (recipeVersionResult?.status === 'error') {
+      this.state.set({ status: 'error', source: 'recipeVersion' });
       this.snackBarService.open('Rezept konnte nicht geladen werden');
       return;
     }
 
     this.foodstuffs.set(foodstuffResult.value);
-    if (recipeResult?.status === 'success') this.recipe.set(recipeResult.value);
+    if (recipeVersionResult?.status === 'success') this.recipeVersion.set(recipeVersionResult.value);
     this.state.set({ status: 'ready' });
   }
 

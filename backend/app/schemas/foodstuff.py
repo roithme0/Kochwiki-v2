@@ -1,5 +1,6 @@
 from decimal import Decimal
 from typing import Self
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -59,4 +60,4 @@ class FoodstuffSummaryOut(BaseModel):
 
 
 class FoodstuffOut(FoodstuffSummaryOut):
-    recipeIds: list[int]
+    recipeVersionIds: list[UUID]

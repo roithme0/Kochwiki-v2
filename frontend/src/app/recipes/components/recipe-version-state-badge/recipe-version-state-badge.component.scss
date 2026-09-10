@@ -1,0 +1,34 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:host.draft {
+  color: #3f001b;
+  background-color: #ffd9e1;
+}
+
+:host.historical {
+  color: #3a2d30;
+  background-color: #f1e5e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host.draft {
+    color: #ffd9e1;
+    background-color: #8f0045;
+  }
+
+  :host.historical {
+    color: #ece0e1;
+    background-color: #3a3334;
+  }
+}

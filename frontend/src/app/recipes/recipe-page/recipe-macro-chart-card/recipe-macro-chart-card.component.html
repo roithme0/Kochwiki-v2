@@ -8,12 +8,12 @@
 
     <mat-card-content>
       <!-- chart -->
-      @if(recipe().carbs != null && recipe().protein != null && recipe().fat !=
+      @if(recipeVersion().carbs != null && recipeVersion().protein != null && recipeVersion().fat !=
       null){
       <div class="chart-wrapper">
         <app-macro-chart
           class="macro-chart"
-          [nutrition]="recipe()"
+          [nutrition]="recipeVersion()"
           (legendUpdated)="legend.set($event)"
         />
         @if(showLegend()){
@@ -28,7 +28,7 @@
       }
 
       <!-- no chart -->
-      @if(recipe().carbs == null || recipe().protein == null || recipe().fat ==
+      @if(recipeVersion().carbs == null || recipeVersion().protein == null || recipeVersion().fat ==
       null){
       <p class="incomplete-message">
         Nährwertangaben der einzelnen Zutaten unvollständig.

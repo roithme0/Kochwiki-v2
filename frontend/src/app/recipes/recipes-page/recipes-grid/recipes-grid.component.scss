@@ -13,6 +13,12 @@
   gap: 0.5rem;
 }
 
+.recipe-link {
+  color: inherit;
+  display: block;
+  text-decoration: none;
+}
+
 .no-recipes-placeholder {
   flex: 1;
   display: flex;

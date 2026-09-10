@@ -11,8 +11,12 @@ import { SnackBarService } from '../../services/snack-bar.service';
 import { RecipeBackendService } from '../services/recipe-backend.service';
 import { RecipesPageComponent } from './recipes-page.component';
 
-const recipe = (id: number, name: string) => ({
-  id,
+const recipeVersion = (id: number, name: string) => ({
+  recipeLineageId: `00000000-0000-4000-8000-00000000000${id}`,
+  recipeVersionId: `00000000-0000-0000-0000-00000000000${id}`,
+  state: 'active' as const,
+  createdAt: '2026-09-10T10:00:00Z',
+  lastModified: '2026-09-10T10:00:00Z',
   name,
   servings: 1,
   preptime: null,
@@ -41,18 +45,18 @@ function createDeferred<T>(): Deferred<T> {
 
 describe('RecipesPageComponent', () => {
   let recipesChanged$: Subject<void>;
-  const getAllRecipes = jasmine.createSpy('getAllRecipes');
+  const getAllRecipeVersions = jasmine.createSpy('getAllRecipeVersions');
   const snackBarOpen = jasmine.createSpy('open');
 
   beforeEach(() => {
     recipesChanged$ = new Subject<void>();
-    getAllRecipes.calls.reset();
+    getAllRecipeVersions.calls.reset();
     snackBarOpen.calls.reset();
     TestBed.configureTestingModule({
       providers: [
         {
           provide: RecipeBackendService,
-          useValue: { recipesChanged$, getAllRecipes },
+          useValue: { recipesChanged$, getAllRecipeVersions },
         },
         { provide: PageHeaderService, useValue: { updateHeader: () => {} } },
         { provide: SnackBarService, useValue: { open: snackBarOpen } },
@@ -62,9 +66,9 @@ describe('RecipesPageComponent', () => {
   });
 
   it('loads recipes initially and after recipe changes', async () => {
-    getAllRecipes.and.returnValues(
-      Promise.resolve([recipe(1, 'Suppe')]),
-      Promise.resolve([recipe(2, 'Salat')])
+    getAllRecipeVersions.and.returnValues(
+      Promise.resolve([recipeVersion(1, 'Suppe')]),
+      Promise.resolve([recipeVersion(2, 'Salat')])
     );
     const component = TestBed.runInInjectionContext(
       () => new RecipesPageComponent()
@@ -74,17 +78,17 @@ describe('RecipesPageComponent', () => {
     recipesChanged$.next();
     await Promise.resolve();
 
-    expect(getAllRecipes).toHaveBeenCalledTimes(2);
-    expect(component.recipesState()).toEqual({
+    expect(getAllRecipeVersions).toHaveBeenCalledTimes(2);
+    expect(component.recipeVersionsState()).toEqual({
       status: 'success',
-      data: [recipe(2, 'Salat')],
+      data: [recipeVersion(2, 'Salat')],
     });
   });
 
   it('retains loaded recipes and reports a refresh error', async () => {
-    const loadedRecipes = [recipe(1, 'Suppe')];
-    getAllRecipes.and.returnValues(
-      Promise.resolve(loadedRecipes),
+    const loadedRecipeVersions = [recipeVersion(1, 'Suppe')];
+    getAllRecipeVersions.and.returnValues(
+      Promise.resolve(loadedRecipeVersions),
       Promise.reject(new Error('request failed'))
     );
     const component = TestBed.runInInjectionContext(
@@ -96,9 +100,9 @@ describe('RecipesPageComponent', () => {
     recipesChanged$.next();
     await Promise.resolve();
 
-    expect(component.recipesState()).toEqual({
+    expect(component.recipeVersionsState()).toEqual({
       status: 'error',
-      data: loadedRecipes,
+      data: loadedRecipeVersions,
     });
     expect(snackBarOpen).toHaveBeenCalledOnceWith(
       'Rezepte konnten nicht geladen werden'
@@ -106,8 +110,8 @@ describe('RecipesPageComponent', () => {
   });
 
   it('ignores a late request success after destruction', async () => {
-    const deferred = createDeferred<ReturnType<typeof recipe>[]>();
-    getAllRecipes.and.returnValue(deferred.promise);
+    const deferred = createDeferred<ReturnType<typeof recipeVersion>[]>();
+    getAllRecipeVersions.and.returnValue(deferred.promise);
     const injector = createEnvironmentInjector(
       [],
       TestBed.inject(EnvironmentInjector)
@@ -119,10 +123,10 @@ describe('RecipesPageComponent', () => {
 
     component.ngOnInit();
     injector.destroy();
-    deferred.resolve([recipe(1, 'Suppe')]);
+    deferred.resolve([recipeVersion(1, 'Suppe')]);
     await Promise.resolve();
 
-    expect(component.recipesState()).toEqual({ status: 'loading', data: [] });
+    expect(component.recipeVersionsState()).toEqual({ status: 'loading', data: [] });
     expect(snackBarOpen).not.toHaveBeenCalled();
   });
 });

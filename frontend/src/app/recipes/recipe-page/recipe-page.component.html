@@ -1,16 +1,18 @@
 <main>
-  @if(recipeIsLoading()){
+  @if(recipeVersionIsLoading()){
   <div class="spinner-wrapper">
     <mat-spinner diameter="25" />
   </div>
-  }@else { @if(recipe != null){
+  }@else { @if(recipeVersion; as recipeVersion){
   <article>
-    <app-ingredients-grid [recipe]="recipe" />
-    <app-steps-grid [recipe]="recipe" />
-    <app-recipe-macro-chart-card [recipe]="recipe" />
+    <app-recipe-version-state-badge class="version-state-badge" [state]="recipeVersion.state" />
+    <app-ingredients-grid [recipeVersion]="recipeVersion" />
+    <app-steps-grid [recipeVersion]="recipeVersion" />
+    <app-recipe-macro-chart-card [recipeVersion]="recipeVersion" />
     <div class="spacer"></div>
   </article>
 
+  @if(recipeVersion.state !== 'historical') {
   <div class="buttons-wrapper">
     <button
       mat-mini-fab
@@ -20,19 +22,20 @@
       <mat-icon aria-hidden="false" aria-label="edit icon" fontIcon="edit" />
     </button>
 
-    <button
-      mat-mini-fab
-      color="warn"
-      (click)="openDeleteRecipeDialog()"
-      class="medium-size-button"
-    >
-      <mat-icon
-        aria-hidden="false"
-        aria-label="delete icon"
-        fontIcon="delete"
-      />
-    </button>
+    @if(recipeVersion.state === 'draft') {
+      <button mat-mini-fab color="primary" (click)="openPublishDraftDialog()" class="medium-size-button" aria-label="Entwurf als aktive Version übernehmen">
+        <mat-icon aria-hidden="true" fontIcon="publish" />
+      </button>
+      <button mat-mini-fab color="warn" (click)="openDiscardDraftDialog()" class="medium-size-button" aria-label="Entwurf verwerfen">
+        <mat-icon aria-hidden="true" fontIcon="delete" />
+      </button>
+    } @else {
+      <button mat-mini-fab color="warn" (click)="openDeleteRecipeDialog()" class="medium-size-button" aria-label="Rezeptlinie löschen">
+        <mat-icon aria-hidden="true" fontIcon="delete" />
+      </button>
+    }
   </div>
+  }
   }@else {
   <div class="recipe-not-found-placeholder">
     <p>Rezept nicht gefunden.</p>

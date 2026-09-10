@@ -36,7 +36,7 @@ def foodstuff_out(foodstuff: Foodstuff) -> FoodstuffOut:
         carbs=summary.carbs,
         protein=summary.protein,
         fat=summary.fat,
-        recipeIds=sorted({ingredient.recipe_id for ingredient in foodstuff.ingredients}),
+        recipeVersionIds=sorted({ingredient.recipe_version_id for ingredient in foodstuff.ingredients}),
     )
 
 

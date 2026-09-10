@@ -9,7 +9,7 @@ import { PageHeaderService } from '../../services/page-header.service';
 import { SnackBarService } from '../../services/snack-bar.service';
 import { LoadState } from '../../utils/load-state';
 import { RecipeCreateDialogComponent } from '../dialogs/recipe-create-dialog/recipe-create-dialog.component';
-import { Recipe } from '../interfaces/recipe';
+import { RecipeVersion } from '../interfaces/recipe';
 import { RecipeBackendService } from '../services/recipe-backend.service';
 import { RecipesGridComponent } from './recipes-grid/recipes-grid.component';
 import { RecipesSearchComponent } from './recipes-search/recipes-search.component';
@@ -36,7 +36,7 @@ export class RecipesPageComponent {
   readonly pageHeaderService = inject(PageHeaderService);
 
   readonly showSearch = signal(false);
-  readonly recipesState = signal<LoadState<Recipe[]>>({
+  readonly recipeVersionsState = signal<LoadState<RecipeVersion[]>>({
     status: 'loading',
     data: [],
   });
@@ -51,8 +51,8 @@ export class RecipesPageComponent {
     this.pageHeaderService.updateHeader(true, 'Rezepte', '', true);
     this.recipeBackendService.recipesChanged$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => void this.fetchRecipes());
-    void this.fetchRecipes();
+      .subscribe(() => void this.fetchRecipeVersions());
+    void this.fetchRecipeVersions();
   }
 
   openCreateRecipeDialog(): void {
@@ -67,20 +67,20 @@ export class RecipesPageComponent {
     });
   }
 
-  private async fetchRecipes(): Promise<void> {
-    this.recipesState.update(({ data }) => ({ status: 'loading', data }));
+  private async fetchRecipeVersions(): Promise<void> {
+    this.recipeVersionsState.update(({ data }) => ({ status: 'loading', data }));
     try {
-      const recipes = await this.recipeBackendService.getAllRecipes();
+      const recipeVersions = await this.recipeBackendService.getAllRecipeVersions();
       if (this.isDestroyed) return;
-      this.recipesState.set({
+      this.recipeVersionsState.set({
         status: 'success',
-        data: recipes,
+        data: recipeVersions,
       });
     } catch (error: unknown) {
       if (this.isDestroyed) return;
-      console.error('failed to fetch recipes: ', error);
+      console.error('failed to fetch recipe versions: ', error);
       this.snackBarService.open('Rezepte konnten nicht geladen werden');
-      this.recipesState.update(({ data }) => ({ status: 'error', data }));
+      this.recipeVersionsState.update(({ data }) => ({ status: 'error', data }));
     }
   }
 }

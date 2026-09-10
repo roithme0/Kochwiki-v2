@@ -34,7 +34,7 @@ describe('FoodstuffBackendService', () => {
       carbs: null,
       protein: null,
       fat: null,
-      recipeIds: [],
+      recipeVersionIds: [],
     };
 
     const responsePromise = service.patchFoodstuff(foodstuff.id, updates);

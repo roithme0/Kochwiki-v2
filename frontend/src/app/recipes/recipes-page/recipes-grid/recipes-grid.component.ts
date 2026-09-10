@@ -1,12 +1,12 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RecipesGridElementComponent } from '../recipes-grid-element/recipes-grid-element.component';
 import { WindowWidthService } from '../../../services/window-width.service';
 import { RecipesGridControlsService } from '../services/recipes-grid-controls.service';
-import { Recipe } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 
 @Component({
   selector: 'app-recipes-grid',
@@ -15,21 +15,21 @@ import { Recipe } from '../../interfaces/recipe';
     RecipesGridElementComponent,
     MatIconModule,
     MatButtonModule,
+    RouterLink,
   ],
   templateUrl: './recipes-grid.component.html',
   styleUrl: './recipes-grid.component.scss',
 })
 export class RecipesGridComponent {
   readonly windowWidthService = inject(WindowWidthService);
-  readonly router = inject(Router);
   readonly recipesGridControlsService = inject(RecipesGridControlsService);
-  readonly recipes = input<Recipe[]>([]);
+  readonly recipeVersions = input<RecipeVersion[]>([]);
 
-  displayedRecipes = computed((): Recipe[] => {
-    let displayedRecipes = this.recipes();
-    displayedRecipes = this.filterRecipesByNameOrOrigin(displayedRecipes);
-    displayedRecipes = this.sortRecipes('name', displayedRecipes);
-    return displayedRecipes;
+  displayedRecipeVersions = computed((): RecipeVersion[] => {
+    let recipeVersions = this.recipeVersions();
+    recipeVersions = this.filterRecipeVersionsByNameOrOrigin(recipeVersions);
+    recipeVersions = this.sortRecipeVersions(recipeVersions);
+    return recipeVersions;
   });
 
   displayedColumns = computed((): number => {
@@ -44,19 +44,27 @@ export class RecipesGridComponent {
     }
   });
 
-  filterRecipesByNameOrOrigin(recipes: Recipe[]): Recipe[] {
+  filterRecipeVersionsByNameOrOrigin(recipeVersions: RecipeVersion[]): RecipeVersion[] {
     const searchBy = this.recipesGridControlsService.searchBy();
     return searchBy === ''
-      ? recipes
-      : recipes.filter(
-          (recipe) =>
-            recipe.name.toLowerCase().includes(searchBy.toLowerCase()) ||
-            recipe.originName?.toLowerCase().includes(searchBy.toLowerCase())
+      ? recipeVersions
+      : recipeVersions.filter(
+          (recipeVersion) =>
+            recipeVersion.name.toLowerCase().includes(searchBy.toLowerCase()) ||
+            recipeVersion.originName?.toLowerCase().includes(searchBy.toLowerCase())
         );
   }
 
-  sortRecipes = (sortBy: string, recipes: Recipe[]): Recipe[] =>
-    [...recipes].sort((a, b) =>
-      sortBy === 'name' ? a.name.localeCompare(b.name) : 0
-    );
+  sortRecipeVersions(recipeVersions: RecipeVersion[]): RecipeVersion[] {
+    return [...recipeVersions].sort((a, b) => {
+      const modifiedOrder = Date.parse(b.lastModified) - Date.parse(a.lastModified);
+      return modifiedOrder !== 0 ? modifiedOrder : b.recipeVersionId.localeCompare(a.recipeVersionId);
+    });
+  }
+
+  recipeVersionLink(recipeVersion: RecipeVersion): string[] {
+    return recipeVersion.state === 'active'
+      ? ['/recipes', recipeVersion.recipeLineageId]
+      : ['/recipes', recipeVersion.recipeLineageId, 'versions', recipeVersion.recipeVersionId];
+  }
 }

@@ -22,7 +22,7 @@ describe('FoodstuffsTableComponent', () => {
     carbs: 3,
     protein: 1,
     fat: 0,
-    recipeIds: [],
+    recipeVersionIds: [],
   };
 
   let component: FoodstuffsTableComponent;

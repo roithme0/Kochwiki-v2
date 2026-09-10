@@ -1,6 +1,6 @@
 import { Component, WritableSignal, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Recipe } from '../../interfaces/recipe';
+import { RecipeVersion } from '../../interfaces/recipe';
 import { ChartLegendElement } from '../../../interfaces/chart-legend-element';
 import { MatCardModule } from '@angular/material/card';
 import { ChartLegendElementComponent } from '../../../core/components/chart-legend-element/chart-legend-element.component';
@@ -18,7 +18,7 @@ import { MacroChartComponent } from '../../../core/components/macro-chart/macro-
   styleUrl: './recipe-macro-chart-card.component.scss',
 })
 export class RecipeMacroChartCardComponent {
-  recipe = input.required<Recipe>();
+  recipeVersion = input.required<RecipeVersion>();
   showHeader = input<boolean>(true);
   showLegend = input<boolean>(true);
 
