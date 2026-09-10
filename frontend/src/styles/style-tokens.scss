@@ -1,0 +1,19 @@
+$primary-font-size: 16px;
+
+$high-emphasis-font-color: var(--mat-app-text-color);
+$medium-emphasis-font-color: color-mix(
+  in srgb,
+  var(--mat-app-text-color) 50%,
+  transparent
+);
+
+$base-container-color: rgba(128, 128, 128, 0.1);
+$accent-container-color: var(--app-accent-container-color);
+$on-accent-container-color: var(--app-on-accent-container-color);
+$neutral-container-color: var(--app-neutral-container-color);
+$on-neutral-container-color: var(--app-on-neutral-container-color);
+$container-box-shadow: var(--mdc-elevated-card-container-elevation);
+
+$transform-duration: 0.5s;
+
+$floating-button-position: 1rem;

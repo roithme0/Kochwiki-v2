@@ -1,4 +1,4 @@
-@use "../../../styles/styles.scss" as *;
+@use "../../../styles/style-tokens" as tokens;
 
 :host {
   display: flex;
@@ -21,8 +21,8 @@ main {
 .navigation-link {
   max-width: 8rem;
   border-radius: 15%;
-  background-color: $element-background-color;
-  box-shadow: $element-box-shadow;
+  background-color: tokens.$base-container-color;
+  box-shadow: tokens.$container-box-shadow;
   position: relative;
   padding: 2%;
   display: flex;

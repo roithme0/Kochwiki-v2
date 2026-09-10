@@ -1,4 +1,4 @@
-@use "../../../styles/styles.scss" as *;
+@use "../../../styles/style-tokens" as tokens;
 
 :host {
   /* stretch hole page */
@@ -44,9 +44,9 @@ main {
   justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
-  width: calc(100% - 2 * $floating-button-position);
+  width: calc(100% - 2 * tokens.$floating-button-position);
   max-width: 30rem;
   position: absolute;
-  right: $floating-button-position;
-  bottom: $floating-button-position;
+  right: tokens.$floating-button-position;
+  bottom: tokens.$floating-button-position;
 }

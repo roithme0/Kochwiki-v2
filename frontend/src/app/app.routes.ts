@@ -1,9 +1,5 @@
 import { Routes } from '@angular/router';
 import { HomePageComponent } from './core/home-page/home-page.component';
-import { FoodstuffsPageComponent } from './foodstuffs/foodstuffs-page/foodstuffs-page.component';
-import { RecipesPageComponent } from './recipes/recipes-page/recipes-page.component';
-import { RecipePageComponent } from './recipes/recipe-page/recipe-page.component';
-import { SelectUserPageComponent } from './core/select-user-page/select-user-page.component';
 import { AuthGuard } from './core/classes/auth-guard';
 
 export const routes: Routes = [
@@ -15,7 +11,10 @@ export const routes: Routes = [
   },
   {
     path: 'foodstuffs',
-    component: FoodstuffsPageComponent,
+    loadComponent: () =>
+      import('./foodstuffs/foodstuffs-page/foodstuffs-page.component').then(
+        ({ FoodstuffsPageComponent }) => FoodstuffsPageComponent,
+      ),
     title: 'Lebensmittel',
     canActivate: [AuthGuard],
   },
@@ -25,24 +24,36 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: RecipesPageComponent,
+        loadComponent: () =>
+          import('./recipes/recipes-page/recipes-page.component').then(
+            ({ RecipesPageComponent }) => RecipesPageComponent,
+          ),
         title: 'Rezepte',
       },
       {
         path: ':lineageId/versions/:recipeVersionId',
-        component: RecipePageComponent,
+        loadComponent: () =>
+          import('./recipes/recipe-page/recipe-page.component').then(
+            ({ RecipePageComponent }) => RecipePageComponent,
+          ),
         title: 'Rezeptversion',
       },
       {
         path: ':lineageId',
-        component: RecipePageComponent,
+        loadComponent: () =>
+          import('./recipes/recipe-page/recipe-page.component').then(
+            ({ RecipePageComponent }) => RecipePageComponent,
+          ),
         title: 'Rezept',
       },
     ],
   },
   {
     path: 'userSelection',
-    component: SelectUserPageComponent,
+    loadComponent: () =>
+      import('./core/select-user-page/select-user-page.component').then(
+        ({ SelectUserPageComponent }) => SelectUserPageComponent,
+      ),
     title: 'Benutzer auswählen',
   },
   { path: '**', redirectTo: '', pathMatch: 'full' },

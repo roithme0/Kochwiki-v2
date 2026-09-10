@@ -1,3 +1,5 @@
+@use "../../../../styles/style-tokens" as tokens;
+
 :host {
   display: inline-flex;
   align-items: center;
@@ -12,23 +14,11 @@
 }
 
 :host.draft {
-  color: #3f001b;
-  background-color: #ffd9e1;
+  color: tokens.$on-accent-container-color;
+  background-color: tokens.$accent-container-color;
 }
 
 :host.historical {
-  color: #3a2d30;
-  background-color: #f1e5e6;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host.draft {
-    color: #ffd9e1;
-    background-color: #8f0045;
-  }
-
-  :host.historical {
-    color: #ece0e1;
-    background-color: #3a3334;
-  }
+  color: tokens.$on-neutral-container-color;
+  background-color: tokens.$neutral-container-color;
 }

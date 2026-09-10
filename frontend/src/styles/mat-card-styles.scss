@@ -1,19 +1,19 @@
-@use "./styles.scss" as *;
+@use "./style-tokens" as tokens;
 
 mat-card {
   --mdc-elevated-card-container-shape: 1rem;
   --mat-card-title-text-line-height: 18px;
   --mat-card-title-text-size: 18px;
-  --mat-card-subtitle-text-line-height: #{$standard-font-size};
-  --mat-card-subtitle-text-size: #{$standard-font-size};
-  --mdc-elevated-card-container-color: #{$element-background-color};
+  --mat-card-subtitle-text-line-height: #{tokens.$primary-font-size};
+  --mat-card-subtitle-text-size: #{tokens.$primary-font-size};
+  --mdc-elevated-card-container-color: #{tokens.$base-container-color};
   display: flex;
   flex-direction: column;
 }
 
 mat-card-content {
   padding: 0 1rem 1rem;
-  font-size: $standard-font-size;
+  font-size: tokens.$primary-font-size;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -27,6 +27,7 @@ mat-card-header {
 }
 
 mat-card-title {
+  color: tokens.$high-emphasis-font-color;
   height: 1lh;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -37,6 +38,6 @@ mat-card-title {
 }
 
 mat-card-subtitle {
+  color: tokens.$medium-emphasis-font-color;
   padding: 0.25rem 0 0 !important;
-  opacity: 0.5;
 }

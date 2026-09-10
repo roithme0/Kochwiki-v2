@@ -1,11 +1,4 @@
-$standard-font-size: 16px;
-
-$element-background-color: rgba(128, 128, 128, 0.1);
-$element-box-shadow: var(--mdc-elevated-card-container-elevation);
-
-$transform-duration: 0.5s;
-
-$floating-button-position: 1rem;
+@use "./style-tokens" as tokens;
 
 html,
 body,
@@ -91,7 +84,7 @@ video {
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: $standard-font-size;
+  font-size: tokens.$primary-font-size;
   font: inherit;
   vertical-align: baseline;
 }
@@ -99,8 +92,8 @@ video {
 html {
   // drop down of auto complete field
   --mat-autocomplete-container-shape: 0.5rem;
-  --mat-optgroup-label-text-size: #{$standard-font-size};
-  --mat-option-label-text-size: #{$standard-font-size};
+  --mat-optgroup-label-text-size: #{tokens.$primary-font-size};
+  --mat-option-label-text-size: #{tokens.$primary-font-size};
 
   overscroll-behavior-y: none; /* prevent pull to refresh on mobile */
   height: 100dvh;

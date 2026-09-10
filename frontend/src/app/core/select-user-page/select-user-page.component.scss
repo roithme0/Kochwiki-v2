@@ -1,4 +1,4 @@
-@use "../../../styles/styles.scss" as *;
+@use "../../../styles/style-tokens" as tokens;
 @use "../../../styles/mat-card-styles.scss" as *;
 
 main {
@@ -36,6 +36,6 @@ mat-card-title {
 
 .create-user-button {
   position: absolute;
-  bottom: $floating-button-position;
-  right: $floating-button-position;
+  bottom: tokens.$floating-button-position;
+  right: tokens.$floating-button-position;
 }

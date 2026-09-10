@@ -1,4 +1,4 @@
-@use "../../../styles/styles.scss" as *;
+@use "../../../styles/style-tokens" as tokens;
 
 :host {
   /* stretch hole page */
@@ -48,8 +48,8 @@ img {
 
 .buttons-wrapper {
   position: absolute;
-  right: $floating-button-position;
-  bottom: $floating-button-position;
+  right: tokens.$floating-button-position;
+  bottom: tokens.$floating-button-position;
   display: flex;
   gap: 0.5rem;
 }

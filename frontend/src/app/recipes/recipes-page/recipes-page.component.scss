@@ -1,4 +1,4 @@
-@use "../../../styles/styles.scss" as *;
+@use "../../../styles/style-tokens" as tokens;
 
 :host {
   /* stretch hole page */
@@ -48,7 +48,7 @@ main {
   background-color: var(--mat-app-background-color);
   box-shadow: 0 -1rem 1rem 1rem var(--mat-app-background-color);
   pointer-events: none;
-  transition: opacity $transform-duration ease-out;
+  transition: opacity tokens.$transform-duration ease-out;
 
   &.hide {
     opacity: 0;
@@ -60,9 +60,9 @@ main {
   justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
-  width: calc(100% - 2 * $floating-button-position);
+  width: calc(100% - 2 * tokens.$floating-button-position);
   max-width: 30rem;
   position: absolute;
-  right: $floating-button-position;
-  bottom: $floating-button-position;
+  right: tokens.$floating-button-position;
+  bottom: tokens.$floating-button-position;
 }
