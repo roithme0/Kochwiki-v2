@@ -4,7 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { environment } from '../../../environments/environment';
+import { backendUrl } from '../constants/api';
 import { User } from '../models/user';
 import { UserBackendService } from './user-backend.service';
 
@@ -30,7 +30,7 @@ describe('UserBackendService', () => {
     const responsePromise: Promise<User> = service.getUserById(user.id);
 
     const request = httpTesting.expectOne(
-      `${environment.backendUrl}/users/${user.id}`
+      `${backendUrl}/users/${user.id}`
     );
     expect(request.request.method).toBe('GET');
     request.flush(user);

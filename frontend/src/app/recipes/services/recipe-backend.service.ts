@@ -2,9 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RecipeVersion, RecipeVersionWrite } from '../models/recipe';
 import { firstValueFrom, Subject } from 'rxjs';
-import { environment } from '../../../environments/environment';
-
-const backendUrl: string = environment.backendUrl;
+import { backendUrl } from '../../core/constants/api';
 
 @Injectable({
   providedIn: 'root',

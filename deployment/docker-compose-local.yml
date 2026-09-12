@@ -13,8 +13,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
 
-  backend-app:
+  backend:
     build:
       context: "../backend"
     ports:
@@ -26,13 +28,24 @@ services:
       DATABASE_URL: postgresql+psycopg://user:password@db:5432/kochwiki
       CORS_ORIGINS: http://localhost:8000,http://localhost:4200
 
-  angular-app:
+  frontend:
     build:
       context: "../frontend"
       dockerfile: Dockerfile
       args:
         CONFIGURATION: local
+    depends_on:
+      - backend
+
+  gateway:
+    image: nginx:1.25
     ports:
       - 8000:80
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - backend-app
+      - backend
+      - frontend
+
+volumes:
+  postgresql-data:
