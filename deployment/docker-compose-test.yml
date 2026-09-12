@@ -1,4 +1,4 @@
-name: kochwiki-test
+name: kochwiki-v2-test
 
 services:
   db:

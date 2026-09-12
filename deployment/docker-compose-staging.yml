@@ -1,5 +1,4 @@
----
-version: "3.1"
+name: kochwiki-v2-staging
 
 services:
   db:
@@ -10,7 +9,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
-      - /volume1/docker/Kochwiki-v2/staging/postgresql/data:/var/lib/postgresql/data
+      - ./staging/postgresql/data:/var/lib/postgresql/data
 
   backend:
     image: roithme0/kochwiki-v2-backend:alpha
