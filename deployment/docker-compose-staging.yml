@@ -10,10 +10,12 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
-      - /volume1/docker/Kochwiki/staging/postgresql/data:/var/lib/postgresql/data
+      - /volume1/docker/Kochwiki-v2/staging/postgresql/data:/var/lib/postgresql/data
 
   backend:
     image: roithme0/kochwiki-v2-backend:alpha
+    environment:
+      DATABASE_URL: postgresql+psycopg://user:password@db:5432/kochwiki
     depends_on:
       - db
 
