@@ -13,12 +13,12 @@ services:
       - /volume1/docker/Kochwiki/staging/postgresql/data:/var/lib/postgresql/data
 
   backend:
-    image: roithme0/kochwiki-backend:alpha
+    image: roithme0/kochwiki-v2-backend:alpha
     depends_on:
       - db
 
   frontend:
-    image: roithme0/kochwiki-frontend:alpha
+    image: roithme0/kochwiki-v2-frontend:alpha
     depends_on:
       - backend
 
