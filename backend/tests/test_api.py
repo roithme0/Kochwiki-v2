@@ -240,11 +240,9 @@ def test_duplicate_foodstuff_membership_and_positions_are_rejected(client: TestC
             ],
         ),
     )
-    assert duplicate_foodstuff.status_code == 409
-    assert duplicate_foodstuff.json() == {
-        "statusCode": 409,
-        "message": "A foodstuff may only occur once per recipe",
-    }
+    assert duplicate_foodstuff.status_code == 422
+    assert duplicate_foodstuff.json()["details"][0]["loc"] == ["body", "ingredients"]
+    assert "foodstuffs must be unique per recipe" in duplicate_foodstuff.json()["details"][0]["msg"]
     duplicate_ingredient_position = client.post(
         "/recipes",
         json=recipe_version_payload(

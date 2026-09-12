@@ -45,8 +45,10 @@ class RecipeVersionWrite(RecipeVersionFields):
 
     @field_validator("ingredients")
     @classmethod
-    def validate_unique_ingredient_indexes(cls, value: list[IngredientWrite]) -> list[IngredientWrite]:
+    def validate_unique_ingredients(cls, value: list[IngredientWrite]) -> list[IngredientWrite]:
         _validate_unique_indexes([ingredient.index for ingredient in value], "ingredient")
+        if len({ingredient.foodstuffId for ingredient in value}) != len(value):
+            raise ValueError("foodstuffs must be unique per recipe")
         return value
 
     @field_validator("steps")
