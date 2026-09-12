@@ -12,16 +12,22 @@ services:
     volumes:
       - /volume1/docker/Kochwiki/staging/postgresql/data:/var/lib/postgresql/data
 
-  backend-app:
-    image: roithme0/kochwiki-backend:alpha
-    ports:
-      - 8889:8080
+  backend:
+    image: roithme0/kochwiki-v2-backend:alpha
     depends_on:
       - db
 
-  frontend-app:
-    image: roithme0/kochwiki-frontend:alpha
+  frontend:
+    image: roithme0/kochwiki-v2-frontend:alpha
+    depends_on:
+      - backend
+
+  gateway:
+    image: nginx:1.25
     ports:
       - 8001:80
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - backend-app
+      - backend
+      - frontend

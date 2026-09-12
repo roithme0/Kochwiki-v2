@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { FoodstuffBackendService } from './foodstuff-backend.service';
 import { Foodstuff } from '../models/foodstuff';
 import { FoodstuffUnit } from '../models/foodstuff-unit';
-import { environment } from '../../../environments/environment';
+import { backendUrl } from '../../core/constants/api';
 
 describe('FoodstuffBackendService', () => {
   let service: FoodstuffBackendService;
@@ -40,7 +40,7 @@ describe('FoodstuffBackendService', () => {
     const responsePromise = service.patchFoodstuff(foodstuff.id, updates);
 
     const request = httpTesting.expectOne(
-      `${environment.backendUrl}/foodstuffs/${foodstuff.id}`
+      `${backendUrl}/foodstuffs/${foodstuff.id}`
     );
     expect(request.request.method).toBe('PATCH');
     expect(request.request.body).toEqual(updates);

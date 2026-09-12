@@ -6,9 +6,7 @@ import {
   FoodstuffVerboseNames,
   FoodstuffUnitChoices,
 } from '../models/foodstuff-meta-data';
-import { environment } from '../../../environments/environment';
-
-const backendUrl: string = environment.backendUrl;
+import { backendUrl } from '../../core/constants/api';
 
 @Injectable({
   providedIn: 'root',
