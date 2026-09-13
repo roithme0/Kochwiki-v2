@@ -4,7 +4,10 @@
   top: 0;
   z-index: 2;
   padding: 0.5rem 24px;
-  background: var(--section-nav-background, var(--mdc-dialog-container-color));
+  background: var(
+    --section-nav-background,
+    var(--mat-dialog-container-color, var(--mat-app-background-color))
+  );
 }
 
 .track {
