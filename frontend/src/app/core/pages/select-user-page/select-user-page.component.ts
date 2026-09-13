@@ -9,12 +9,13 @@ import { User } from '../../models/user';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-select-user-page',
-  imports: [MatCardModule, MatButtonModule, MatIconModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './select-user-page.component.html',
   styleUrl: './select-user-page.component.scss',
 })
@@ -83,7 +84,7 @@ export class SelectUserPageComponent {
       .subscribe(() => void this.fetchUsers());
   }
 
-  private async fetchUsers(): Promise<void> {
+  async fetchUsers(): Promise<void> {
     this.isLoading.set(true);
     this.hasError.set(false);
 

@@ -81,46 +81,18 @@ describe('RecipeIngredientsFormComponent', () => {
     fixture.detectChanges();
   });
 
-  it('keeps the legend collapsed until Details is clicked', () => {
-    const detailsButton = getDetailsButton();
-
-    expect(detailsButton.getAttribute('aria-expanded')).toBe('false');
-    expect(getLegend()).toBeNull();
-
-    const chart = fixture.nativeElement.querySelector(
-      'app-macro-chart'
-    ) as HTMLElement;
-    chart.click();
+  it('shows the complete legend beside the chart without a disclosure', () => {
+    fixture.componentInstance.legend.set({
+      carbs: legendElement('Kohlenhydrate'),
+      protein: legendElement('Eiweiß'),
+      fat: legendElement('Fett'),
+    });
     fixture.detectChanges();
 
-    expect(getDetailsButton().getAttribute('aria-expanded')).toBe('false');
-    expect(getLegend()).toBeNull();
-
-    detailsButton.click();
-    fixture.detectChanges();
-
-    expect(getDetailsButton().getAttribute('aria-expanded')).toBe('true');
-    expect(getLegend()).not.toBeNull();
-
-    getDetailsButton().click();
-    fixture.detectChanges();
-
-    expect(getDetailsButton().getAttribute('aria-expanded')).toBe('false');
-    expect(getLegend()).toBeNull();
-  });
-
-  it('keeps the chart area fixed when Details expands the legend', () => {
-    const chartArea = getChartArea();
-    const initialTop = chartArea.getBoundingClientRect().top;
-    const initialHeight = getComputedStyle(chartArea).height;
-
-    getDetailsButton().click();
-    fixture.detectChanges();
-
-    const expandedChartArea = getChartArea();
-    expect(getComputedStyle(expandedChartArea).height).toBe(initialHeight);
-    expect(expandedChartArea.getBoundingClientRect().top).toBe(initialTop);
-    expect(getLegend()).not.toBeNull();
+    expect(getLegend()?.querySelectorAll('app-chart-legend-element').length).toBe(3);
+    expect(getChartArea().querySelector('app-macro-chart')).not.toBeNull();
+    expect(getChartArea().querySelector('.legend')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.details-button')).toBeNull();
   });
 
   it('does not offer a legend when every macro is zero', () => {
@@ -130,7 +102,6 @@ describe('RecipeIngredientsFormComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('app-macro-chart')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.details-button')).toBeNull();
     expect(getLegend()).toBeNull();
   });
 
@@ -219,12 +190,6 @@ describe('RecipeIngredientsFormComponent', () => {
     expect(getComputedStyle(nutritionSection).minHeight).toBe('208px');
   });
 
-  function getDetailsButton(): HTMLButtonElement {
-    return fixture.nativeElement.querySelector(
-      '.details-button'
-    ) as HTMLButtonElement;
-  }
-
   function getLegend(): HTMLElement | null {
     return fixture.nativeElement.querySelector('#recipe-draft-macro-legend');
   }
@@ -246,6 +211,10 @@ describe('RecipeIngredientsFormComponent', () => {
     });
   }
 });
+
+function legendElement(displayName: string): ChartLegendElement {
+  return { displayName, color: '#ffffff', valuePercentage: 33, valueAbsolute: 10 };
+}
 
 function createRecipeForm(): FormGroup {
   return new FormGroup({

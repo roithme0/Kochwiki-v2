@@ -11,6 +11,49 @@ import { UserCreateDialogComponent } from '../../dialogs/user-create-dialog/user
 import { SelectUserPageComponent } from './select-user-page.component';
 
 describe('SelectUserPageComponent', () => {
+  it('shows an error without the create button and loads users after retry', async () => {
+    const user: User = { id: 7, username: 'Daniel' };
+    const getAllUsers = jasmine.createSpy('getAllUsers').and.returnValues(
+      Promise.reject(new Error('request failed')),
+      Promise.resolve([user])
+    );
+    spyOn(console, 'error');
+
+    TestBed.configureTestingModule({
+      imports: [SelectUserPageComponent],
+      providers: [
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+        { provide: ActiveUserService, useValue: {} },
+        { provide: Router, useValue: {} },
+        { provide: PageHeaderService, useValue: { updateHeader: () => {} } },
+        { provide: UserBackendService, useValue: { usersChanged$: NEVER, getAllUsers } },
+        { provide: SnackBarService, useValue: {} },
+      ],
+    });
+    const fixture = TestBed.createComponent(SelectUserPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const page: HTMLElement = fixture.nativeElement;
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain(
+      'Benutzer konnten nicht geladen werden.'
+    );
+    expect(page.querySelector('.create-user-button')).toBeNull();
+
+    const retryButton = page.querySelector<HTMLButtonElement>('.error button');
+    retryButton?.click();
+    fixture.detectChanges();
+    expect(page.querySelector('mat-spinner')).not.toBeNull();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(getAllUsers).toHaveBeenCalledTimes(2);
+    expect(page.querySelector('mat-card-title')?.textContent).toContain('Daniel');
+    expect(page.querySelector('.create-user-button')).not.toBeNull();
+    expect(page.querySelector('[role="alert"]')).toBeNull();
+  });
+
   it('focuses the username input and selects a newly created user', () => {
     const createdUser: User = { id: 7, username: 'Daniel' };
     const afterClosed = new Subject<User | undefined>();

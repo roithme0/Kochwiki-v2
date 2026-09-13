@@ -70,7 +70,6 @@ export class RecipeIngredientsFormComponent {
   recipeForm!: FormGroup;
   ingredientsFormGroup!: FormGroup;
   readonly ingredientDrafts = signal<DraftIngredientNutrition[]>([]);
-  readonly showLegend = signal(false);
   readonly legend: WritableSignal<Record<string, ChartLegendElement>> = signal({});
   readonly nutritionState = computed((): DraftNutritionState =>
     calculateDraftNutrition(
@@ -155,10 +154,6 @@ export class RecipeIngredientsFormComponent {
     this.ingredients.removeAt(index);
     this.reindexIngredients();
     this.updateNutritionDraft();
-  }
-
-  toggleLegend(): void {
-    this.showLegend.update((showLegend) => !showLegend);
   }
 
   onNutritionPreviewFocusIn(event: FocusEvent): void {
