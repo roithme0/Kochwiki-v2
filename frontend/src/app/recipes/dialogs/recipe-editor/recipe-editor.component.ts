@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, DestroyRef, ElementRef, QueryList, Renderer2, ViewChild, ViewChildren, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -71,7 +71,6 @@ export interface RecipeEditorSubmission {
 @Component({
   selector: 'app-recipe-editor',
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatButtonModule,
@@ -82,8 +81,8 @@ export interface RecipeEditorSubmission {
     SectionNavComponent,
     RecipeIngredientsFormComponent,
     RecipeMetaFormComponent,
-    RecipePreparationFormComponent,
-  ],
+    RecipePreparationFormComponent
+],
   templateUrl: './recipe-editor.component.html',
   styleUrl: './recipe-editor.component.scss',
 })

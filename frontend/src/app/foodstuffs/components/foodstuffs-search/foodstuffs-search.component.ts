@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -12,15 +12,14 @@ import { Foodstuff } from '../../models/foodstuff';
 @Component({
   selector: 'app-foodstuffs-search',
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
     MatFormFieldModule,
     MatAutocompleteModule,
     MatIconModule,
-    MatButtonModule,
-  ],
+    MatButtonModule
+],
   templateUrl: './foodstuffs-search.component.html',
   styleUrl: './foodstuffs-search.component.scss',
 })

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,14 +13,13 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-foodstuff-form',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatIconModule,
-  ],
+    MatIconModule
+],
   templateUrl: './foodstuff-form.component.html',
   styleUrl: './foodstuff-form.component.scss',
 })

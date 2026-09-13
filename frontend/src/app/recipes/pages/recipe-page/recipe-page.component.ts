@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, signal, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,15 +23,14 @@ import { RecipeVersionStateBadgeComponent } from '../../components/recipe-versio
 @Component({
   selector: 'app-recipe-page',
   imports: [
-    CommonModule,
     IngredientsGridComponent,
     StepsGridComponent,
     RecipeMacroChartCardComponent,
     MatIconModule,
     MatButtonModule,
     MatProgressSpinner,
-    RecipeVersionStateBadgeComponent,
-  ],
+    RecipeVersionStateBadgeComponent
+],
   templateUrl: './recipe-page.component.html',
   styleUrl: './recipe-page.component.scss',
 })

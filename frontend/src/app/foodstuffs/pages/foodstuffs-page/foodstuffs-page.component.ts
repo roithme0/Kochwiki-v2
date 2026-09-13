@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,13 +16,12 @@ import { LoadState } from '../../../core/utils/load-state';
 @Component({
   selector: 'app-foodstuffs-page',
   imports: [
-    CommonModule,
     FoodstuffsTableComponent,
     FoodstuffsTableCreateFoodstuffComponent,
     MatProgressSpinnerModule,
     MatIconModule,
-    FoodstuffsSearchComponent,
-  ],
+    FoodstuffsSearchComponent
+],
   templateUrl: './foodstuffs-page.component.html',
   styleUrl: './foodstuffs-page.component.scss',
 })
