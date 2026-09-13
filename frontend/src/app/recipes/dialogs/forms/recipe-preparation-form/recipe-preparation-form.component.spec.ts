@@ -32,6 +32,16 @@ describe('RecipePreparationFormComponent', () => {
     expect(fixture.nativeElement.querySelector('[formControlName="index"]')).toBeNull();
   });
 
+  it('starts with one removable step when no steps exist', () => {
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.steps.length).toBe(1);
+
+    fixture.componentInstance.removeStep(0);
+
+    expect(fixture.componentInstance.steps.length).toBe(0);
+  });
+
   it('reorders a dragged step without losing its control or validation state', () => {
     fixture.componentRef.setInput('recipeVersion', recipeVersionWithSteps());
     fixture.detectChanges();

@@ -93,6 +93,32 @@ describe('RecipeEditorComponent', () => {
     expect(sections.every((section) => section.querySelector('app-recipe-meta-form, app-recipe-ingredients-form, app-recipe-preparation-form'))).toBeTrue();
   });
 
+  it('starts create mode with one removable ingredient and preparation row', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const ingredients = component.recipeForm.controls.ingredientsFormGroup.controls.ingredients;
+    const steps = component.recipeForm.controls.preparationFormGroup.controls.steps;
+    expect(ingredients.length).toBe(1);
+    expect(steps.length).toBe(1);
+
+    component.recipeForm.controls.ingredientsFormGroup.controls.ingredients.removeAt(0);
+    component.recipeForm.controls.preparationFormGroup.controls.steps.removeAt(0);
+    expect(ingredients.length).toBe(0);
+    expect(steps.length).toBe(0);
+  });
+
+  it('starts an empty edited recipe with one ingredient and preparation row', async () => {
+    fixture.componentRef.setInput('recipeLineageId', recipeVersion.recipeLineageId);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.recipeForm.controls.ingredientsFormGroup.controls.ingredients.length).toBe(1);
+    expect(component.recipeForm.controls.preparationFormGroup.controls.steps.length).toBe(1);
+  });
+
   it('navigates to a section and follows manual dialog scrolling', async () => {
     const scrollArea = document.createElement('mat-dialog-content');
     scrollArea.appendChild(fixture.nativeElement);

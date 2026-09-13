@@ -128,6 +128,7 @@ export class RecipeIngredientsFormComponent {
         this.addIngredient(ingredient)
       );
     }
+    if (this.ingredients.length === 0) this.addIngredient();
 
     this.ingredientsFormGroup.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -113,6 +113,12 @@ describe('RecipeIngredientsFormComponent', () => {
     expect(getNutritionMessage()).toBeNull();
   });
 
+  it('allows removing the last ingredient row', () => {
+    fixture.componentInstance.removeIngredient(0);
+
+    expect(fixture.componentInstance.ingredients.length).toBe(0);
+  });
+
   it('keeps ingredient indexes unique and sequential after adding and removing rows', () => {
     fixture.componentInstance.addIngredient();
     fixture.componentInstance.addIngredient();
