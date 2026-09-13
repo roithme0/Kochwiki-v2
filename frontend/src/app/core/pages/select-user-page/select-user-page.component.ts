@@ -41,7 +41,11 @@ export class SelectUserPageComponent {
 
   //#region Event Handlers
 
-  onUserSelected(selectedUser: User): void {
+  onUserSelected(selectedUser: User | undefined): void {
+    if (selectedUser === undefined) {
+      return;
+    }
+
     this.activeUserService.selectUser(selectedUser);
     this.router.navigate(['']);
   }
@@ -51,8 +55,10 @@ export class SelectUserPageComponent {
   //#region Public Methods
 
   openUserCreateDialog(): void {
-    const dialogRef: MatDialogRef<UserCreateDialogComponent, User> =
-      this.dialog.open<UserCreateDialogComponent, unknown, User>(
+    const dialogRef: MatDialogRef<
+      UserCreateDialogComponent,
+      User | undefined
+    > = this.dialog.open<UserCreateDialogComponent, unknown, User | undefined>(
         UserCreateDialogComponent,
         {
           minWidth: 'calc(100vw - 1rem)',
@@ -68,9 +74,11 @@ export class SelectUserPageComponent {
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((createdUser: User | undefined) => {
-        if (createdUser !== undefined) {
-          this.onUserSelected(createdUser);
+        if (createdUser === undefined) {
+          return;
         }
+
+        this.onUserSelected(createdUser);
       });
   }
 

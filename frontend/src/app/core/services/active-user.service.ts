@@ -42,6 +42,10 @@ export class ActiveUserService {
   }
 
   selectUser(value: User): void {
+    if (!this.isUser(value)) {
+      return;
+    }
+
     this._activeUser.set(value);
     this.storeUser(value);
     this.snackBarService.open('Als ' + value.username + ' angemeldet');

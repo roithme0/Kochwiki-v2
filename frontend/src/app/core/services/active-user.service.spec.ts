@@ -92,6 +92,17 @@ describe('ActiveUserService', () => {
     expect(snackBarService.open).toHaveBeenCalledWith('Als Roi angemeldet');
   });
 
+  it('ignores an invalid runtime selection', () => {
+    const { service, snackBarService, router } = createContext();
+
+    service.selectUser(undefined as unknown as User);
+
+    expect(service.activeUser()).toBeNull();
+    expect(localStorage.getItem(ACTIVE_USER_STORAGE_KEY)).toBeNull();
+    expect(snackBarService.open).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
   it('restores and refreshes a persisted user without a selection notification', async () => {
     localStorage.setItem(ACTIVE_USER_STORAGE_KEY, JSON.stringify(USER));
     const refreshedUser: User = { id: USER.id, username: 'Renamed Roi' };
