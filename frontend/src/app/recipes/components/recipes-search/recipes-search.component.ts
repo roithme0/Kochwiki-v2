@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -16,15 +16,14 @@ import { RecipeVersion } from '../../models/recipe';
 @Component({
   selector: 'app-recipes-search',
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
     MatFormFieldModule,
     MatAutocompleteModule,
     MatIconModule,
-    MatButtonModule,
-  ],
+    MatButtonModule
+],
   templateUrl: './recipes-search.component.html',
   styleUrl: './recipes-search.component.scss',
 })

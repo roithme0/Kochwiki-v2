@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RecipeVersion } from '../../models/recipe';
 import { MatCardModule } from '@angular/material/card';
 import { MacroChartComponent } from '../../../core/components/macro-chart/macro-chart.component';
@@ -7,10 +7,9 @@ import { MacroChartComponent } from '../../../core/components/macro-chart/macro-
 @Component({
   selector: 'app-ingredients-grid',
   imports: [
-    CommonModule,
     MatCardModule,
-    MacroChartComponent,
-  ],
+    MacroChartComponent
+],
   templateUrl: './ingredients-grid.component.html',
   styleUrl: './ingredients-grid.component.scss',
 })

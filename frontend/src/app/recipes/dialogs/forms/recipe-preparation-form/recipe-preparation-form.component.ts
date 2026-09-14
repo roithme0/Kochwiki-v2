@@ -1,5 +1,5 @@
 import { Component, NgZone, ViewChild, inject, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   FormArray,
   AbstractControl,
@@ -22,14 +22,13 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-recipe-preparation-form',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
-    DragDropModule,
-  ],
+    DragDropModule
+],
   templateUrl: './recipe-preparation-form.component.html',
   styleUrl: './recipe-preparation-form.component.scss',
 })

@@ -1,5 +1,5 @@
 import { Component, WritableSignal, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RecipeVersion } from '../../models/recipe';
 import { ChartLegendElement } from '../../../core/models/chart-legend-element';
 import { MatCardModule } from '@angular/material/card';
@@ -9,11 +9,10 @@ import { MacroChartComponent } from '../../../core/components/macro-chart/macro-
 @Component({
   selector: 'app-recipe-macro-chart-card',
   imports: [
-    CommonModule,
     MatCardModule,
     ChartLegendElementComponent,
-    MacroChartComponent,
-  ],
+    MacroChartComponent
+],
   templateUrl: './recipe-macro-chart-card.component.html',
   styleUrl: './recipe-macro-chart-card.component.scss',
 })

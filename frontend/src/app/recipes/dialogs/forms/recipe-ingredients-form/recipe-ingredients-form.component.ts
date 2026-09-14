@@ -8,7 +8,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
@@ -43,7 +43,6 @@ import {
 @Component({
   selector: 'app-recipe-ingredients-form',
   imports: [
-    CommonModule,
     IngredientFieldComponent,
     MatButtonModule,
     ReactiveFormsModule,
@@ -53,8 +52,8 @@ import {
     MatExpansionModule,
     MatSelectModule,
     ChartLegendElementComponent,
-    MacroChartComponent,
-  ],
+    MacroChartComponent
+],
   templateUrl: './recipe-ingredients-form.component.html',
   styleUrl: './recipe-ingredients-form.component.scss',
 })

@@ -8,7 +8,7 @@ import {
   OnDestroy,
   input,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,14 +34,13 @@ const DEFAULT_PAGE_SIZE: number = 12;
 @Component({
   selector: 'app-foodstuffs-table',
   imports: [
-    CommonModule,
     MatTableModule,
     MatSortModule,
     MatButtonModule,
     MatIconModule,
     MacroChartComponent,
-    MatPaginatorModule,
-  ],
+    MatPaginatorModule
+],
   templateUrl: './foodstuffs-table.component.html',
   styleUrl: './foodstuffs-table.component.scss',
 })

@@ -99,4 +99,42 @@ describe('SelectUserPageComponent', () => {
     expect(activeUserService.selectUser).toHaveBeenCalledOnceWith(createdUser);
     expect(router.navigate).toHaveBeenCalledOnceWith(['']);
   });
+
+  it('does not select a user when creation is aborted', () => {
+    const afterClosed = new Subject<User | undefined>();
+    const dialogRef = {
+      afterClosed: () => afterClosed.asObservable(),
+    } as MatDialogRef<UserCreateDialogComponent, User | undefined>;
+    const dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    const activeUserService = jasmine.createSpyObj<ActiveUserService>(
+      'ActiveUserService',
+      ['selectUser']
+    );
+    const router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    dialog.open.and.returnValue(dialogRef);
+
+    TestBed.configureTestingModule({
+      imports: [SelectUserPageComponent],
+      providers: [
+        { provide: MatDialog, useValue: dialog },
+        { provide: ActiveUserService, useValue: activeUserService },
+        { provide: Router, useValue: router },
+        { provide: PageHeaderService, useValue: {} },
+        {
+          provide: UserBackendService,
+          useValue: { usersChanged$: NEVER },
+        },
+        { provide: SnackBarService, useValue: {} },
+      ],
+    });
+    const component: SelectUserPageComponent = TestBed.createComponent(
+      SelectUserPageComponent
+    ).componentInstance;
+
+    component.openUserCreateDialog();
+    afterClosed.next(undefined);
+
+    expect(activeUserService.selectUser).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
 });

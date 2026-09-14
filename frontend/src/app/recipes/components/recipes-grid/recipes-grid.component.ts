@@ -1,5 +1,5 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,12 +11,11 @@ import { RecipeVersion } from '../../models/recipe';
 @Component({
   selector: 'app-recipes-grid',
   imports: [
-    CommonModule,
     RecipesGridElementComponent,
     MatIconModule,
     MatButtonModule,
-    RouterLink,
-  ],
+    RouterLink
+],
   templateUrl: './recipes-grid.component.html',
   styleUrl: './recipes-grid.component.scss',
 })

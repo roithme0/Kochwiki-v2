@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,14 +13,13 @@ import { BackendMetaService } from '../../services/backend-meta.service';
 @Component({
   selector: 'app-page-header',
   imports: [
-    CommonModule,
     RouterModule,
     RouterLink,
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,
-    MatMenuModule,
-  ],
+    MatMenuModule
+],
   templateUrl: './page-header.component.html',
   styleUrl: './page-header.component.scss',
 })

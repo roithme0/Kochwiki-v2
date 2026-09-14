@@ -6,7 +6,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   FormControl,
   FormGroup,
@@ -23,14 +23,13 @@ import { Foodstuff } from '../../../../../foodstuffs/models/foodstuff';
 @Component({
   selector: 'app-ingredient-field',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
     MatExpansionModule,
-    MatSelectModule,
-  ],
+    MatSelectModule
+],
   templateUrl: './ingredient-field.component.html',
   styleUrl: './ingredient-field.component.scss',
 })

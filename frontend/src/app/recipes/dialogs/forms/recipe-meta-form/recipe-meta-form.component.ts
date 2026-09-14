@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   FormGroup,
   FormGroupDirective,
@@ -12,11 +12,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 @Component({
   selector: 'app-recipe-meta-form',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatFormFieldModule,
-  ],
+    MatFormFieldModule
+],
   templateUrl: './recipe-meta-form.component.html',
   styleUrl: './recipe-meta-form.component.scss',
 })
