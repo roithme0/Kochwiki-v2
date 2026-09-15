@@ -33,6 +33,8 @@ Kochwiki is for personal, private use. It is also a learning environment for app
 
 ## AI Workflows
 
+An authenticated `/chat-ui-demo` route demonstrates the static `@ai-service/chat-ui` banner and a Kochwiki-owned renderer. Its package is installed from a versioned tarball in `frontend/vendor`; the central theme mapping is in `frontend/src/styles/chat-ui-integration.scss`. The AI Service library's README describes the rebuild/pack/copy/reinstall cycle.
+
 Use workflow skills only when explicitly invoked by the user.
 
 - `$prepare-spec`: pressure-test a scoped change and create or refine its lightweight spec.

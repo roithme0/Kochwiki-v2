@@ -7,6 +7,7 @@ ARG CONFIGURATION
 WORKDIR /usr/local/app
 # Copy only necessary files to reduce context size
 COPY package*.json /usr/local/app/
+COPY vendor/ /usr/local/app/vendor/
 RUN npm ci
 
 COPY ./ /usr/local/app/
